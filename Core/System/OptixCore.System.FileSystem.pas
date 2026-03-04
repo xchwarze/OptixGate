@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.FileSystem;
 
 interface
@@ -106,6 +104,8 @@ type
     class function GetFullPathName(const APath : String) : String; static;
     class procedure PathExists(const APath : String); static;
     class function CleanFileName(const AFileName : String) : String; static;
+    class procedure CreateDirectory(const APath, ANewDirectoryName : String); overload; static;
+    class procedure CreateDirectory(const AFullPath : String); overload; static;
   end;
 
   TContentReader = class
@@ -727,6 +727,17 @@ begin
   // Or use a Regular Expression
   for var AChar in TPath.GetInvalidFileNameChars do
     result := result.Replace(AChar, '_');
+end;
+
+class procedure TFileSystemHelper.CreateDirectory(const AFullPath : String);
+begin
+  if not Winapi.Windows.CreateDirectoryW(PWideChar(AFullPath), nil) then
+    raise EWindowsException.Create('CreateDirectoryW');
+end;
+
+class procedure TFileSystemHelper.CreateDirectory(const APath, ANewDirectoryName : String);
+begin
+  TFileSystemHelper.CreateDirectory(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName)
 end;
 
 (* TContentReader *)

@@ -71,6 +71,7 @@ type
   protected
     FClient      : TClientSocket;
     FPeerAddress : String;
+    FPort        : Word;
 
     {@M}
     procedure ThreadExecute(); override;
@@ -91,6 +92,7 @@ type
 
     {@G}
     property PeerAddress : String read FPeerAddress;
+    property Port        : Word   read FPort;
   end;
 
 implementation
@@ -121,6 +123,7 @@ begin
 
   FClient := AClient;
   FPeerAddress := FClient.RemoteAddress;
+  FPort := FClient.RemotePort;
 
   FOnClientDisconnect := nil;
 

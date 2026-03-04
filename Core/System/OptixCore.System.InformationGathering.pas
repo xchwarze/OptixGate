@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.InformationGathering;
 
 interface
@@ -121,18 +119,15 @@ begin
 end;
 
 class function TOptixInformationGathering.UserName() : string;
-var ABufferLen : DWORD;
-    ABuffer    : array[0..255 -1] of WideChar;
 begin
-  result := '';
+  var ABuffer : array[0..UNLEN] of WideChar;
+  var ABufferLen := DWORD(Length(ABuffer));
+
+  if not GetUserNameW(ABuffer, ABufferLen) then
+    raise EWindowsException.Create('GetUserNameW');
+
   ///
-
-  ABufferLen := Length(ABuffer);
-
-  if GetUserName(ABuffer, ABufferLen) then
-    SetString(result, ABuffer, ABufferLen)
-  else
-    raise EWindowsException.Create('GetUserName');
+  SetString(Result, ABuffer, ABufferLen - 1);
 end;
 
 class function TOptixInformationGathering.TryGetUserName() : String;
@@ -148,18 +143,15 @@ begin
 end;
 
 class function TOptixInformationGathering.ComputerName() : string;
-var ABufferLen : DWORD;
-    ABuffer    : array[0..255 -1] of WideChar;
 begin
-  result := '';
+  var ABuffer : array[0..MAX_COMPUTERNAME_LENGTH] of WideChar;
+  var ABufferLen := DWORD(Length(ABuffer));
+
+  if not GetComputerNameW(ABuffer, ABufferLen) then
+    raise EWindowsException.Create('GetComputerNameW');
+
   ///
-
-  ABufferLen := Length(ABuffer);
-
-  if GetComputerName(ABuffer, ABufferLen) then
-    SetString(result, ABuffer, ABufferLen)
-  else
-    raise EWindowsException.Create('GetComputerName');
+  SetString(result, ABuffer, ABufferLen);
 end;
 
 class function TOptixInformationGathering.TryGetComputerName() : String;

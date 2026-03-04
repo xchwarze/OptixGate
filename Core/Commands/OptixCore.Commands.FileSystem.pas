@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.FileSystem;
 
 interface
@@ -65,7 +63,7 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOptixCommandReceiveFileInformation = class(TOptixCommandActionResponse)
+  TOptixCommandFileInformation = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
     FFileName : String;
@@ -92,8 +90,7 @@ type
     property FileInformation : TFileInformation read FFileInformation;
   end;
 
-  {@ALIASES: TOptixCommandReceiveFileInformation}
-  TOptixCommandGetUploadedFileInformation = class(TOptixCommandReceiveFileInformation);
+  TOptixCommandGetUploadedFileInformation = class(TOptixCommandFileInformation);
 
   TOptixCommandEnumDrives = class(TOptixCommandActionResponse)
   private
@@ -177,6 +174,16 @@ type
     property FileSize : UInt64 read FFileSize;
   end;
 
+  TOptixCommandCreateDirectory = class(TOptixCommandFileInformation)
+  public
+    {@C}
+    constructor Create(const APath, ANewDirectoryName : String); overload;
+
+    {$IFNDEF SERVER}
+    procedure DoAction(); override;
+    {$ENDIF}
+  end;
+
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -184,9 +191,9 @@ uses
   System.IOUtils;
 // ---------------------------------------------------------------------------------------------------------------------
 
-(* TOptixCommandReceiveFileInformation *)
+(* TOptixCommandFileInformation *)
 
-procedure TOptixCommandReceiveFileInformation.AfterCreate();
+procedure TOptixCommandFileInformation.AfterCreate();
 begin
   inherited;
   ///
@@ -194,7 +201,7 @@ begin
   FFileInformation := TFileInformation.Create();
 end;
 
-constructor TOptixCommandReceiveFileInformation.Create(const AFileName : String; const AIsDirectory : Boolean);
+constructor TOptixCommandFileInformation.Create(const AFileName : String; const AIsDirectory : Boolean);
 begin
   Create();
   ///
@@ -203,7 +210,7 @@ begin
   FIsDirectory := AIsDirectory;
 end;
 
-destructor TOptixCommandReceiveFileInformation.Destroy();
+destructor TOptixCommandFileInformation.Destroy();
 begin
   if Assigned(FFileInformation) then
     FreeAndNil(FFileInformation);
@@ -213,7 +220,7 @@ begin
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandReceiveFileInformation.DoAction();
+procedure TOptixCommandFileInformation.DoAction();
 begin
   inherited;
   ///
@@ -328,5 +335,24 @@ begin
   FFilePath   := AFilePath;
   FTransferId := ATransferId;
 end;
+
+(* TOptixCommandCreateDirectory *)
+
+constructor TOptixCommandCreateDirectory.Create(const APath, ANewDirectoryName : String);
+begin
+  inherited Create(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName, True);
+end;
+
+{$IFNDEF SERVER}
+procedure TOptixCommandCreateDirectory.DoAction();
+begin
+  TFileSystemHelper.CreateDirectory(FFileName);
+
+  if Assigned(FFileInformation) then
+    FreeAndNil(FFileInformation);
+
+  FFileInformation := TFileInformation.Create(FFileName, FIsDirectory);
+end;
+{$ENDIF}
 
 end.

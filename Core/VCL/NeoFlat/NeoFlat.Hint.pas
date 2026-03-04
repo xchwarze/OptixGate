@@ -49,7 +49,7 @@ uses
 
   Winapi.Windows,
 
-  VCL.Controls, VCl.Graphics,
+  VCL.Controls, VCl.Graphics, VCL.AppEvnts,
 
   NeoFlat.Helper, NeoFlat.Types;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -75,21 +75,24 @@ type
 
     FOldHintWindowClass : THintWindowClass;
     FOldHintInfo        : THintInfo;
+    FApplicationEvents  : TApplicationEvents;
 
     {@M}
-    procedure SetActive(const AValue : Boolean);
+    procedure OnGlobalShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: Vcl.Controls.THintInfo);
   public
     {@C}
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy(); override;
   published
     {@G/S}
-    property Active : Boolean read FActive write SetActive;
+    property Active : Boolean read FActive write FActive;
   end;
 
   TFlatHintWindow = class(THintWindow)
   private
     FMetrics  : TFlatMetrics;
     FArrowPos : TArrowPos;
+    FCaption  : String;
   protected
     {@M}
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -104,17 +107,19 @@ type
     destructor Destroy(); override;
   end;
 
-  const ARROW_TOP_RIGHT_GLYPH : TMatrixGlyph = [
-                                                    [$0, $1, $1, $1, $1, $1, $1, $1],
-                                                    [$0, $1, $1, $1, $1, $1, $1, $1],
-                                                    [$0, $0, $0, $1, $1, $1, $1, $1],
-                                                    [$0, $0, $1, $1, $1, $1, $1, $1],
-                                                    [$0, $1, $1, $1, $1, $1, $1, $1],
-                                                    [$1, $1, $1, $1, $1, $0, $1, $1],
-                                                    [$1, $1, $1, $1, $0, $0, $1, $1],
-                                                    [$0, $1, $1, $0, $0, $0, $0, $0]
-                                              ];
+  const
+    ARROW_TOP_RIGHT_GLYPH : TMatrixGlyph = [
+                                              [$0, $1, $1, $1, $1, $1, $1, $1],
+                                              [$0, $1, $1, $1, $1, $1, $1, $1],
+                                              [$0, $0, $0, $1, $1, $1, $1, $1],
+                                              [$0, $0, $1, $1, $1, $1, $1, $1],
+                                              [$0, $1, $1, $1, $1, $1, $1, $1],
+                                              [$1, $1, $1, $1, $1, $0, $1, $1],
+                                              [$1, $1, $1, $1, $0, $0, $1, $1],
+                                              [$0, $1, $1, $0, $0, $0, $0, $0]
+    ];
 
+    HINT_IS_MONO = '[\MONO_HINT\]';
 
 implementation
 
@@ -138,43 +143,24 @@ begin
 
   ZeroMemory(@FOldHintInfo, SizeOf(THintInfo));
 
-  FOldHintWindowClass := nil;
+  FOldHintWindowClass := HintWindowClass;
+
+  FApplicationEvents := TApplicationEvents.Create(Self);
+  FApplicationEvents.OnShowHint := OnGlobalShowHint;
 end;
 
-procedure TFlatHint.SetActive(const AValue : Boolean);
+destructor TFlatHint.Destroy();
 begin
-  if FActive = AValue then
-    Exit;
-  ///
+  if Assigned(FApplicationEvents) then
+    FreeAndNil(FApplicationEvents);
+end;
 
-  FActive := AValue;
-
-  ///
-  if (csDesigning in ComponentState) then
-    Exit;
-  ///
-
-  if FActive then begin
-    FOldHintWindowClass := HintWindowClass;
-    HintWindowClass := TFlatHintWindow;
-
-    FOldHintInfo.HintShow       := Application.ShowHint;
-    FOldHintInfo.HintShortPause := Application.HintShortPause;
-    FOldHintInfo.HintPause      := Application.HintPause;
-    FOldHintInfo.HintHidePause  := Application.HintHidePause;
-
-    Application.ShowHint       := FActive;
-    Application.HintShortPause := 25;
-    Application.HintPause      := 500;
-    Application.HintHidePause  := 5000;
-  end else begin
-    Application.ShowHint       := FOldHintInfo.HintShow;
-    Application.HintShortPause := FOldHintInfo.HintShortPause;
-    Application.HintPause      := FOldHintInfo.HintPause;
-    Application.HintHidePause  := FOldHintInfo.HintHidePause;
-
-    ZeroMemory(@FOldHintInfo, SizeOf(THintInfo));
-  end;
+procedure TFlatHint.OnGlobalShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: Vcl.Controls.THintInfo);
+begin
+  if FActive then
+    HintInfo.HintWindowClass := TFlatHintWindow
+  else if ASsigned(FOldHintWindowClass) then
+    HintInfo.HintWindowClass := FOldHintWindowClass;
 end;
 
 (* TFlatHintWindow *)
@@ -190,6 +176,8 @@ begin
   if not Assigned(AWinControl) then
     Exit;
   ///
+
+  FCaption := '';
 
   FMetrics := TFlatMetrics.Create(AWinControl);
 end;
@@ -221,9 +209,16 @@ begin
 
   Caption := AHint;
 
-  Canvas.Font.Name  := FONT_1;
   Canvas.Font.Size  := 9;
   Canvas.Font.Color := MAIN_ACCENT;
+
+  FCaption := Caption;
+  if Copy(FCaption, 1, Length(HINT_IS_MONO)) = HINT_IS_MONO then begin
+    Delete(FCaption, 1, Length(HINT_IS_MONO));
+
+    Canvas.Font.Name := 'Consolas';
+  end else
+    Canvas.Font.Name := FONT_1;
 
   AHintRect.Right := AHintRect.Left + HINT_WIDTH - FMetrics.ScaleValue(22);
 
@@ -402,7 +397,7 @@ begin
     Canvas.Brush.Color := LIGHT_GRAY;
 
     ///
-    DrawText(Canvas.Handle, PWideChar(Caption), Length(Caption), ATextRect, (DT_WORDBREAK or DT_NOPREFIX));
+    DrawText(Canvas.Handle, PWideChar(FCaption), Length(FCaption), ATextRect, (DT_WORDBREAK or DT_NOPREFIX));
   finally
     Canvas.Unlock();
   end;

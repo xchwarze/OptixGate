@@ -84,10 +84,12 @@ type
     SpawnDate          : TDateTime;
     Forms              : TObjectList<TBaseFormControl>;
     Workers            : TObjectList<TOptixThread>;
+    HintText           : String;
 
     ///
     function ToString: String;
     function GetUPN() : String;
+    function GetHintText() : String;
   end;
   PTreeData = ^TTreeData;
 
@@ -164,9 +166,10 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure Server1Click(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure RegistryManager1Click(Sender: TObject);
     procedure ContentReader1Click(Sender: TObject);
+    procedure VSTGetHint(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+      var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
   private
     FFileInfo : TSHFileInfo;
 
@@ -207,7 +210,7 @@ implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.DateUtils, System.Rtti,
+  System.DateUtils, System.Rtti, System.Math,
 
   uControlFormProcessManager, uControlFormLogs, uFormAbout, uControlFormTransfers, uControlFormControlForms,
   uControlFormFileManager, uFormDebugThreads, uControlFormTasks, uControlFormRemoteShell, uFormListen, uFormServers,
@@ -240,6 +243,53 @@ begin
     result := Format('%s@%s', [SessionInformation.Username, SessionInformation.Computer])
   else
     result := '';
+end;
+
+function TTreeData.GetHintText() : String;
+begin
+  result := '';
+  ///
+
+  if not Assigned(Handler) or not Assigned(SessionInformation) then
+    Exit;
+
+  var ADictionary := TDictionary<String, String>.Create();
+  var AStringBuilder := TStringBuilder.Create();
+  try
+    ADictionary.Add('Remote Address / Port', Format('%s/%d', [Handler.PeerAddress, Handler.Port]));
+    ADictionary.Add('Username@Computer', GetUPN());
+
+    if not String.IsNullOrWhiteSpace(SessionInformation.Langroup) then
+      ADictionary.Add('LAN Group Name', SessionInformation.Langroup);
+
+    if not String.IsNullOrWhiteSpace(SessionInformation.DomainName) then
+      ADictionary.Add('Domain Name', SessionInformation.DomainName);
+
+    ADictionary.Add('Windows Version', SessionInformation.WindowsVersion);
+    ADictionary.Add('Spawn Since', TOptixHelper.ElapsedDateTime(SpawnDate, Now));
+    ADictionary.Add('Spawn Date', DateTimeToStr(SpawnDate));
+    ADictionary.Add('Elevated Status', SessionInformation.ElevatedStatus_STR);
+    ADictionary.Add('User In Admin Group', BoolToStr(SessionInformation.IsInAdminGroup, True));
+
+    var AMaxKeyLength := 0;
+    for var AKey in ADictionary.Keys do
+      AMaxKeyLength := Max(AMaxKeyLength, AKey.Length);
+
+    AStringBuilder.Append(HINT_IS_MONO);
+
+    for var APair in ADictionary do
+      AStringBuilder.Append(Format('%s : %s%s', [
+        APair.Key.PadRight(AMaxKeyLength),
+        APair.Value,
+        sLineBreak
+      ]));
+
+    ///
+    result := AStringBuilder.ToString.TrimRight;
+  finally
+    FreeAndNil(AStringBuilder);
+    FreeAndNil(ADictionary);
+  end;
 end;
 
 (* TFormMain *)
@@ -518,6 +568,7 @@ begin
     pData^.Handler := AHandler;
     pData^.SessionInformation := ASessionInformation;
     pData^.SpawnDate := Now;
+    pData^.HintText := pData^.GetHintText;
 
     // Create not mandatory windows
 
@@ -603,6 +654,17 @@ begin
     ///
     FreeAndNil(pData^.Workers);
   end;
+end;
+
+procedure TFormMain.VSTGetHint(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
+begin
+  var pData := PTreeData(Node.GetData);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  HintText := pData^.HintText;
 end;
 
 procedure TFormMain.VSTGetImageIndex(Sender: TBaseVirtualTree;
@@ -903,6 +965,9 @@ begin
   TOptixHelper.InitializeSystemIcons(ImageSystem, FFileInfo);
   ///
 
+  Constraints.MinWidth  := ScaleValue(250);
+  Constraints.MinHeight := ScaleValue(150);
+
   Caption := Format('%s - %s', [Caption, OPTIX_PROTOCOL_VERSION]);
 
   {$IFNDEF USETLS}
@@ -910,11 +975,6 @@ begin
   Certificates1.Visible := False;
   rustedCertificates1.Visible := False;
   {$ENDIF}
-end;
-
-procedure TFormMain.FormDestroy(Sender: TObject);
-begin
-
 end;
 
 //procedure TFormMain.StopServer();

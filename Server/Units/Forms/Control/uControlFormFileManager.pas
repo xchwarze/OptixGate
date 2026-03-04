@@ -122,7 +122,7 @@ type
     PanelPath: TFlatPanel;
     EditPath: TFlatEdit;
     PanelActions: TFlatPanel;
-    ButtonHome: TFlatButton;
+    ButtonDrives: TFlatButton;
     LabelAccess: TLabel;
     PanelDirection: TFlatPanel;
     ButtonBack: TFlatButton;
@@ -132,6 +132,9 @@ type
     ButtonGoTo: TFlatButton;
     ButtonUpload: TFlatButton;
     ButtonOptions: TFlatButton;
+    ButtonNewDirectory: TFlatButton;
+    Shape2: TShape;
+    Shape3: TShape;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -149,7 +152,7 @@ type
     procedure PopupMenuPopup(Sender: TObject);
     procedure ColoredFoldersAccessView1Click(Sender: TObject);
     procedure DownloadFile1Click(Sender: TObject);
-    procedure ButtonHomeClick(Sender: TObject);
+    procedure ButtonDrivesClick(Sender: TObject);
     procedure ButtonRefreshClick(Sender: TObject);
     procedure UploadToFolder1Click(Sender: TObject);
     procedure ButtonOptionsClick(Sender: TObject);
@@ -157,7 +160,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure ButtonBackClick(Sender: TObject);
     procedure ButtonForwardClick(Sender: TObject);
-    procedure VSTFilesMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ButtonGoToClick(Sender: TObject);
     procedure ShowFolderTree1Click(Sender: TObject);
     procedure VSTFoldersGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
@@ -172,9 +174,13 @@ type
       var Result: Integer);
     procedure VSTFoldersFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure StreamFileContentOpen1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure ButtonNewDirectoryClick(Sender: TObject);
   private
-    FHistoryCursor : Integer;
-    FPathHistory   : TList<String>;
+    FHistoryCursor  : Integer;
+    FPathHistory    : TList<String>;
+
+    FCurrentPathACL : TFileAccessAttributes;
 
     {@M}
     procedure InsertPathToHistory(APath : String);
@@ -187,7 +193,7 @@ type
     procedure DisplayFiles(const AList : TOptixCommandEnumDirectoryFiles);
     procedure SetDisplayMode(const AMode : TDisplayMode);
     procedure BrowsePath(const APath : string; const APushToHistory : Boolean = True);
-    procedure RefreshNavButtons();
+    procedure RefreshActionsButtons();
     procedure RefreshDrives(const APushToHistory : Boolean = True);
     procedure RefreshFiles();
     function GetFolderImageIndex(const AFolderAccess : TFileAccessAttributes) : Integer;
@@ -203,10 +209,6 @@ type
     {@M}
     procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
     procedure RegisterNewFile(const APath : String; const AFileInformation : TFileInformation);
-
-    {@C}
-    constructor Create(AOwner : TComponent; const AUserIdentifier : String;
-      const ASpecialForm : Boolean = False); override;
   end;
 
 var
@@ -375,10 +377,14 @@ begin
   end;
 end;
 
-procedure TControlFormFileManager.RefreshNavButtons();
+procedure TControlFormFileManager.RefreshActionsButtons();
 begin
-  ButtonBack.Enabled    := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
-  ButtonForward.Enabled := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1)
+  ButtonBack.Enabled      := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
+  ButtonForward.Enabled   := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1);
+
+  ButtonRefresh.Enabled      := PanelPath.Visible;
+  ButtonUpload.Enabled       := ButtonRefresh.Enabled and (faWrite in FCurrentPathACL);
+  ButtonNewDirectory.Enabled := ButtonUpload.Enabled;
 end;
 
 procedure TControlFormFileManager.InsertPathToHistory(APath : String);
@@ -402,7 +408,7 @@ begin
   end;
 
   ///
-  RefreshNavButtons();
+  RefreshActionsButtons();
 end;
 
 procedure TControlFormFileManager.OnFirstShow();
@@ -443,18 +449,6 @@ begin
   VSTFolders.Refresh();
 end;
 
-constructor TControlFormFileManager.Create(AOwner : TComponent; const AUserIdentifier : String;
-  const ASpecialForm : Boolean = False);
-begin
-  inherited;
-  ///
-
-  FHistoryCursor := 0;
-  FPathHistory := TList<String>.Create();
-
-  SetDisplayMode(dmDrives);
-end;
-
 procedure TControlFormFileManager.SetDisplayMode(const AMode : TDisplayMode);
 begin
   VSTFiles.Clear();
@@ -471,11 +465,8 @@ begin
   TOptixVirtualTreesHelper.UpdateColumnVisibility(VSTFiles, 'Last Modified', AMode = dmFiles);
   TOptixVirtualTreesHelper.UpdateColumnVisibility(VSTFiles, 'Last Access', AMode = dmFiles);
 
-  ButtonRefresh.Enabled := AMode = dmFiles;
-  ButtonUpload.Enabled  := AMode = dmFiles;
-
   ///
-  RefreshNavButtons();
+  RefreshActionsButtons();
 end;
 
 procedure TControlFormFileManager.ButtonBackClick(Sender: TObject);
@@ -486,7 +477,7 @@ begin
 
   BrowseFromCurrentHistoryLocation();
 
-  RefreshNavButtons();
+  RefreshActionsButtons();
 end;
 
 procedure TControlFormFileManager.ButtonForwardClick(Sender: TObject);
@@ -497,7 +488,7 @@ begin
 
   BrowseFromCurrentHistoryLocation();
 
-  RefreshNavButtons();
+  RefreshActionsButtons();
 end;
 
 procedure TControlFormFileManager.ButtonGoToClick(Sender: TObject);
@@ -511,9 +502,24 @@ begin
   BrowsePath(APath);
 end;
 
-procedure TControlFormFileManager.ButtonHomeClick(Sender: TObject);
+procedure TControlFormFileManager.ButtonDrivesClick(Sender: TObject);
 begin
   RefreshDrives();
+end;
+
+procedure TControlFormFileManager.ButtonNewDirectoryClick(Sender: TObject);
+begin
+  var AFolderName := '';
+
+  if not InputQuery('Create New Directory', 'Directory Name', AFolderName) then
+    Exit;
+
+  AFolderName := TFileSystemHelper.CleanFileName(AFolderName);
+  if String.IsNullOrWhiteSpace(AFolderName) then
+    Exit;
+
+  ///
+  SendCommand(TOptixCommandCreateDirectory.Create(EditPath.Text, AFolderName));
 end;
 
 procedure TControlFormFileManager.ButtonOptionsClick(Sender: TObject);
@@ -892,12 +898,6 @@ begin
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
 end;
 
-procedure TControlFormFileManager.VSTFilesMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X,
-  Y: Integer);
-begin
- 
-end;
-
 procedure TControlFormFileManager.VSTFoldersCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode;
   Column: TColumnIndex; var Result: Integer);
 begin
@@ -973,7 +973,13 @@ begin
     DisplayDrives(TOptixCommandEnumDrives(AOptixPacket))
   // -------------------------------------------------------------------------------------------------------------------
   else if AOptixPacket is TOptixCommandEnumDirectoryFiles then
-    DisplayFiles(TOptixCommandEnumDirectoryFiles(AOptixPacket));
+    DisplayFiles(TOptixCommandEnumDirectoryFiles(AOptixPacket))
+  // -------------------------------------------------------------------------------------------------------------------
+  else if AOptixPacket is TOptixCommandFileInformation then
+    RegisterNewFile(
+      ExtractFilePath(TOptixCommandFileInformation(AOptixPacket).FileName),
+      TOptixCommandFileInformation(AOptixPacket).FileInformation
+    );
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
@@ -981,6 +987,8 @@ procedure TControlFormFileManager.DisplayDrives(const AList : TOptixCommandEnumD
 begin
   SetDisplayMode(dmDrives);
   ///
+
+  FCurrentPathACL := [];
 
   if not Assigned(AList) then
     Exit();
@@ -1023,9 +1031,9 @@ begin
   ///
 
   EditPath.Text := AList.Path;
-  LabelAccess.Caption := AccessSetToString(AList.Access);
 
-  ButtonUpload.Enabled := faWrite in AList.Access;
+  LabelAccess.Caption := AccessSetToString(AList.Access);
+  FCurrentPathACL := AList.Access;
 
   var AFolders := TObjectList<TSimpleFolderInformation>.Create(True);
 
@@ -1061,6 +1069,8 @@ begin
 
     VSTFiles.EndUpdate();
 
+    RefreshActionsButtons();
+
     ///
     if Assigned(AFolders) then
       FreeAndNil(AFolders);
@@ -1095,6 +1105,24 @@ begin
   var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
   if CanNodeFileBeRead(pData) then
     StreamFileContent(pData^.FileInformation.Path);
+end;
+
+procedure TControlFormFileManager.FormCreate(Sender: TObject);
+begin
+  FHistoryCursor := 0;
+  FPathHistory := TList<String>.Create();
+
+  SetDisplayMode(dmDrives);
+
+  FCurrentPathACL := [];
+
+  // Setup Constraints
+  Constraints.MinWidth  := ScaleValue(250);
+
+  var APoint := ButtonOptions.ClientToScreen(Point(0, 0));
+
+  Constraints.MinHeight := (APoint.Y - Top) + ButtonOptions.Height + LabelAccess.Height + PanelPath.Height +
+    ScaleValue(20);
 end;
 
 procedure TControlFormFileManager.FormDestroy(Sender: TObject);

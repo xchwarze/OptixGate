@@ -213,7 +213,7 @@ begin
   {$ENDIF}
 
   {$IFDEF USETLS}
-    FCertificate := ACertificate;
+    TOptixOpenSSLHelper.CopyCertificate(ACertificate, FCertificate);
     FSSLContext := TOptixOpenSSLContext.Create(sslClient, FCertificate);
 
     {$IFNDEF CLIENT_GUI}

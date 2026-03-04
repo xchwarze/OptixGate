@@ -357,6 +357,8 @@ const
 
   CREATE_BREAKAWAY_FROM_JOB = $01000000;
 
+  UNLEN = 256;
+
   (* DbgHelp.DLL *)
 
   MiniDumpNormal                          = $00000000;

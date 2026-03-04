@@ -148,18 +148,20 @@ end;
 
 initialization
   (* Commands *)
+
   TClassesRegistry.RegisterClasses([
     // General
     TOptixCommandTerminateCurrentProcess,
     TOptixCommandReceiveSessionInformation,
 
     // File System Commands
-    TOptixCommandReceiveFileInformation,
+    TOptixCommandFileInformation,
     TOptixCommandGetUploadedFileInformation,
     TOptixCommandEnumDrives,
     TOptixCommandEnumDirectoryFiles,
     TOptixCommandDownloadFile,
     TOptixCommandUploadFile,
+    TOptixCommandCreateDirectory,
 
     // System & Process Commands
     TOptixCommandTerminateProcess,

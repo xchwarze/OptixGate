@@ -113,7 +113,6 @@ type
     procedure PopupMenuPopup(Sender: TObject);
     procedure CancelTransfer1Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
   private
@@ -621,11 +620,6 @@ end;
 procedure TControlFormTransfers.FormDestroy(Sender: TObject);
 begin
   VST.Clear();
-end;
-
-procedure TControlFormTransfers.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
 end;
 
 end.

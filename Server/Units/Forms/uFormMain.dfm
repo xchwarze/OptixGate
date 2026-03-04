@@ -16,7 +16,6 @@ object FormMain: TFormMain
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   TextHeight = 13
   object VST: TVirtualStringTree
     Left = 0
@@ -38,8 +37,11 @@ object FormMain: TFormMain
     Header.Height = 17
     Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible, hoHeaderClickAutoSort]
     Header.SortColumn = 1
+    HintMode = hmHint
     Images = VirtualImageList
+    ParentShowHint = False
     PopupMenu = PopupMenu
+    ShowHint = True
     TabOrder = 0
     TreeOptions.PaintOptions = [toHideFocusRect, toShowButtons, toShowDropmark, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toFullVertGridLines]
     TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect, toSelectNextNodeOnRemoval]
@@ -48,6 +50,7 @@ object FormMain: TFormMain
     OnFreeNode = VSTFreeNode
     OnGetText = VSTGetText
     OnGetImageIndex = VSTGetImageIndex
+    OnGetHint = VSTGetHint
     OnGetNodeDataSize = VSTGetNodeDataSize
     OnInitNode = VSTInitNode
     Touch.InteractiveGestures = [igPan, igPressAndTap]
@@ -9392,8 +9395,8 @@ object FormMain: TFormMain
   end
   object FlatHint: TFlatHint
     Active = True
-    Left = 128
-    Top = 168
+    Left = 512
+    Top = 72
   end
   object FlatWindow: TFlatWindow
     BorderWidth = 2

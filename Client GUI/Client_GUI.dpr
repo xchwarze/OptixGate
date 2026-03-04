@@ -132,6 +132,9 @@ begin
 
     Application.Initialize;
     Application.MainFormOnTaskbar := True;
+    Application.ShowHint := True;
+    Application.HintPause := 200;
+
     Application.CreateForm(TFormMain, FormMain);
     Application.CreateForm(TFormAbout, FormAbout);
     Application.CreateForm(TFormDebugThreads, FormDebugThreads);
