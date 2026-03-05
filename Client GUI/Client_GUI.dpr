@@ -66,6 +66,7 @@ uses
   OptixCore.System.InformationGathering in '..\Core\System\OptixCore.System.InformationGathering.pas',
   OptixCore.System.Process in '..\Core\System\OptixCore.System.Process.pas',
   OptixCore.SessionInformation in '..\Core\Commands\OptixCore.SessionInformation.pas',
+  OptixCore.Task.CopyFileOrDirectory in '..\..\Public\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas',
   Optix.Protocol.SessionHandler in 'Units\Threads\Optix.Protocol.SessionHandler.pas',
   Optix.Protocol.Client in 'Units\Threads\Optix.Protocol.Client.pas',
   OptixCore.WinApiEx in '..\Core\OptixCore.WinApiEx.pas',

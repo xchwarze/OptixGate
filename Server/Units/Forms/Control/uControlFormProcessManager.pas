@@ -64,6 +64,7 @@ uses
   __uBaseFormControl__, uControlFormDumpProcess,
 
   OptixCore.System.Process, OptixCore.WinApiEx, OptixCore.Commands.Process, OptixCore.Protocol.Packet,
+  Optix.ControlSingleton,
 
   NeoFlat.PopupMenu, NeoFlat.Panel;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -117,7 +118,6 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormDestroy(Sender: TObject);
-    procedure VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     FClientArchitecture          : TProcessorArchitecture;
     FRemoteProcessorArchitecture : TProcessorArchitecture;
@@ -140,8 +140,8 @@ type
     procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
 
     {@C}
-    constructor Create(AOwner : TComponent; const AUserIdentifier : String;
-      const AClientArchitecture : TProcessorArchitecture;
+    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
+      const AUserIdentifier : String; const AClientArchitecture : TProcessorArchitecture;
       const ARemoteProcessorArchitecture : TProcessorArchitecture); reintroduce;
   end;
 
@@ -287,10 +287,11 @@ begin
   end;
 end;
 
-constructor TControlFormProcessManager.Create(AOwner : TComponent; const AUserIdentifier : String;
-  const AClientArchitecture : TProcessorArchitecture; const ARemoteProcessorArchitecture : TProcessorArchitecture);
+constructor TControlFormProcessManager.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
+  const AUserIdentifier : String; const AClientArchitecture : TProcessorArchitecture;
+  const ARemoteProcessorArchitecture : TProcessorArchitecture);
 begin
-  inherited Create(AOwner, AUserIdentifier);
+  inherited Create(AOwner, ASharedClass, AUserIdentifier);
   ///
 
   FClientArchitecture          := AClientArchitecture;
@@ -534,12 +535,6 @@ begin
 
   ///
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
-end;
-
-procedure TControlFormProcessManager.VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X,
-  Y: Integer);
-begin
-
 end;
 
 procedure TControlFormProcessManager.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);

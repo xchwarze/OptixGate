@@ -391,7 +391,9 @@ begin
 
     pData^.Handler.Start();
   finally
+    {$IFDEF USETLS}
     TOptixOpenSSLHelper.FreeCertificate(ACertificate);
+    {$ENDIF}
 
     ///
     VST.EndUpdate();

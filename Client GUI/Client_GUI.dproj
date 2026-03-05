@@ -166,6 +166,7 @@
         <DCCReference Include="..\Core\System\OptixCore.System.InformationGathering.pas"/>
         <DCCReference Include="..\Core\System\OptixCore.System.Process.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.SessionInformation.pas"/>
+        <DCCReference Include="..\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.SessionHandler.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Client.pas"/>
         <DCCReference Include="..\Core\OptixCore.WinApiEx.pas"/>

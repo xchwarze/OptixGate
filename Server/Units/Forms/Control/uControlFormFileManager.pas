@@ -80,12 +80,21 @@ uses
 
 type
   TFileTreeData = record
+  private
+    {@M}
+    function GetName() : String;
+    function GetAccess() : TFileAccessAttributes;
+  public
     DriveInformation : TDriveInformation;
     FileInformation  : TFileInformation;
     ImageIndex       : Integer;
 
     {@M}
-    function Name() : String;
+    function Path(const IncludeTrailingPathDelimiterIfDirectory : Boolean = False) : String;
+
+    {@G}
+    property Name   : String                read GetName;
+    property Access : TFileAccessAttributes read GetAccess;
   end;
   PFileTreeData = ^TFileTreeData;
 
@@ -135,6 +144,14 @@ type
     ButtonNewDirectory: TFlatButton;
     Shape2: TShape;
     Shape3: TShape;
+    N3: TMenuItem;
+    Copy1: TMenuItem;
+    Cut1: TMenuItem;
+    PasteToSelectedFolder1: TMenuItem;
+    Shape4: TShape;
+    ButtonPaste: TFlatButton;
+    Paste1: TMenuItem;
+    ClearClipboard1: TMenuItem;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -176,10 +193,17 @@ type
     procedure StreamFileContentOpen1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ButtonNewDirectoryClick(Sender: TObject);
+    procedure Cut1Click(Sender: TObject);
+    procedure Copy1Click(Sender: TObject);
+    procedure VSTFilesPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType);
+    procedure ButtonPasteClick(Sender: TObject);
+    procedure Paste1Click(Sender: TObject);
+    procedure PasteToSelectedFolder1Click(Sender: TObject);
+    procedure ClearClipboard1Click(Sender: TObject);
   private
     FHistoryCursor  : Integer;
     FPathHistory    : TList<String>;
-
     FCurrentPathACL : TFileAccessAttributes;
 
     {@M}
@@ -198,6 +222,9 @@ type
     procedure RefreshFiles();
     function GetFolderImageIndex(const AFolderAccess : TFileAccessAttributes) : Integer;
     function GetNodeByFileName(const AFileName : String) : PVirtualNode;
+    procedure CopyOrCutSelectedNode(const ACopyMode : TVirtualClipboardCopyMode);
+    procedure PasteFileOrDirectory(const pNode : PVirtualNode = nil);
+    procedure OnVirtualClipboardUpdate(Sender : TObject);
   protected
     {@M}
     function GetContextDescription() : String; override;
@@ -209,6 +236,7 @@ type
     {@M}
     procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
     procedure RegisterNewFile(const APath : String; const AFileInformation : TFileInformation);
+    procedure DeleteFile(const ANewFilePath : string; const AIsDirectory : Boolean);
   end;
 
 var
@@ -229,7 +257,7 @@ uses
 
 (* TFileTreeData *)
 
-function TFileTreeData.Name() : String;
+function TFileTreeData.GetName() : String;
 begin
   result := '';
   ///
@@ -238,6 +266,26 @@ begin
     result := DriveInformation.Letter
   else if Assigned(FileInformation) then
     result := FileInformation.Name;
+end;
+
+function TFileTreeData.GetAccess() : TFileAccessAttributes;
+begin
+  if Assigned(FileInformation) then
+    result := FileInformation.Access
+  else
+    result := [];
+end;
+
+function TFileTreeData.Path(const IncludeTrailingPathDelimiterIfDirectory : Boolean = False) : String;
+begin
+  result := '';
+  ///
+
+  if Assigned(FileInformation) then begin
+    result := FileInformation.Path;
+    if IncludeTrailingPathDelimiterIfDirectory and FileInformation.IsDirectory then
+      result := IncludeTrailingPathDelimiter(result);
+  end;
 end;
 
 (* TControlFormFileManager *)
@@ -262,7 +310,7 @@ end;
 procedure TControlFormFileManager.RegisterNewFile(const APath : String; const AFileInformation : TFileInformation);
 begin
   if not Assigned(AFileInformation) then
-    Exit();
+    Exit;
   ///
 
   if String.Compare(
@@ -270,15 +318,18 @@ begin
     IncludeTrailingPathDelimiter(EditPath.Text),
     True
   ) <> 0 then
-    Exit();
+    Exit;
 
-  VSTFiles.BeginUpdate();
+  VSTFiles.BeginUpdate;
   try
     var pNode := GetNodeByFileName(AFileInformation.Name);
     if not Assigned(pNode) then
       pNode := VSTFiles.AddChild(nil);
 
     var pData := PFileTreeData(pNode.GetData);
+
+    if Assigned(pData^.FileInformation) then
+      FreeAndNil(pData^.FileInformation);
 
     pData^.FileInformation := TFileInformation.Create();
     pData^.FileInformation.Assign(AFileInformation);
@@ -288,12 +339,37 @@ begin
     else
       pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.Name, True);
   finally
-    VSTFiles.EndUpdate();
+    VSTFiles.EndUpdate;
   end;
 
   ///
   if AFileInformation.IsDirectory then begin
-    // TODO: Support directories (Modify "new file/folder" feedback command to have parent folders list)
+    // TODO: Update Parent > Child Folder Tree
+  end;
+end;
+
+procedure TControlFormFileManager.DeleteFile(const ANewFilePath : string; const AIsDirectory : Boolean);
+begin
+  if String.Compare(
+    IncludeTrailingPathDelimiter(ExtractFilePath(ANewFilePath)),
+    IncludeTrailingPathDelimiter(EditPath.Text),
+    True
+  ) <> 0 then
+    Exit;
+  ///
+
+  VSTFiles.BeginUpdate;
+  try
+    var pNode := GetNodeByFileName(ExtractFileName(ANewFilePath));
+    if Assigned(pNode) then
+      VSTFiles.DeleteNode(pNode);
+  finally
+    VSTFiles.EndUpdate;
+  end;
+
+  ///
+  if AIsDirectory then begin
+    // TODO: Update Parent > Child Folder Tree
   end;
 end;
 
@@ -379,12 +455,12 @@ end;
 
 procedure TControlFormFileManager.RefreshActionsButtons();
 begin
-  ButtonBack.Enabled      := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
-  ButtonForward.Enabled   := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1);
-
+  ButtonBack.Enabled         := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
+  ButtonForward.Enabled      := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1);
   ButtonRefresh.Enabled      := PanelPath.Visible;
   ButtonUpload.Enabled       := ButtonRefresh.Enabled and (faWrite in FCurrentPathACL);
   ButtonNewDirectory.Enabled := ButtonUpload.Enabled;
+  ButtonPaste.Enabled        := ButtonUpload.Enabled and not FSharedClass.FileClipboard.IsEmpty;
 end;
 
 procedure TControlFormFileManager.InsertPathToHistory(APath : String);
@@ -447,6 +523,73 @@ procedure TControlFormFileManager.ColoredFoldersAccessView1Click(Sender: TObject
 begin
   VSTFiles.Refresh();
   VSTFolders.Refresh();
+end;
+
+procedure TControlFormFileManager.Copy1Click(Sender: TObject);
+begin
+  CopyOrCutSelectedNode(vccmCopy);
+end;
+
+procedure TControlFormFileManager.CopyOrCutSelectedNode(const ACopyMode : TVirtualClipboardCopyMode);
+begin
+  if not Assigned(VSTFiles.FocusedNode) then
+    Exit;
+  ///
+
+  var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
+  if (faRead in pData^.Access) and (((ACopyMode = vccmCut) and (faWrite in pData^.Access)) or (ACopyMode = vccmCopy))
+  then begin
+    FSharedClass.FileClipboard.CopyMode := ACopyMode;
+    FSharedClass.FileClipboard.Content  := pData^.FileInformation.Path;
+  end;
+
+  ///
+  RefreshActionsButtons();
+  VSTFiles.Refresh();
+end;
+
+procedure TControlFormFileManager.Paste1Click(Sender: TObject);
+begin
+  ButtonPasteClick(ButtonPaste);
+end;
+
+procedure TControlFormFileManager.PasteFileOrDirectory(const pNode : PVirtualNode = nil);
+begin
+  if FSharedClass.FileClipboard.IsEmpty then
+    Exit;
+  ///
+
+  var ADestination := '';
+  ///
+
+  if Assigned(pNode) then begin
+    var pData := PFileTreeData(pNode.GetData);
+    if Assigned(pData) and (faWrite in pData^.Access) then
+      ADestination := pData^.Path(True);
+  end else if faWrite in FCurrentPathACL then
+    ADestination := EditPath.Text;
+
+  ///
+  if not String.IsNullOrWhiteSpace(ADestination) then
+    SendCommand(TOptixCommandCopyFileOrDirectory.Create(
+      FSharedClass.FileClipboard.Content,
+      ADestination,
+      FSharedClass.FileClipboard.CopyMode
+    ));
+
+  ///
+  ClearClipboard1Click(ClearClipboard1);
+end;
+
+procedure TControlFormFileManager.PasteToSelectedFolder1Click(Sender: TObject);
+begin
+  if Assigned(VSTFiles.FocusedNode) then
+    PasteFileOrDirectory(VSTFiles.FocusedNode);
+end;
+
+procedure TControlFormFileManager.Cut1Click(Sender: TObject);
+begin
+  CopyOrCutSelectedNode(vccmCut);
 end;
 
 procedure TControlFormFileManager.SetDisplayMode(const AMode : TDisplayMode);
@@ -534,6 +677,11 @@ begin
   PopupMenuOptions.Popup(APoint.X, APoint.Y);
 end;
 
+procedure TControlFormFileManager.ButtonPasteClick(Sender: TObject);
+begin
+  PasteFileOrDirectory();
+end;
+
 procedure TControlFormFileManager.ButtonRefreshClick(Sender: TObject);
 begin
   if EditPath.Visible then
@@ -585,6 +733,13 @@ begin
   result := (pData^.FileInformation.Size > 0) and (faRead in pData^.FileInformation.Access);
 end;
 
+procedure TControlFormFileManager.ClearClipboard1Click(Sender: TObject);
+begin
+  FSharedClass.FileClipboard.Clear;
+  RefreshActionsButtons;
+  VSTFiles.Refresh;
+end;
+
 function TControlFormFileManager.CanFileBeUploadedToNodeDirectory(var pData : PFileTreeData) : Boolean;
 begin
   result := False;
@@ -609,18 +764,32 @@ begin
       var pData := PFileTreeData(pNode.GetData());
       ///
 
+      Copy1.Visible  := True;
+      Cut1.Visible   := True;
+
       if Assigned(pData^.FileInformation) then begin
         if pData^.FileInformation.IsDirectory then begin
           UploadToFolder1.Visible := True;
           UploadToFolder1.Enabled := CanFileBeUploadedToNodeDirectory(pData);
+          PasteToSelectedFolder1.Visible := True;
+          PasteToSelectedFolder1.Enabled := (faWrite in pData^.Access) and not FSharedClass.FileClipboard.IsEmpty;
         end else begin
           DownloadFile1.Visible          := True;
           DownloadFile1.Enabled          := CanNodeFileBeRead(pData);
           StreamFileContentOpen1.Visible := DownloadFile1.Visible;
           StreamFileContentOpen1.Enabled := DownloadFile1.Enabled;
         end;
+
+        ///
+        Copy1.Enabled  := faRead in pData^.Access;
+        Cut1.Enabled   := (faRead in pData^.Access) and (faWrite in pData^.Access);
       end;
     end;
+
+    ///
+    ClearClipboard1.Visible := not FSharedClass.FileClipboard.IsEmpty();
+    Paste1.Visible := True;
+    Paste1.Enabled := not FSharedClass.FileClipboard.IsEmpty and (faWrite in FCurrentPathACL);
   end;
 end;
 
@@ -805,11 +974,20 @@ begin
       end;
 
       ikState : begin
-        if pData^.FileInformation.IsDirectory and ColoredFoldersAccessView1.Checked then begin
-          if (pData^.FileInformation.Name = '..') then
-            ImageIndex := IMAGE_FOLDER_PREV
-          else
-            ImageIndex := GetFolderImageIndex(pData^.FileInformation.Access);
+        if not FSharedClass.FileClipboard.IsEmpty then begin
+          if String.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0 then begin
+            if FSharedClass.FileClipboard.CopyMode = vccmCopy then
+              ImageIndex := IMAGE_COPY
+            else
+              ImageIndex := IMAGE_CUT;
+          end;
+        end else begin
+          if pData^.FileInformation.IsDirectory and ColoredFoldersAccessView1.Checked then begin
+            if (pData^.FileInformation.Name = '..') then
+              ImageIndex := IMAGE_FOLDER_PREV
+            else
+              ImageIndex := GetFolderImageIndex(pData^.FileInformation.Access);
+          end;
         end;
       end;
     end;
@@ -898,6 +1076,24 @@ begin
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
 end;
 
+procedure TControlFormFileManager.VSTFilesPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas;
+  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType);
+begin
+  var pData := PFileTreeData(Node.GetData);
+  if not Assigned(pData) then
+    Exit;
+
+  if not FSharedClass.FileClipboard.IsEmpty and
+    (String.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
+  then begin
+    case FSharedClass.FileClipboard.CopyMode of
+      vccmCopy : TargetCanvas.Font.Color := clBlue;
+      vccmCut  : TargetCanvas.Font.Color := clRed;
+    end;
+
+  end;
+end;
+
 procedure TControlFormFileManager.VSTFoldersCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode;
   Column: TColumnIndex; var Result: Integer);
 begin
@@ -975,11 +1171,13 @@ begin
   else if AOptixPacket is TOptixCommandEnumDirectoryFiles then
     DisplayFiles(TOptixCommandEnumDirectoryFiles(AOptixPacket))
   // -------------------------------------------------------------------------------------------------------------------
-  else if AOptixPacket is TOptixCommandFileInformation then
-    RegisterNewFile(
-      ExtractFilePath(TOptixCommandFileInformation(AOptixPacket).FileName),
-      TOptixCommandFileInformation(AOptixPacket).FileInformation
-    );
+  else if AOptixPacket is TOptixCommandFileInformation then begin
+    var ACastedPacket := TOptixCommandFileInformation(AOptixPacket);
+    ///
+
+    // Propagate signal to other File Manager Windows
+    RegisterNewFileOnFileManagers(ExtractFilePath(ACastedPacket.FileName), ACastedPacket.FileInformation);
+  end;
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
@@ -1123,6 +1321,8 @@ begin
 
   Constraints.MinHeight := (APoint.Y - Top) + ButtonOptions.Height + LabelAccess.Height + PanelPath.Height +
     ScaleValue(20);
+
+  FSharedClass.FileClipboard.SubscribeToClipboardUpdateSignal(OnVirtualClipboardUpdate);
 end;
 
 procedure TControlFormFileManager.FormDestroy(Sender: TObject);
@@ -1142,6 +1342,13 @@ end;
 procedure TControlFormFileManager.FullExpand1Click(Sender: TObject);
 begin
   VSTFolders.FullExpand(nil);
+end;
+
+procedure TControlFormFileManager.OnVirtualClipboardUpdate(Sender : TObject);
+begin
+  RefreshActionsButtons;
+  VSTFolders.Refresh;
+  VSTFiles.Refresh;
 end;
 
 end.

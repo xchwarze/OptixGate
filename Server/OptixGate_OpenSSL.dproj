@@ -163,43 +163,56 @@
         </DelphiCompile>
         <DCCReference Include="..\Core\OptixCore.Exceptions.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Sockets.Helper.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Packet.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Sockets.Exceptions.pas"/>
         <DCCReference Include="..\Core\OptixCore.Interfaces.pas"/>
         <DCCReference Include="..\Core\OptixCore.Thread.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Client.Handler.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.SessionInformation.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.Helper.pas"/>
         <DCCReference Include="..\Core\OptixCore.Types.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.InformationGathering.pas"/>
+        <DCCReference Include="..\Core\OptixCore.Helper.pas"/>
         <DCCReference Include="..\Core\OptixCore.WinApiEx.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.Process.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.LogNotifier.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.FileSystem.pas"/>
         <DCCReference Include="..\Core\OptixCore.Classes.pas"/>
+        <DCCReference Include="..\Core\OptixCore.ClassesRegistry.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.Helper.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.InformationGathering.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.Process.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.FileSystem.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.Registry.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Packet.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Client.Handler.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.Preflight.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.Exceptions.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.FileTransfer.pas"/>
-        <DCCReference Include="..\Core\Tasks\OptixCore.Task.ProcessDump.pas"/>
         <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Headers.pas"/>
         <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Helper.pas"/>
         <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Exceptions.pas"/>
         <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Context.pas"/>
         <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Handler.pas"/>
-        <DCCReference Include="Units\Optix.DebugCertificate.pas"/>
-        <DCCReference Include="Units\Configs\Optix.Config.CertificatesStore.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.SessionInformation.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Base.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.FileSystem.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Process.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Shell.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Registry.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.ContentReader.pas"/>
+        <DCCReference Include="..\Core\Tasks\OptixCore.Task.ProcessDump.pas"/>
+        <DCCReference Include="..\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Worker.FileTransfer.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Server.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.SessionHandler.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Client.pas"/>
+        <DCCReference Include="Units\Optix.DebugCertificate.pas"/>
         <DCCReference Include="Units\Optix.Helper.pas"/>
+        <DCCReference Include="Units\Optix.Constants.pas"/>
+        <DCCReference Include="Units\Optix.ControlSingleton.pas"/>
         <DCCReference Include="Units\Configs\Optix.Config.Helper.pas"/>
+        <DCCReference Include="Units\Configs\Optix.Config.TrustedCertificatesStore.pas"/>
+        <DCCReference Include="Units\Configs\Optix.Config.Servers.pas"/>
+        <DCCReference Include="Units\Configs\Optix.Config.CertificatesStore.pas"/>
         <DCCReference Include="Units\Forms\Control\__uBaseFormControl__.pas"/>
         <DCCReference Include="Units\Forms\uFormMain.pas">
             <Form>FormMain</Form>
         </DCCReference>
-        <DCCReference Include="Units\Optix.Constants.pas"/>
         <DCCReference Include="Units\Forms\uFormAbout.pas">
             <Form>FormAbout</Form>
         </DCCReference>
@@ -246,22 +259,12 @@
         <DCCReference Include="Units\Forms\uFormTrustedCertificates.pas">
             <Form>FormTrustedCertificates</Form>
         </DCCReference>
-        <DCCReference Include="Units\Configs\Optix.Config.TrustedCertificatesStore.pas"/>
         <DCCReference Include="Units\Forms\uFormServers.pas">
             <Form>FormServers</Form>
         </DCCReference>
-        <DCCReference Include="Units\Configs\Optix.Config.Servers.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Base.pas"/>
-        <DCCReference Include="..\Core\OptixCore.ClassesRegistry.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.FileSystem.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Process.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Shell.pas"/>
         <DCCReference Include="Units\Forms\Control\uControlFormRegistryManager.pas">
             <Form>ControlFormRegistryManager</Form>
         </DCCReference>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Registry.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.Registry.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.ContentReader.pas"/>
         <DCCReference Include="Units\Forms\Control\uControlFormContentReader.pas">
             <Form>ControlFormContentReader</Form>
         </DCCReference>
@@ -275,7 +278,6 @@
         <DCCReference Include="Units\Forms\Control\uControlFormRegistryEditor.pas">
             <Form>ControlFormRegistryEditor</Form>
         </DCCReference>
-        <DCCReference Include="..\Core\OptixCore.Helper.pas"/>
         <DCCReference Include="Units\Forms\uFormSelectCertificate.pas">
             <Form>FormSelectCertificate</Form>
         </DCCReference>

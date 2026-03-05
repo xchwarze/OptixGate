@@ -59,7 +59,7 @@ uses
 
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Menus,
 
-  OptixCore.System.Registry, OptixCore.Classes,
+  OptixCore.System.Registry, OptixCore.Classes, Optix.ControlSingleton,
 
   __uBaseFormControl__, uFrameHexEditor,
 
@@ -133,7 +133,7 @@ type
     procedure RefreshCaption(); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent; const AUserIdentifier : String;
+    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
       const ASpecialForm : Boolean = False); override;
     destructor Destroy(); override;
 
@@ -345,8 +345,8 @@ begin
   Close;
 end;
 
-constructor TControlFormRegistryEditor.Create(AOwner : TComponent; const AUserIdentifier : String;
-  const ASpecialForm : Boolean = False);
+constructor TControlFormRegistryEditor.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
+  const AUserIdentifier : String; const ASpecialForm : Boolean = False);
 begin
   inherited;
   ///

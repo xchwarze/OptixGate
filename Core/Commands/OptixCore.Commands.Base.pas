@@ -128,6 +128,9 @@ type
     FState : TOptixTaskState;
 
     FResult  : TOptixTaskResult;
+
+    {@M}
+    function GetHasEnded : Boolean;
   protected
     {@M}
     procedure DeSerialize(const ASerializedObject : TJsonObject); override;
@@ -143,6 +146,7 @@ type
     property Id            : TGUID            read FId;
     property TaskClassName : String           read FTaskClassName;
     property State         : TOptixTaskState  read FState;
+    property HasEnded      : Boolean          read GetHasEnded;
     property Result        : TOptixTaskResult read FResult;
   end;
 
@@ -271,6 +275,11 @@ begin
     result.AddPair('Result', FResult.Serialize())
   else
     result.AddPair('Result', TJsonObject.Create());
+end;
+
+function TOptixTaskCallback.GetHasEnded : Boolean;
+begin
+  Result := (FState = otsFailed) or (FState = otsSuccess);
 end;
 
 (* TOptixTask *)
@@ -425,11 +434,11 @@ begin
     var AExtendedDescription := GetExtendedDescription();
     var ATimingInformation := '';
     if FTaskDuration > 1000 then
-      ATimingInformation := Format('Task completed in %d seconds.', [FTaskDuration div 1000]);
+      ATimingInformation := Format(' (Task completed in %d seconds.)', [FTaskDuration div 1000]);
     ///
 
     if not String.IsNullOrWhiteSpace(AExtendedDescription) then
-      result := Format('%s (%s)', [
+      result := Format('%s%s', [
         AExtendedDescription,
         ATimingInformation
       ])

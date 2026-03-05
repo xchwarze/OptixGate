@@ -184,11 +184,36 @@ type
     {$ENDIF}
   end;
 
+  TOptixCommandCopyFileOrDirectory = class(TOptixCommandTask)
+  private
+    [OptixSerializableAttribute]
+    FSource : String;
+
+    [OptixSerializableAttribute]
+    FDestination : String;
+
+    [OptixSerializableAttribute]
+    FCopyMode : TVirtualClipboardCopyMode;
+  public
+    {@C}
+    constructor Create(const ASource, ADestination : String; const ACopyMode : TVirtualClipboardCopyMode); overload;
+
+    {@M}
+    {$IFNDEF SERVER}
+    function CreateTask(const ACommand : TOptixCommand) : TOptixTask; override;
+    {$ENDIF}
+
+    {@G}
+    property Source      : String                    read FSource;
+    property Destination : String                    read FDestination;
+    property CopyMode    : TVirtualClipboardCopyMode read FCopyMode;
+  end;
+
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.IOUtils;
+  System.IOUtils, OptixCore.Task.CopyFileOrDirectory;
 // ---------------------------------------------------------------------------------------------------------------------
 
 (* TOptixCommandFileInformation *)
@@ -352,6 +377,29 @@ begin
     FreeAndNil(FFileInformation);
 
   FFileInformation := TFileInformation.Create(FFileName, FIsDirectory);
+end;
+{$ENDIF}
+
+(* TOptixCommandCopyFileOrDirectory *)
+
+constructor TOptixCommandCopyFileOrDirectory.Create(const ASource, ADestination : String;
+  const ACopyMode : TVirtualClipboardCopyMode);
+begin
+  inherited Create();
+  ///
+
+  FSource      := ASource;
+  FDestination := ADestination;
+  FCopyMode    := ACopyMode;
+end;
+
+{$IFNDEF SERVER}
+function TOptixCommandCopyFileOrDirectory.CreateTask(const ACommand : TOptixCommand) : TOptixTask;
+begin
+  if Assigned(ACommand) then
+    result := TOptixCopyFileOrDirectoryTask.Create(ACommand)
+  else
+    result := nil;
 end;
 {$ENDIF}
 

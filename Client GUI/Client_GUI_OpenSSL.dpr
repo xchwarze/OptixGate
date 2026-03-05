@@ -81,6 +81,7 @@ uses
   Optix.Protocol.Worker.FileTransfer in 'Units\Threads\Optix.Protocol.Worker.FileTransfer.pas',
   OptixCore.Protocol.FileTransfer in '..\Core\Network\OptixCore.Protocol.FileTransfer.pas',
   OptixCore.Task.ProcessDump in '..\Core\Tasks\OptixCore.Task.ProcessDump.pas',
+  OptixCore.Task.CopyFileOrDirectory in '..\..\Public\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas',
   Optix.Actions.ProcessHandler in 'Units\Actions\Optix.Actions.ProcessHandler.pas',
   Optix.Helper in '..\Server\Units\Optix.Helper.pas',
   Optix.Constants in '..\Server\Units\Optix.Constants.pas',

@@ -177,6 +177,7 @@
         <DCCReference Include="Units\Threads\Optix.Protocol.Worker.FileTransfer.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.FileTransfer.pas"/>
         <DCCReference Include="..\Core\Tasks\OptixCore.Task.ProcessDump.pas"/>
+        <DCCReference Include="..\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas"/>
         <DCCReference Include="Units\Actions\Optix.Actions.ProcessHandler.pas"/>
         <DCCReference Include="..\Server\Units\Optix.Helper.pas"/>
         <DCCReference Include="..\Server\Units\Optix.Constants.pas"/>

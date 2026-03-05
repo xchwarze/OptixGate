@@ -189,6 +189,7 @@ object ControlFormFileManager: TControlFormFileManager
           OnDblClick = VSTFilesDblClick
           OnFreeNode = VSTFilesFreeNode
           OnGetText = VSTFilesGetText
+          OnPaintText = VSTFilesPaintText
           OnGetImageIndex = VSTFilesGetImageIndex
           OnGetNodeDataSize = VSTFilesGetNodeDataSize
           Touch.InteractiveGestures = [igPan, igPressAndTap]
@@ -346,7 +347,7 @@ object ControlFormFileManager: TControlFormFileManager
       object LabelAccess: TLabel
         Left = 6
         Top = 278
-        Width = 68
+        Width = 21
         Height = 15
         Margins.Left = 8
         Margins.Top = 10
@@ -365,7 +366,6 @@ object ControlFormFileManager: TControlFormFileManager
         ParentFont = False
         Transparent = False
         Visible = False
-        ExplicitWidth = 21
       end
       object Shape1: TShape
         AlignWithMargins = True
@@ -463,7 +463,7 @@ object ControlFormFileManager: TControlFormFileManager
       object ButtonOptions: TFlatButton
         AlignWithMargins = True
         Left = 6
-        Top = 177
+        Top = 208
         Width = 68
         Height = 22
         Hint = 'Open the file manager options.'
@@ -508,12 +508,12 @@ object ControlFormFileManager: TControlFormFileManager
         Value = 0
         OnClick = ButtonNewDirectoryClick
         Busy = False
-        ExplicitTop = 167
+        ExplicitTop = 168
       end
       object Shape2: TShape
         AlignWithMargins = True
         Left = 6
-        Top = 172
+        Top = 203
         Width = 68
         Height = 1
         Margins.Left = 0
@@ -534,6 +534,42 @@ object ControlFormFileManager: TControlFormFileManager
         Margins.Right = 0
         Margins.Bottom = 4
         Align = alTop
+      end
+      object Shape4: TShape
+        AlignWithMargins = True
+        Left = 6
+        Top = 172
+        Width = 68
+        Height = 1
+        Margins.Left = 0
+        Margins.Top = 4
+        Margins.Right = 0
+        Margins.Bottom = 4
+        Align = alTop
+      end
+      object ButtonPaste: TFlatButton
+        AlignWithMargins = True
+        Left = 6
+        Top = 177
+        Width = 68
+        Height = 22
+        Hint = 'Paste the clipboard contents into the current directory.'
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Caption = 'Paste'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Align = alTop
+        ShowHint = True
+        ImageIndex = 17
+        Value = 0
+        OnClick = ButtonPasteClick
+        Busy = False
       end
       object PanelDirection: TFlatPanel
         AlignWithMargins = True
@@ -612,14 +648,14 @@ object ControlFormFileManager: TControlFormFileManager
   object PopupMenu: TFlatPopupMenu
     OwnerDraw = True
     OnPopup = PopupMenuPopup
-    Left = 240
-    Top = 128
+    Left = 208
+    Top = 72
     object DownloadFile1: TMenuItem
       Caption = 'Download File'
       OnClick = DownloadFile1Click
     end
     object UploadToFolder1: TMenuItem
-      Caption = 'Upload To Folder'
+      Caption = 'Upload To Selected Folder'
       OnClick = UploadToFolder1Click
     end
     object N2: TMenuItem
@@ -629,11 +665,34 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Stream File Content (Open)'
       OnClick = StreamFileContentOpen1Click
     end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object Cut1: TMenuItem
+      Caption = 'Cut'
+      OnClick = Cut1Click
+    end
+    object Copy1: TMenuItem
+      Caption = 'Copy'
+      OnClick = Copy1Click
+    end
+    object Paste1: TMenuItem
+      Caption = 'Paste'
+      OnClick = Paste1Click
+    end
+    object PasteToSelectedFolder1: TMenuItem
+      Caption = 'Paste To Selected Folder'
+      OnClick = PasteToSelectedFolder1Click
+    end
+    object ClearClipboard1: TMenuItem
+      Caption = 'Clear Clipboard'
+      OnClick = ClearClipboard1Click
+    end
   end
   object PopupMenuOptions: TFlatPopupMenu
     OwnerDraw = True
-    Left = 168
-    Top = 80
+    Left = 256
+    Top = 168
     object ColoredFoldersAccessView1: TMenuItem
       AutoCheck = True
       Caption = 'Colored Folders (Access View)'
@@ -650,8 +709,8 @@ object ControlFormFileManager: TControlFormFileManager
   end
   object PopupFoldersTree: TFlatPopupMenu
     OwnerDraw = True
-    Left = 256
-    Top = 241
+    Left = 56
+    Top = 177
     object FullExpand1: TMenuItem
       Caption = 'Full Expand'
       OnClick = FullExpand1Click

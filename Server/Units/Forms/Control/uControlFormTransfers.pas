@@ -161,20 +161,10 @@ begin
 
   // -------------------------------------------------------------------------------------------------------------------
   if AOptixPacket is TOptixCommandGetUploadedFileInformation then begin
-    var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
-    if not Assigned(AForms) then
-      Exit();
-    try
-      var AFileInformation := TOptixCommandGetUploadedFileInformation(AOptixPacket);
-      if Assigned(AFileInformation.FileInformation) then
-        for var AForm in AForms do
-          TControlFormFileManager(AForm).RegisterNewFile(
-            ExtractFilePath(AFileInformation.FileName),
-            AFileInformation.FileInformation
-          );
-    finally
-      FreeAndNil(AForms);
-    end;
+    var ACastedPacket := TOptixCommandGetUploadedFileInformation(AOptixPacket);
+    ///
+
+    RegisterNewFileOnFileManagers(ExtractFilePath(ACastedPacket.FileName), ACastedPacket.FileInformation);
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;

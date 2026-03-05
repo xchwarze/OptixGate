@@ -48,9 +48,31 @@
 {******************************************************************************}
 
 (*
-  When Delphi 13 in Community Edition (Code Improvements):
-    - Replace "not (x in y)" by "x not in y"
-    - Ternary operator
+  -----------------------------------------------------------
+  - (!) Nice-to-Have Code Improvements / Best Practices (!) -
+  -----------------------------------------------------------
+
+  - Omit parentheses when calling both parameterless functions and procedures. Rely on standard Delphi syntax to keep
+    the code clean (MyProcedure; and Result := MyFunction;)
+
+  - Ensure that records used as node data in VirtualTreeView are properly finalized (using Finalize(pData^)) in the
+    OnFreeNode event, which is critical to prevent memory leaks
+
+  - Use FreeAndNil only when the object reference is expected to be reused or when clearing the reference improves
+    safety. Prefer Free when the variable goes out of scope
+
+  - When Delphi Community Edition 13 becomes available, review and adopt relevant language syntax improvements where
+    appropriate (e.g., 'if X is not in Y', ternary expressions etc..)
+
+  - Use Result (uppercase R) consistently for returning values from functions
+
+  - Ensure all variable types currently declared as 'String' are updated to lowercase 'string'
+
+  - Avoid using 'self.' to access class-level variables or methods
+
+  - Work on 'TODO' Comments
+
+  -----------------------------------------------------------
 *)
 
 unit uFormMain;
@@ -72,7 +94,7 @@ uses
 
   OptixCore.Thread, OptixCore.Protocol.Preflight, Optix.Protocol.Server, OptixCore.Sockets.Helper,
   OptixCore.SessionInformation, Optix.Protocol.SessionHandler, OptixCore.Commands.Base, OptixCore.Protocol.Packet,
-  OptixCore.Commands,
+  OptixCore.Commands, Optix.ControlSingleton,
 
   NeoFlat.TreeView, NeoFlat.PopupMenu, NeoFlat.Panel, NeoFlat.Button, NeoFlat.Hint, NeoFlat.Window;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -85,6 +107,7 @@ type
     Forms              : TObjectList<TBaseFormControl>;
     Workers            : TObjectList<TOptixThread>;
     HintText           : String;
+    SharedClass        : TOptixControlSingleton;
 
     ///
     function ToString: String;
@@ -253,7 +276,7 @@ begin
   if not Assigned(Handler) or not Assigned(SessionInformation) then
     Exit;
 
-  var ADictionary := TDictionary<String, String>.Create();
+  var ADictionary := TOrderedDictionary<String, String>.Create();
   var AStringBuilder := TStringBuilder.Create();
   try
     ADictionary.Add('Remote Address / Port', Format('%s/%d', [Handler.PeerAddress, Handler.Port]));
@@ -270,6 +293,9 @@ begin
     ADictionary.Add('Spawn Date', DateTimeToStr(SpawnDate));
     ADictionary.Add('Elevated Status', SessionInformation.ElevatedStatus_STR);
     ADictionary.Add('User In Admin Group', BoolToStr(SessionInformation.IsInAdminGroup, True));
+    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem));
+    ADictionary.Add('User SID', SessionInformation.UserSid);
+    ADictionary.Add('Image', SessionInformation.ProcessDetail);
 
     var AMaxKeyLength := 0;
     for var AKey in ADictionary.Keys do
@@ -486,6 +512,7 @@ begin
     if AFormClass = TControlFormProcessManager then
       AForm := TControlFormProcessManager.Create(
         self,
+        pData^.SharedClass,
         pData^.ToString,
         pData^.SessionInformation.Architecture,
         pData^.SessionInformation.WindowsArchitecture
@@ -513,7 +540,7 @@ begin
   if not Assigned(pData^.Forms) then
     Exit();
 
-  var AForm := AFormClass.Create(self, pData^.ToString);
+  var AForm := AFormClass.Create(self, pData^.SharedClass, pData^.ToString);
   pData^.Forms.Add(AForm);
 
   result := AForm;
@@ -569,17 +596,18 @@ begin
     pData^.SessionInformation := ASessionInformation;
     pData^.SpawnDate := Now;
     pData^.HintText := pData^.GetHintText;
+    pData^.SharedClass := TOptixControlSingleton.Create;
 
     // Create not mandatory windows
 
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormLogs.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormLogs.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormControlForms.Create(self, pData^.ToString, pData));
+    pData^.Forms.Add(TControlFormControlForms.Create(self, pData^.SharedClass, pData^.ToString, pData));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormTransfers.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormTransfers.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormTasks.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormTasks.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
   finally
     VST.EndUpdate();
@@ -654,6 +682,12 @@ begin
     ///
     FreeAndNil(pData^.Workers);
   end;
+
+  if Assigned(pData^.SharedClass) then
+    FreeAndNil(pData^.SharedClass);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TFormMain.VSTGetHint(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;

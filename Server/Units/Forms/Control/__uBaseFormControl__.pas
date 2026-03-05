@@ -61,7 +61,7 @@ uses
 
   VCL.Forms, VCL.Controls, VCL.Menus,
 
-  OptixCore.Commands.Base, OptixCore.Protocol.Packet,
+  OptixCore.Commands.Base, OptixCore.Protocol.Packet, OptixCore.System.FileSystem, Optix.ControlSingleton,
 
   NeoFlat.Window;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -121,6 +121,7 @@ type
     FFlatWindow      : TFlatWindow;
     FSpecialForm     : Boolean;
     FFormInformation : TFormControlInformation;
+    FSharedClass     : TOptixControlSingleton;
 
     {@M}
     function GetContextDescription() : String; virtual;
@@ -151,10 +152,12 @@ type
     procedure SendCommand(const ACommand : TOptixCommand; const AControlFormGUIDForCallBack : TGUID); overload;
     procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); virtual;
     procedure PurgeRequest(); virtual;
+    procedure RegisterNewFileOnFileManagers(const ABasePath : String; const ANewFileInformation : TFileInformation);
+    procedure DeleteFileFromFileManagers(const ADeletedFilePath : String; const AIsDirectory : Boolean);
     procedure __WARNING__OverrideWindowGUID(const ANewGUID : TGUID); (* Warning | TODO: Safer method *)
 
     {@C}
-    constructor Create(AOwner : TComponent; const AUserIdentifier : String;
+    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
       const ASpecialForm : Boolean = False); reintroduce; virtual;
     destructor Destroy(); override;
 
@@ -179,7 +182,7 @@ uses
 
   OptixCore.Commands.ContentReader,
 
-  uFormMain, uControlFormTransfers;
+  uFormMain, uControlFormTransfers, uControlFormFileManager;
 // ---------------------------------------------------------------------------------------------------------------------
 
 (* Local *)
@@ -315,11 +318,13 @@ begin
   Height := Height +1;
 end;
 
-constructor TBaseFormControl.Create(AOwner : TComponent; const AUserIdentifier : String;
-  const ASpecialForm : Boolean = False);
+constructor TBaseFormControl.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
+  const AUserIdentifier : String; const ASpecialForm : Boolean = False);
 begin
   inherited Create(AOwner);
   ///
+
+  FSharedClass := ASharedClass;
 
   FFlatWindow := TFlatWindow.Create(self);
 
@@ -480,6 +485,37 @@ end;
 procedure TBaseFormControl.__WARNING__OverrideWindowGUID(const ANewGUID : TGUID);
 begin
   FFormInformation.GUID := ANewGUID;
+end;
+
+procedure TBaseFormControl.RegisterNewFileOnFileManagers(const ABasePath : String;
+  const ANewFileInformation : TFileInformation);
+begin
+  if not Assigned(ANewFileInformation) then
+    Exit;
+  ///
+
+  var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
+  if not Assigned(AForms) then
+    Exit;
+  try
+    for var AForm in AForms do
+      TControlFormFileManager(AForm).RegisterNewFile(ABasePath, ANewFileInformation);
+  finally
+    AForms.Free;
+  end;
+end;
+
+procedure TBaseFormControl.DeleteFileFromFileManagers(const ADeletedFilePath : String; const AIsDirectory : Boolean);
+begin
+  var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
+  if not Assigned(AForms) then
+    Exit;
+  try
+    for var AForm in AForms do
+      TControlFormFileManager(AForm).DeleteFile(ADeletedFilePath, AIsDirectory);
+  finally
+    AForms.Free;
+  end;
 end;
 
 end.

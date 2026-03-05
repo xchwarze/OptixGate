@@ -53,7 +53,9 @@ interface
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.Classes,
+  System.Classes, System.Win.ComObj, System.SysUtils,
+
+  Winapi.Windows, Winapi.ShlObj,
 
   Generics.Collections,
 
@@ -78,9 +80,87 @@ type
   );
   TFileAccessAttributes = set of TFileAccess;
 
+  TVirtualClipboardCopyMode = (
+    vccmCopy,
+    vccmCut
+  );
+
+  TVirtualClipboard = class
+  private
+    FContent                   : string;
+    FCopyMode                  : TVirtualClipboardCopyMode;
+
+    FNotifyClipboardUpdateList : TList<TNotifyEvent>;
+
+    {@M}
+    procedure SetContent(const AValue : string);
+    procedure SetCopyMode(const AValue : TVirtualClipboardCopyMode);
+    procedure SignalClipboardUpdate;
+  public
+    {@C}
+    constructor Create;
+    destructor Destroy; override;
+
+    {@M}
+    procedure SubscribeToClipboardUpdateSignal(const ASignalFunc : TNotifyEvent);
+    procedure UnsubscribeFromClipboardUpdateSignal(const ASignalFunc : TNotifyEvent);
+    function IsEmpty : Boolean;
+    procedure Clear;
+
+    {@G/S}
+    property Content  : string                    read FContent  write SetContent;
+    property CopyMode : TVirtualClipboardCopyMode read FCopyMode write SetCopyMode;
+  end;
+
+  TFileOperationSink = class(TInterfacedObject, IFileOperationProgressSink)
+  private
+    FSourcePath             : string;
+    FLastOperationFinalPath : string;
+
+    {@M}
+    function PostMoveOrCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrCopyOrMove: HResult; const psiNewlyCreated: IShellItem) : HResult;
+  public
+    {@C}
+    constructor Create(const ASourcePath : string);
+
+    {@M:Implemented}
+    function PostCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrCopy: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PostMoveItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrMove: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+
+    {@M:Not Implemented}
+    function StartOperations: HResult; stdcall;
+    function FinishOperations(hrResult: HResult): HResult; stdcall;
+    function PreRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+    function PostRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR; hrRename: HResult;
+      const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PreMoveItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR): HResult; stdcall;
+    function PreCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR): HResult; stdcall;
+    function PreDeleteItem(dwFlags: DWORD; const psiItem: IShellItem): HResult; stdcall;
+    function PostDeleteItem(dwFlags: DWORD; const psiItem: IShellItem; hrDelete: HResult;
+      const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PreNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+    function PostNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR;
+      pszTemplateName: LPCWSTR; dwFileAttributes: DWORD; hrNew: HResult;
+      const psiNewItem: IShellItem): HResult; stdcall;
+    function UpdateProgress(iWorkTotal: UINT; iWorkSoFar: UINT): HResult; stdcall;
+    function ResetTimer: HResult; stdcall;
+    function PauseTimer: HResult; stdcall;
+    function ResumeTimer: HResult; stdcall;
+
+    {@G}
+    property LastOperationFinalPath : string read FLastOperationFinalPath;
+  end;
+
   TFileSystemHelper = class
   type
     TTraversedDirectoryCallback = reference to procedure(const ADirectoryName : String; const AAbsolutePath : String);
+  private
+
   public
     class function GetDriveInformation(ADriveLetter : String; out AName : String; out AFormat : String;
       var ADriveType : TDriveType) : Boolean; static;
@@ -97,7 +177,9 @@ type
     class function GetFileTypeDescription(const AFileName: String): String; static;
     class procedure GetFileTime(const AFileName : String; out ACreate, ALastModified, ALastAccess : TDateTime); static;
     class function TryGetFileTime(const AFileName : String; out ACreate, ALastModified, ALastAccess : TDateTime) : Boolean; static;
-    class function UniqueFileName(const AFileName : String) : String; static;
+    class function UniqueFileName(const AFilePath : String) : String; static;
+    class function UniqueDirectoryName(const ADirectoryPath : String) : String; static;
+    class function UniqueFileOrDirectoryName(const APath : string) : string; static;
     class function ExpandPath(const APath : String) : String; static;
     class procedure TraverseDirectories(const APath : String;
       const ATraversedDirectoryFunc : TTraversedDirectoryCallback); static;
@@ -106,6 +188,8 @@ type
     class function CleanFileName(const AFileName : String) : String; static;
     class procedure CreateDirectory(const APath, ANewDirectoryName : String); overload; static;
     class procedure CreateDirectory(const AFullPath : String); overload; static;
+    class function Copy(const ASource, ADestination : String; const ADoMove : Boolean;
+      const ABlockThread : Boolean = True): string; static;
   end;
 
   TContentReader = class
@@ -287,9 +371,9 @@ implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.SysUtils, System.IOUtils, System.StrUtils, System.Math,
+  System.IOUtils, System.StrUtils, System.Math,
 
-  Winapi.AccCtrl, Winapi.AclAPI, Winapi.Windows, Winapi.ShellAPI,
+  Winapi.AccCtrl, Winapi.AclAPI, Winapi.ShellAPI, Winapi.ActiveX,
 
   OptixCore.Exceptions, OptixCore.WinApiEx, OptixCore.System.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -636,23 +720,47 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.UniqueFileName(const AFileName : String) : String;
+class function TFileSystemHelper.UniqueFileName(const AFilePath : String) : String;
 begin
-  if not FileExists(AFileName) then
-    Exit(AFileName);
-
-  var i := 1;
+  if not FileExists(AFilePath) then
+    Exit(AFilePath);
+  ///
+  var I := 1;
   repeat
-    result := Format('%s%s(%d)%s', [
-      IncludeTrailingPathDelimiter(ExtractFilePath(AFileName)),
-      TPath.GetFileNameWithoutExtension(AFileName),
-      i,
-      TPath.GetExtension(AFileName)
+    Result := Format('%s%s(%d)%s', [
+      IncludeTrailingPathDelimiter(ExtractFilePath(AFilePath)),
+      TPath.GetFileNameWithoutExtension(AFilePath),
+      I,
+      TPath.GetExtension(AFilePath)
     ]);
 
     ///
     Inc(i);
-  until (NOT FileExists(result));
+  until (not FileExists(Result));
+end;
+
+class function TFileSystemHelper.UniqueDirectoryName(const ADirectoryPath : string) : string;
+begin
+  if not DirectoryExists(ADirectoryPath) then
+    Exit(ADirectoryPath);
+  ///
+  var I := 1;
+  repeat
+    Result := Format('%s(%d)', [ADirectoryPath, I]);
+
+    ///
+    Inc(I);
+  until (not DirectoryExists(Result));
+end;
+
+class function TFileSystemHelper.UniqueFileOrDirectoryName(const APath : string) : string;
+begin
+  if DirectoryExists(APath) then
+    Result := UniqueDirectoryName(APath)
+  else if FileExists(APath) then
+    Result := UniqueFileName(APath)
+  else
+    Result := APath;
 end;
 
 class function TFileSystemHelper.ExpandPath(const APath : String) : String;
@@ -738,6 +846,52 @@ end;
 class procedure TFileSystemHelper.CreateDirectory(const APath, ANewDirectoryName : String);
 begin
   TFileSystemHelper.CreateDirectory(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName)
+end;
+
+class function TFileSystemHelper.Copy(const ASource, ADestination : String; const ADoMove : Boolean;
+  const ABlockThread : Boolean = True): string;
+begin
+  Result := '';
+  ///
+
+  CoInitialize(nil);
+  try
+    var AFileOperation := CreateComObject(CLSID_FileOperation) as IFileOperation;
+    AFileOperation.SetOperationFlags(
+      FOF_SILENT or
+      FOF_NOCONFIRMATION or
+      FOF_NOERRORUI or
+      FOF_NOCONFIRMMKDIR or
+      FOFX_EARLYFAILURE or
+      FOF_RENAMEONCOLLISION
+    );
+
+    var ASourceShellItem, ADestinationShellItem : IShellItem;
+    OleCheck(SHCreateItemFromParsingName(PWideChar(ASource), nil, IShellItem, ASourceShellItem));
+    OleCheck(SHCreateItemFromParsingName(PWideChar(ADestination), nil, IShellItem, ADestinationShellItem));
+
+    var AFileOperationSink := TFileOperationSink.Create(ASource);
+    var ASinkInterface := IFileOperationProgressSink(AFileOperationSink);
+    try
+      if ADoMove then
+        AFileOperation.MoveItem(ASourceShellItem, ADestinationShellItem, nil, ASinkInterface)
+      else
+        AFileOperation.CopyItem(ASourceShellItem, ADestinationShellItem, nil, ASinkInterface);
+
+      if ABlockThread then
+        AFileOperation.PerformOperations;
+
+      ///
+      Result := AFileOperationSink.LastOperationFinalPath;
+    finally
+      AFileOperation        := nil;
+      ASourceShellItem      := nil;
+      ADestinationShellItem := nil;
+      ASinkInterface        := nil;
+    end;
+  finally
+    CoUninitialize();
+  end;
 end;
 
 (* TContentReader *)
@@ -1031,5 +1185,214 @@ begin
   end;
 end;
 
+(* TVirtualClipboard *)
+
+constructor TVirtualClipboard.Create;
+begin
+  inherited;
+  ///
+
+  FNotifyClipboardUpdateList := TList<TNotifyEvent>.Create;
+
+  Clear;
+end;
+
+destructor TVirtualClipboard.Destroy;
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Free;
+
+  ///
+  inherited;
+end;
+
+function TVirtualClipboard.IsEmpty : Boolean;
+begin
+  result := String.IsNullOrWhiteSpace(Content);
+end;
+
+procedure TVirtualClipboard.SubscribeToClipboardUpdateSignal(const ASignalFunc : TNotifyEvent);
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Add(ASignalFunc);
+end;
+
+procedure TVirtualClipboard.UnsubscribeFromClipboardUpdateSignal(const ASignalFunc : TNotifyEvent);
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Remove(ASignalFunc);
+end;
+
+procedure TVirtualClipboard.SignalClipboardUpdate;
+begin
+  if not Assigned(FNotifyClipboardUpdateList) then
+    Exit;
+  ///
+
+  for var ASubscriber in FNotifyClipboardUpdateList do
+    ASubscriber(self);
+end;
+
+procedure TVirtualClipboard.Clear;
+begin
+  FContent  := '';
+  FCopyMode := vccmCopy;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+procedure TVirtualClipboard.SetContent(const AValue : string);
+begin
+  if AValue = FContent then
+    Exit;
+  ///
+
+  FContent := AValue;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+procedure TVirtualClipboard.SetCopyMode(const AValue : TVirtualClipboardCopyMode);
+begin
+  if AValue = FCopyMode then
+    Exit;
+  ///
+
+  FCopyMode := AValue;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+(* TFileOperationSink *)
+
+constructor TFileOperationSink.Create(const ASourcePath : string);
+begin
+  inherited Create;
+  ///
+
+  FSourcePath := ASourcePath;
+  FLastOperationFinalPath := '';
+end;
+
+function TFileOperationSink.PostMoveOrCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+  pszNewName: LPCWSTR; hrCopyOrMove: HResult; const psiNewlyCreated: IShellItem): HResult;
+begin
+  if Assigned(psiItem) and Assigned(psiNewlyCreated) then begin
+    var ASource  : PWideChar;
+    var ACurrent : PWideChar;
+    if Succeeded(psiItem.GetDisplayName(SIGDN_FILESYSPATH, ASource)) then begin
+      try
+        if Succeeded(psiNewlyCreated.GetDisplayName(SIGDN_FILESYSPATH, ACurrent)) and
+          (string.Compare(string(ASource), FSourcePath, True) = 0)
+        then begin
+          try
+            FLastOperationFinalPath := string(ACurrent);
+          finally
+            CoTaskMemFree(ACurrent);
+          end;
+        end;
+      finally
+        CoTaskMemFree(ASource);
+      end;
+    end;
+  end;
+
+  ///
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostCopyItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR; hrCopy: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := PostMoveOrCopyItem(dwFlags, psiItem, psiDestinationFolder, pszNewName, hrCopy, psiNewlyCreated);
+end;
+
+function TFileOperationSink.PostMoveItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR; hrMove: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := PostMoveOrCopyItem(dwFlags, psiItem, psiDestinationFolder, pszNewName, hrMove, psiNewlyCreated);
+end;
+
+function TFileOperationSink.StartOperations: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.FinishOperations(hrResult: HResult): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreRenameItem(dwFlags: DWORD; const psiItem: IShellItem;
+  pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR;
+  hrRename: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreMoveItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreCopyItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreDeleteItem(dwFlags: DWORD; const psiItem: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostDeleteItem(dwFlags: DWORD; const psiItem: IShellItem; hrDelete: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem;
+  pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR;
+  pszTemplateName: LPCWSTR; dwFileAttributes: DWORD; hrNew: HResult; const psiNewItem: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.UpdateProgress(iWorkTotal: UINT; iWorkSoFar: UINT): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.ResetTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PauseTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.ResumeTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
 
 end.

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormTasks;
 
 interface
@@ -91,11 +89,10 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormDestroy(Sender: TObject);
-    procedure VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Action1Click(Sender: TObject);
     procedure VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    { Private declarations }
+    procedure TaskSuccessDirectCallback(const AResult : TOptixTaskResult);
   private
     {@M}
     function GetNodeByTaskId(const ATaskId : TGUID) : PVirtualNode;
@@ -119,10 +116,34 @@ uses
 
   uFormMain,
 
-  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump;
+  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump, OptixCore.Task.CopyFileOrDirectory,
+  OptixCore.System.FileSystem,
+
+  uControlFormFileManager;
 // ---------------------------------------------------------------------------------------------------------------------
 
 {$R *.dfm}
+
+procedure TControlFormTasks.TaskSuccessDirectCallback(const AResult : TOptixTaskResult);
+begin
+  if not Assigned(AResult) then
+    Exit;
+  ///
+
+  if AResult is TOptixTaskGetCopyFileOrDirectoryResult then begin
+      var ACastedResult := TOptixTaskGetCopyFileOrDirectoryResult(AResult);
+      ///
+
+      if Assigned(ACastedResult) and Assigned(ACastedResult.FileInformation) then begin
+        // Register moved or pasted file or directory if related to cwd
+        RegisterNewFileOnFileManagers(ExtractFilePath(ACastedResult.Destination), ACastedResult.FileInformation);
+
+        // If a file or directory was cut, remove the corresponding entry if related to cwd
+        if ACastedResult.Moved then
+          DeleteFileFromFileManagers(ACastedResult.Source, ACastedResult.FileInformation.IsDirectory);
+      end;
+  end;
+end;
 
 procedure TControlFormTasks.FormDestroy(Sender: TObject);
 begin
@@ -249,9 +270,14 @@ begin
 
     AHandleMemory := True;
 
-    if (pData^.TaskCallBack.State = otsFailed) or (pData^.TaskCallBack.State = otsSuccess) then begin
+    if pData^.TaskCallBack.HasEnded then begin
       pData^.Ended := Now;
       pData^.HasEnded := True;
+      ///
+
+      // Success Direct Callback
+      if pData^.TaskCallBack.State = otsSuccess then
+        TaskSuccessDirectCallback(pData^.TaskCallBack.Result);
     end;
   finally
     VST.EndUpdate();
@@ -336,6 +362,9 @@ begin
   var pData := PTreeData(Node.GetData);
   if Assigned(pData) and Assigned(pData^.TaskCallBack) then
     FreeAndNil(pData^.TaskCallBack);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TControlFormTasks.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -402,11 +431,6 @@ begin
 
   ///
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
-end;
-
-procedure TControlFormTasks.VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
 end;
 
 end.

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.ClassesRegistry;
 
 interface
@@ -81,7 +79,7 @@ implementation
 uses
   OptixCore.Commands.FileSystem, OptixCore.Commands.Process, OptixCore.Commands, OptixCore.Commands.Shell,
   OptixCore.Task.ProcessDump, OptixCore.Commands.Base, OptixCore.SessionInformation, OptixCore.LogNotifier,
-  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader;
+  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader, OptixCore.Task.CopyFileOrDirectory;
 // ---------------------------------------------------------------------------------------------------------------------
 
 class constructor TClassesRegistry.Create();
@@ -162,6 +160,7 @@ initialization
     TOptixCommandDownloadFile,
     TOptixCommandUploadFile,
     TOptixCommandCreateDirectory,
+    TOptixCommandCopyFileOrDirectory,
 
     // System & Process Commands
     TOptixCommandTerminateProcess,
@@ -200,7 +199,8 @@ initialization
 
     TOptixTaskResult,
     TOptixTaskCallback,
-    TOptixTaskGetProcessDumpResult
+    TOptixTaskGetProcessDumpResult,
+    TOptixTaskGetCopyFileOrDirectoryResult
   ]);
 
 end.

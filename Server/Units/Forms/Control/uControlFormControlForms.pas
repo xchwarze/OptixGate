@@ -63,6 +63,8 @@ uses
 
   VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL, VirtualTrees,  VirtualTrees.Types,
 
+  Optix.ControlSingleton,
+
    __uBaseFormControl__,
 
    NeoFlat.PopupMenu;
@@ -110,7 +112,6 @@ type
     procedure VSTDblClick(Sender: TObject);
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
-    procedure VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     FTick       : UInt64;
     FClientData : Pointer;
@@ -123,7 +124,7 @@ type
     function GetSelectedNodeGUID() : TGUID;
   public
     {@C}
-    constructor Create(AOwner : TComponent; const AUserIdentifier : String;
+    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
       const pClientData : Pointer); reintroduce;
   end;
 
@@ -256,10 +257,10 @@ begin
   Refresh();
 end;
 
-constructor TControlFormControlForms.Create(AOwner : TComponent; const AUserIdentifier : String;
-  const pClientData : Pointer);
+constructor TControlFormControlForms.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
+  const AUserIdentifier : String; const pClientData : Pointer);
 begin
-  inherited Create(AOwner, AUserIdentifier, True);
+  inherited Create(AOwner, ASharedClass, AUserIdentifier, True);
   ///
 
   FClientData  := pClientData;
@@ -525,12 +526,6 @@ begin
 
   ///
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
-end;
-
-procedure TControlFormControlForms.VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X,
-  Y: Integer);
-begin
- 
 end;
 
 end.
