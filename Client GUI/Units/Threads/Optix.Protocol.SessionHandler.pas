@@ -441,12 +441,18 @@ begin
   if not Assigned(AOptixPacket) then
     Exit;
   try
-    ACallHandleMemory := True;
+    ACallHandleMemory := True; // TODO: Improve
     ///
 
     // Optix Action Command (& Response) -------------------------------------------------------------------------------
     if AOptixPacket is TOptixCommandAction then begin
-      TOptixCommandActionResponse(AOptixPacket).DoAction();
+      try
+        TOptixCommandActionResponse(AOptixPacket).DoAction();
+      except
+        ACallHandleMemory := False;
+
+        raise;
+      end;
 
       // For Action & Response
       if AOptixPacket is TOptixCommandActionResponse then begin
@@ -456,7 +462,14 @@ begin
       end;
     // Optix Task Command ----------------------------------------------------------------------------------------------
     end else if AOptixPacket is TOptixCommandTask then begin
-      var ATask := TOptixCommandTask(AOptixPacket).CreateTask(TOptixCommand(AOptixPacket));
+      var ATask : TOptixTask;
+      try
+        ATask := TOptixCommandTask(AOptixPacket).CreateTask(TOptixCommand(AOptixPacket));
+      except
+        ACallHandleMemory := False;
+
+        raise;
+      end;
 
       ///
       RegisterAndStartNewTask(ATask);
