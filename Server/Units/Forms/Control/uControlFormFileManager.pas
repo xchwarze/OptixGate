@@ -576,9 +576,6 @@ begin
       ADestination,
       FSharedClass.FileClipboard.CopyMode
     ));
-
-  ///
-  ClearClipboard1Click(ClearClipboard1);
 end;
 
 procedure TControlFormFileManager.PasteToSelectedFolder1Click(Sender: TObject);
@@ -977,13 +974,13 @@ begin
       end;
 
       ikState: begin
-        if not FSharedClass.FileClipboard.IsEmpty then begin
-          if String.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0 then begin
-            if FSharedClass.FileClipboard.CopyMode = vccmCopy then
-              ImageIndex := IMAGE_COPY
-            else
-              ImageIndex := IMAGE_CUT;
-          end;
+        if not FSharedClass.FileClipboard.IsEmpty and
+          (String.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0)
+        then begin
+          if FSharedClass.FileClipboard.CopyMode = vccmCopy then
+            ImageIndex := IMAGE_COPY
+          else
+            ImageIndex := IMAGE_CUT;
         end else begin
           if pData^.FileInformation.IsDirectory and ColoredFoldersAccessView1.Checked then begin
             if (pData^.FileInformation.Name = '..') then

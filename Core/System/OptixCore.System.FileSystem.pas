@@ -878,8 +878,11 @@ begin
       else
         AFileOperation.CopyItem(ASourceShellItem, ADestinationShellItem, nil, ASinkInterface);
 
-      if ABlockThread then
-        AFileOperation.PerformOperations;
+      if ABlockThread then begin
+        var AResult := AFileOperation.PerformOperations;
+        if Failed(AResult) then
+          raise ECOMException.Create('MoveItem|CopyItem', AResult);
+      end;
 
       ///
       Result := AFileOperationSink.LastOperationFinalPath;
