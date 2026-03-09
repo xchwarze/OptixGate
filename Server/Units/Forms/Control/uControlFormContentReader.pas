@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormContentReader;
 
 interface
@@ -121,20 +119,20 @@ type
     procedure ButtonOptionsClick(Sender: TObject);
     procedure ShowStrings1Click(Sender: TObject);
   private
-    FFrameHexEditor           : TFrameHexEditor;
-    FCurrentPage              : TOptixCommandReadContentReaderPage;
-    FMinExtractedStringLength : Cardinal;
+    FFrameHexEditor: TFrameHexEditor;
+    FCurrentPage: TOptixCommandReadContentReaderPage;
+    FMinExtractedStringLength: Cardinal;
 
     {@M}
-    procedure UpdateFormElements();
-    procedure BrowsePage(APageNumber : UInt64);
+    procedure UpdateFormElements;
+    procedure BrowsePage(APageNumber: UInt64);
   protected
     {@M}
-    procedure RefreshCaption(); override;
-    procedure RefreshExtractedStrings();
+    procedure RefreshCaption; override;
+    procedure RefreshExtractedStrings;
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
   end;
 
 var
@@ -151,16 +149,16 @@ uses
 
 {$R *.dfm}
 
-procedure TControlFormContentReader.RefreshExtractedStrings();
+procedure TControlFormContentReader.RefreshExtractedStrings;
 begin
-  RichStrings.Clear();
+  RichStrings.Clear;
   ///
 
   if not Assigned(FCurrentPage) or not Assigned(FCurrentPage.Data) then
-    Exit();
+    Exit;
   ///
 
-  var AStringKinds : TContentFormater.TStringKinds;
+  var AStringKinds: TContentFormater.TStringKinds;
 
   if Ansi1.Checked then
     Include(AStringKinds, skAnsi);
@@ -179,9 +177,9 @@ end;
 procedure TControlFormContentReader.ShowStrings1Click(Sender: TObject);
 begin
   if TMenuItem(Sender).Checked then
-    RefreshExtractedStrings()
+    RefreshExtractedStrings
   else
-    RichStrings.Clear();
+    RichStrings.Clear;
 
   MultiPanel.PanelCollection.Items[1].Visible := TMenuItem(Sender).Checked;
 end;
@@ -200,7 +198,7 @@ procedure TControlFormContentReader.NoMinimum1Click(Sender: TObject);
 begin
   FMinExtractedStringLength := 0;
 
-  RefreshExtractedStrings();
+  RefreshExtractedStrings;
 
   ///
   TMenuItem(Sender).Checked := True;
@@ -213,13 +211,13 @@ end;
 
 procedure TControlFormContentReader.Ansi1Click(Sender: TObject);
 begin
-  RefreshExtractedStrings();
+  RefreshExtractedStrings;
 end;
 
-procedure TControlFormContentReader.BrowsePage(APageNumber : UInt64);
+procedure TControlFormContentReader.BrowsePage(APageNumber: UInt64);
 begin
   if not Assigned(FCurrentPage) then
-    Exit();
+    Exit;
   ///
 
   if APageNumber > FCurrentPage.PageCount  then
@@ -229,7 +227,7 @@ begin
   SendCommand(TOptixCommandGetContentReaderPage.Create(APageNumber));
 end;
 
-procedure TControlFormContentReader.RefreshCaption();
+procedure TControlFormContentReader.RefreshCaption;
 begin
   inherited;
   ///
@@ -251,20 +249,20 @@ end;
 procedure TControlFormContentReader.ButtonBrowsePageClick(Sender: TObject);
 begin
   if not Assigned(FCurrentPage) then
-    Exit();
+    Exit;
   ///
 
-  var AValue : String;
+  var AValue: string;
 
   if not InputQuery('Browse Page', Format('Enter page number(1 to %d)', [
     FCurrentPage.PageCount
   ]), AValue) then
-    Exit();
+    Exit;
   ///
 
-  var APageNumber : UInt64;
+  var APageNumber: UInt64;
   if not TryStrToUInt64(AValue, APageNumber) then
-    Exit();
+    Exit;
   ///
 
   if APageNumber = 0 then
@@ -306,12 +304,12 @@ begin
     'Update Page Size',
     Format('New page size (min: %d):', [TContentReader.MIN_PAGE_SIZE]),
     AValue) then
-      Exit();
+      Exit;
   ///
 
-  var APageSize : UInt64;
+  var APageSize: UInt64;
   if not TryStrToUInt64(AValue, APageSize) then
-    Exit();
+    Exit;
 
   if APageSize < TContentReader.MIN_PAGE_SIZE then
     APageSize := TContentReader.MIN_PAGE_SIZE
@@ -326,13 +324,13 @@ procedure TControlFormContentReader.Custom1Click(Sender: TObject);
 begin
   var AValue := '';
   if not InputQuery('Minimum String Length', 'Minimum:', AValue) then
-    Exit();
+    Exit;
   ///
 
   if not TryStrToUInt(AValue, FMinExtractedStringLength) then
-    Exit();
+    Exit;
 
-  RefreshExtractedStrings();
+  RefreshExtractedStrings;
 
   ///
   TMenuItem(Sender).Checked := True;
@@ -343,10 +341,7 @@ begin
   Action := caFree;
   ///
 
-  SendCommand(TOptixCommandDeleteContentReader.Create());
-
-  if Assigned(FCurrentPage) then
-    FreeAndNil(FCurrentPage);
+  SendCommand(TOptixCommandDeleteContentReader.Create);
 end;
 
 procedure TControlFormContentReader.FormCreate(Sender: TObject);
@@ -361,21 +356,24 @@ begin
   FFrameHexEditor.Expandable := False;
 
   ///
-  UpdateFormElements();
+  UpdateFormElements;
 end;
 
 procedure TControlFormContentReader.FormDestroy(Sender: TObject);
 begin
   if Assigned(FFrameHexEditor) then
     FreeAndNil(FFrameHexEditor);
+
+  if Assigned(FCurrentPage) then
+    FreeAndNil(FCurrentPage);
 end;
 
 procedure TControlFormContentReader.Unicode1Click(Sender: TObject);
 begin
-  RefreshExtractedStrings();
+  RefreshExtractedStrings;
 end;
 
-procedure TControlFormContentReader.UpdateFormElements();
+procedure TControlFormContentReader.UpdateFormElements;
 begin
   StatusBar.Panels.Items[0].Text := '';
   StatusBar.Panels.Items[1].Text := '';
@@ -386,15 +384,15 @@ begin
       TSpeedButton(PanelActions.Controls[I]).Enabled := False;
 
   if not Assigned(FCurrentPage) then
-    Exit();
+    Exit;
   ///
 
-  ButtonDownload.Enabled       := not String.IsNullOrWhiteSpace(FCurrentPage.FilePath);
-  ButtonBack.Enabled           := FCurrentPage.PageNumber > 0;
-  ButtonForward.Enabled        := FCurrentPage.PageNumber < FCurrentPage.PageCount -1;
-  ButtonBrowsePage.Enabled     := FCurrentPage.PageCount > 1;
+  ButtonDownload.Enabled := not String.IsNullOrWhiteSpace(FCurrentPage.FilePath);
+  ButtonBack.Enabled := FCurrentPage.PageNumber > 0;
+  ButtonForward.Enabled := FCurrentPage.PageNumber < FCurrentPage.PageCount -1;
+  ButtonBrowsePage.Enabled := FCurrentPage.PageCount > 1;
   ButtonUpdatePageSize.Enabled := True;
-  ShowStrings1.Enabled         := Assigned(FCurrentPage);
+  ShowStrings1.Enabled := Assigned(FCurrentPage);
   ///
 
   StatusBar.Panels.Items[0].Text := Format('Page: %d / %d', [
@@ -409,16 +407,16 @@ begin
   ]);
 
   ///
-  RefreshCaption();
+  RefreshCaption;
 end;
 
-procedure TControlFormContentReader.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormContentReader.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   // -------------------------------------------------------------------------------------------------------------------
   if AOptixPacket is TOptixCommandReadContentReaderPage then begin
     var ACommand := TOptixCommandReadContentReaderPage(AOptixPacket);
     if not Assigned(ACommand.Data) then
-      Exit();
+      Exit;
     ///
 
     AHandleMemory := True;
@@ -438,10 +436,10 @@ begin
       );
 
     if ShowStrings1.Checked then
-      RefreshExtractedStrings();
+      RefreshExtractedStrings;
 
     ///
-    UpdateFormElements();
+    UpdateFormElements;
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;

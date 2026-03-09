@@ -57,24 +57,24 @@ uses
 type
   TFlatPanel = class(TCustomControl)
   private
-    FBorderTop    : Integer;
-    FBorderLeft   : Integer;
-    FBorderRight  : Integer;
-    FBorderBottom : Integer;
+    FBorderTop: Integer;
+    FBorderLeft: Integer;
+    FBorderRight: Integer;
+    FBorderBottom: Integer;
 
-    FColor        : TColor;
-    FBorderColor  : TColor;
+    FColor: TColor;
+    FBorderColor: TColor;
 
     {@M}
-    procedure SetBorder(AIndex : Integer; AValue : Integer);
-    procedure SetColor(AIndex : Integer; AValue : TColor);
+    procedure SetBorder(AIndex: Integer; AValue: Integer);
+    procedure SetColor(AIndex: Integer; AValue: TColor);
   protected
     {@M}
     procedure Paint; override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     property Align;
     property Cursor;
@@ -118,13 +118,13 @@ type
     property Padding;
 
     {@G/S}
-    property BorderTop    : Integer index 0 read FBorderTop    write SetBorder;
-    property BorderLeft   : Integer index 1 read FBorderLeft   write SetBorder;
-    property BorderRight  : Integer index 2 read FBorderRight  write SetBorder;
-    property BorderBottom : Integer index 3 read FBorderBottom write SetBorder;
+    property BorderTop: Integer index 0 read FBorderTop write SetBorder;
+    property BorderLeft: Integer index 1 read FBorderLeft write SetBorder;
+    property BorderRight: Integer index 2 read FBorderRight write SetBorder;
+    property BorderBottom: Integer index 3 read FBorderBottom write SetBorder;
 
-    property Color        : TColor  index 0 read FColor        write SetColor;
-    property BorderColor  : TColor  index 1 read FBorderColor  write SetColor;
+    property Color: TColor index 0 read FColor write SetColor;
+    property BorderColor: TColor index 1 read FBorderColor write SetColor;
   end;
 
 implementation
@@ -141,16 +141,16 @@ begin
   inherited Create(AOwner);
   ///
 
-  FBorderTop    := 0;
-  FBorderLeft   := 0;
-  FBorderRight  := 0;
+  FBorderTop := 0;
+  FBorderLeft := 0;
+  FBorderRight := 0;
   FBorderBottom := 0;
 
-  Font.Height  := -11;
-  Font.Name    := FONT_1;
-  Font.Color   := MAIN_ACCENT;
+  Font.Height := -11;
+  Font.Name := FONT_1;
+  Font.Color := MAIN_ACCENT;
 
-  ControlStyle  := ControlStyle + [csAcceptsControls, csOpaque];
+  ControlStyle := ControlStyle + [csAcceptsControls, csOpaque];
 
   DoubleBuffered := True;
 
@@ -158,21 +158,21 @@ begin
   FBorderColor := clBlack;
 end;
 
-destructor TFlatPanel.Destroy();
+destructor TFlatPanel.Destroy;
 begin
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFlatPanel.Paint;
 begin
-  var ABorderTop    := ScaleValue(FBorderTop);
-  var ABorderLeft   := ScaleValue(FBorderLeft);
-  var ABorderRight  := ScaleValue(FBorderRight);
+  var ABorderTop := ScaleValue(FBorderTop);
+  var ABorderLeft := ScaleValue(FBorderLeft);
+  var ABorderRight := ScaleValue(FBorderRight);
   var ABorderBottom := ScaleValue(FBorderBottom);
 
-  Canvas.Lock();
+  Canvas.Lock;
   try
     Canvas.Brush.Style := bsSolid;
 
@@ -187,60 +187,60 @@ begin
     var ARect := TRect.Empty;
 
     if (ABorderTop > 0) then begin
-      ARect.Width  := ClientWidth;
+      ARect.Width := ClientWidth;
       ARect.Height := ABorderTop;
 
       Canvas.FillRect(ARect);
     end;
 
     if (ABorderRight > 0) then begin
-      ARect        := TRect.Empty;
-      ARect.Left   := (ClientWidth - ABorderRight);
-      ARect.Width  := ABorderRight;
+      ARect := TRect.Empty;
+      ARect.Left := (ClientWidth - ABorderRight);
+      ARect.Width := ABorderRight;
       ARect.Height := ClientHeight;
 
       Canvas.FillRect(ARect);
     end;
 
     if (ABorderBottom > 0) then begin
-      ARect        := TRect.Empty;
-      ARect.Top    := (ClientHeight - ABorderBottom);
-      ARect.Width  := ClientWidth;
+      ARect := TRect.Empty;
+      ARect.Top := (ClientHeight - ABorderBottom);
+      ARect.Width := ClientWidth;
       ARect.Height := ABorderBottom;
 
       Canvas.FillRect(ARect);
     end;
 
     if (ABorderLeft > 0) then begin
-      ARect        := TRect.Empty;
-      ARect.Width  := ABorderLeft;
+      ARect := TRect.Empty;
+      ARect.Width := ABorderLeft;
       ARect.Height := ClientHeight;
 
       Canvas.FillRect(ARect);
     end;
   finally
-    Canvas.UnLock();
+    Canvas.UnLock;
   end;
 end;
 
-procedure TFlatPanel.SetBorder(AIndex : Integer; AValue : Integer);
+procedure TFlatPanel.SetBorder(AIndex: Integer; AValue: Integer);
 begin
   case AIndex of
-    0 : FBorderTop    := AValue;
-    1 : FBorderLeft   := AValue;
-    2 : FBorderRight  := AValue;
-    3 : FBorderBottom := AValue;
+    0: FBorderTop := AValue;
+    1: FBorderLeft := AValue;
+    2: FBorderRight := AValue;
+    3: FBorderBottom := AValue;
   end;
 
   ///
   Invalidate;
 end;
 
-procedure TFlatPanel.SetColor(AIndex : Integer; AValue : TColor);
+procedure TFlatPanel.SetColor(AIndex: Integer; AValue: TColor);
 begin
   case AIndex of
-    0 : FColor       := AValue;
-    1 : FBorderColor := AValue;
+    0: FColor := AValue;
+    1: FBorderColor := AValue;
   end;
 
   ///

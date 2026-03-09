@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.Registry;
 
 interface
@@ -82,112 +80,112 @@ type
 
   TRegistryHelper = class
   private
-    class var FRegistryHives : TDictionary<String, HKEY>;
+    class var FRegistryHives: TDictionary<String, HKEY>;
   public
     const
       REG_MSZ_LINE_SEP = '{/\$/\@/\0\n/%\//\!/\}';
 
     {@C}
-    class constructor Create();
-    class destructor Destroy();
+    class constructor Create;
+    class destructor Destroy;
 
     {@M}
-    class procedure ExtractKeyPathInformation(const AFullPath: String; out AHive: HKEY; out APath: String); static;
-    class function GetRegistryACLString(const AKeyFullPath : String = '') : String; static;
-    class function TryGetFileACLString(const AKeyFullPath : String) : String; static;
-    class procedure GetCurrentUserRegistryKeyAccess(const AKeyFullPath : String;
-      out ARegistryKeyPermissions : TRegistryKeyPermissions); static;
-    class procedure TryGetCurrentUserRegistryKeyAccess(const AKeyFullPath : String;
-      out ARegistryKeyPermissions : TRegistryKeyPermissions); static;
-    class function HiveToString(const AHive : HKEY) : String; static;
-    class function ExpandHiveShortName(const AKeyFullPath : String) : String; static;
-    class function OpenRegistryKey(const ARegistryHive : HKEY; const AKeyPath : String;
-      const ADesiredAccess : REGSAM) : HKEY; overload; static;
-    class procedure SplitRegKeyFullPath(AKeyFullPath: String; out ARootKeyPath, AKeyName: String); static;
-    class function OpenRegistryKey(const AKeyFullPath : String; const ADesiredAccess : REGSAM) : HKEY; overload; static;
-    class procedure CheckRegistryPath(const AKeyFullPath : String); static;
-    class procedure CreateSubKey(ANewKeyFullPath : String); overload; static;
-    class procedure CreateSubKey(const AKeyFullPath, ANewKeyName : String); overload; static;
-    class procedure DeleteKey(const AKeyFullPath : String); static;
-    class procedure SetValue(const hOpenedKey : HKEY; const AName : String; const AValueKind : DWORD;
-      const pData : Pointer; const ADataSize : UInt64); overload; static;
-    class procedure SetValue(const AKeyFullPath, AName : String; const AValueKind : DWORD;
-      const pData : Pointer; const ADataSize : UInt64); overload; static;
-    class function ValueKindToString(const AValueKind : DWORD) : String; static;
-    class procedure ReadValue(const hOpenedKey : HKEY; const AValueName : String; out AValueType : DWORD;
-      out pData : Pointer; out ADataSize : DWORD); overload; static;
-    class procedure ReadValue(const AFullKeyPath : String; const AValueName : String; out AValueType : DWORD;
-      out pData : Pointer; out ADataSize : DWORD); overload; static;
-    class procedure RenameKey(const hOpenedKey : HKEY; const ASubKeyName, ANewKeyName : String); overload; static;
-    class procedure RenameKey(const AFullKeyPath, ASubKeyName, ANewKeyName : String); overload; static;
-    class procedure DeleteValue(const hOpenedKey : HKEY; const AValueName : String); overload; static;
-    class procedure DeleteValue(const AFullKeyPath : String; const AValueName : String); overload; static;
-    class procedure RenameValue(const AFullKeyPath, AValueName, ANewValueName : String); static;
+    class procedure ExtractKeyPathInformation(const AFullPath: string; out AHive: HKEY; out APath: String); static;
+    class function GetRegistryACLString(const AKeyFullPath: String = ''): string; static;
+    class function TryGetFileACLString(const AKeyFullPath: String): string; static;
+    class procedure GetCurrentUserRegistryKeyAccess(const AKeyFullPath: string;
+      out ARegistryKeyPermissions: TRegistryKeyPermissions); static;
+    class procedure TryGetCurrentUserRegistryKeyAccess(const AKeyFullPath: string;
+      out ARegistryKeyPermissions: TRegistryKeyPermissions); static;
+    class function HiveToString(const AHive: HKEY): string; static;
+    class function ExpandHiveShortName(const AKeyFullPath: String): string; static;
+    class function OpenRegistryKey(const ARegistryHive: HKEY; const AKeyPath: string;
+      const ADesiredAccess: REGSAM) : HKEY; overload; static;
+    class procedure SplitRegKeyFullPath(AKeyFullPath: string; out ARootKeyPath, AKeyName: String); static;
+    class function OpenRegistryKey(const AKeyFullPath: string; const ADesiredAccess: REGSAM): HKEY; overload; static;
+    class procedure CheckRegistryPath(const AKeyFullPath: String); static;
+    class procedure CreateSubKey(ANewKeyFullPath: String); overload; static;
+    class procedure CreateSubKey(const AKeyFullPath, ANewKeyName: String); overload; static;
+    class procedure DeleteKey(const AKeyFullPath: String); static;
+    class procedure SetValue(const hOpenedKey: HKEY; const AName: string; const AValueKind: DWORD;
+      const pData: Pointer; const ADataSize: UInt64); overload; static;
+    class procedure SetValue(const AKeyFullPath, AName: string; const AValueKind: DWORD;
+      const pData: Pointer; const ADataSize: UInt64); overload; static;
+    class function ValueKindToString(const AValueKind: DWORD): string; static;
+    class procedure ReadValue(const hOpenedKey: HKEY; const AValueName: string; out AValueType: DWORD;
+      out pData: Pointer; out ADataSize: DWORD); overload; static;
+    class procedure ReadValue(const AFullKeyPath: string; const AValueName: string; out AValueType: DWORD;
+      out pData: Pointer; out ADataSize: DWORD); overload; static;
+    class procedure RenameKey(const hOpenedKey: HKEY; const ASubKeyName, ANewKeyName: String); overload; static;
+    class procedure RenameKey(const AFullKeyPath, ASubKeyName, ANewKeyName: String); overload; static;
+    class procedure DeleteValue(const hOpenedKey: HKEY; const AValueName: String); overload; static;
+    class procedure DeleteValue(const AFullKeyPath: string; const AValueName: String); overload; static;
+    class procedure RenameValue(const AFullKeyPath, AValueName, ANewValueName: String); static;
 
     {@G}
-    class property RegistryHives : TDictionary<String, HKEY> read FRegistryHives;
+    class property RegistryHives: TDictionary<String, HKEY> read FRegistryHives;
   end;
 
   TRegistryKeyInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FACL_SSDL : String;
+    FACL_SSDL: string;
 
     [OptixSerializableAttribute]
-    FPermissions : TRegistryKeyPermissions;
+    FPermissions: TRegistryKeyPermissions;
   public
     {@C}
-    constructor Create(const AName : String; const APath : String = ''); overload;
+    constructor Create(const AName: string; const APath: String = ''); overload;
 
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Name : String read FName write FName;
+    property Name: String read FName write FName;
 
-    property ACL_SSDL    : String                  read FACL_SSDL;
-    property Permissions : TRegistryKeyPermissions read FPermissions;
+    property ACL_SSDL: String read FACL_SSDL;
+    property Permissions: TRegistryKeyPermissions read FPermissions;
   end;
 
   TRegistryValueInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FValue : TOptixMemoryObject;
+    FValue: TOptixMemoryObject;
 
     [OptixSerializableAttribute]
-    FType : DWORD;
+    FType: DWORD;
 
     {@M}
-    function GetIsDefault() : Boolean;
+    function GetIsDefault: Boolean;
   public
     {@C}
-    constructor Create(const AName : String; const AType : DWORD; const pData : Pointer;
-      const ADataSize : DWORD); overload;
-    destructor Destroy(); override;
+    constructor Create(const AName: string; const AType: DWORD; const pData: Pointer;
+      const ADataSize: DWORD); overload;
+    destructor Destroy; override;
 
     {@M}
-    function ToString() : String; override;
-    procedure Assign(ASource : TPersistent); override;
+    function ToString: string; override;
+    procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Value     : TOptixMemoryObject read FValue;
-    property _Type     : DWORD              read FType;
-    property IsDefault : Boolean            read GetIsDefault;
+    property Value: TOptixMemoryObject read FValue;
+    property _Type: DWORD read FType;
+    property IsDefault: Boolean read GetIsDefault;
 
     {@G/S}
-    property Name : String read FName write FName;
+    property Name: String read FName write FName;
   end;
 
   TOptixEnumRegistry = class
   public
-    class procedure Enum(const AKeyFullPath : String; var AKeys : TObjectList<TRegistryKeyInformation>;
-      var AValues : TObjectList<TRegistryValueInformation>); static;
+    class procedure Enum(const AKeyFullPath: string; var AKeys: TObjectList<TRegistryKeyInformation>;
+      var AValues: TObjectList<TRegistryValueInformation>); static;
   end;
 
 implementation
@@ -199,9 +197,9 @@ uses
   OptixCore.Exceptions, OptixCore.WinApiEx, OptixCore.System.Helper, OptixCore.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
 
-class constructor TRegistryHelper.Create();
+class constructor TRegistryHelper.Create;
 begin
-  FRegistryHives := TDictionary<String, HKEY>.Create();
+  FRegistryHives := TDictionary<String, HKEY>.Create;
   ///
 
   FRegistryHives.Add('HKEY_CLASSES_ROOT', HKEY_CLASSES_ROOT);
@@ -212,13 +210,13 @@ begin
   FRegistryHives.Add('HKEY_CURRENT_CONFIG', HKEY_CURRENT_CONFIG);
   FRegistryHives.Add('HKEY_DYN_DATA', HKEY_DYN_DATA);
 end;
-class destructor TRegistryHelper.Destroy();
+class destructor TRegistryHelper.Destroy;
 begin
   if Assigned(FRegistryHives) then
     FreeAndNil(FRegistryHives);
 end;
 
-class procedure TRegistryHelper.ExtractKeyPathInformation(const AFullPath: String; out AHive: HKEY; out APath: String);
+class procedure TRegistryHelper.ExtractKeyPathInformation(const AFullPath: string; out AHive: HKEY; out APath: String);
 begin
   AHive := 0;
 
@@ -237,13 +235,13 @@ begin
     raise Exception.Create(Format('"%s" is not a valid registry hive.', [AHiveName]));
 end;
 
-class function TRegistryHelper.GetRegistryACLString(const AKeyFullPath : String = '') : String;
+class function TRegistryHelper.GetRegistryACLString(const AKeyFullPath: String = ''): string;
 begin
-  result := '';
+  Result := '';
   ///
 
-  var AHive : HKEY;
-  var AKeyPath : String;
+  var AHive: HKEY;
+  var AKeyPath: string;
 
   ExtractKeyPathInformation(AKeyFullPath, AHive, AKeyPath);
 
@@ -272,7 +270,7 @@ begin
     if AResult <> ERROR_SUCCESS then
       raise EWindowsException.Create('GetNamedSecurityInfoW', AResult);
 
-    var pSSDL : LPWSTR := nil;
+    var pSSDL: LPWSTR := nil;
     if not ConvertSecurityDescriptorToStringSecurityDescriptorW(
       ptrSecurityDescriptor,
       SDDL_REVISION_1,
@@ -283,7 +281,7 @@ begin
       raise EWindowsException.Create('ConvertSecurityDescriptorToStringSecurityDescriptorW');
 
     ///
-    result := string(pSSDL);
+    Result := string(pSSDL);
   finally
     if AKeyHandle <> 0 then
       RegCloseKey(AKeyHandle);
@@ -296,22 +294,22 @@ begin
   end;
 end;
 
-class function TRegistryHelper.TryGetFileACLString(const AKeyFullPath : String) : String;
+class function TRegistryHelper.TryGetFileACLString(const AKeyFullPath: String): string;
 begin
   try
-    result := GetRegistryACLString(AKeyFullPath);
+    Result := GetRegistryACLString(AKeyFullPath);
   except
-    result := '';
+    Result := '';
   end;
 end;
 
-class procedure TRegistryHelper.GetCurrentUserRegistryKeyAccess(const AKeyFullPath : String;
- out ARegistryKeyPermissions : TRegistryKeyPermissions);
+class procedure TRegistryHelper.GetCurrentUserRegistryKeyAccess(const AKeyFullPath: string;
+ out ARegistryKeyPermissions: TRegistryKeyPermissions);
 begin
   ARegistryKeyPermissions := [];
   ///
 
-  var AHive : HKEY;
+  var AHive: HKEY;
   var AKeyPath := '';
 
   ExtractKeyPathInformation(AKeyFullPath, AHive, AKeyPath);
@@ -333,7 +331,7 @@ begin
 
     AImpersonated := ImpersonateSelf(SecurityImpersonation);
 
-    if not OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, False, hToken) then
+    if not OpenThreadToken(GetCurrentThread, TOKEN_QUERY, False, hToken) then
       raise EWindowsException.Create('OpenProcessToken');
     ///
 
@@ -387,12 +385,12 @@ begin
       CloseHandle(hToken);
 
     if AImpersonated then
-      RevertToSelf();
+      RevertToSelf;
   end;
 end;
 
-class procedure TRegistryHelper.TryGetCurrentUserRegistryKeyAccess(const AKeyFullPath : String;
- out ARegistryKeyPermissions : TRegistryKeyPermissions);
+class procedure TRegistryHelper.TryGetCurrentUserRegistryKeyAccess(const AKeyFullPath: string;
+ out ARegistryKeyPermissions: TRegistryKeyPermissions);
 begin
   try
     GetCurrentUserRegistryKeyAccess(AKeyFullPath, ARegistryKeyPermissions);
@@ -401,19 +399,19 @@ begin
   end;
 end;
 
-class function TRegistryHelper.HiveToString(const AHive : HKEY) : String;
+class function TRegistryHelper.HiveToString(const AHive: HKEY): string;
 begin
-  result := '';
+  Result := '';
   ///
 
   for var APair in FRegistryHives do
     if APair.Value = AHive then
-      result := APair.Key;
+      Result := APair.Key;
 end;
 
-class function TRegistryHelper.ExpandHiveShortName(const AKeyFullPath : String) : String;
+class function TRegistryHelper.ExpandHiveShortName(const AKeyFullPath: String): string;
 const
-  HIVES_MAP : array[0..7-1, 0..2-1] of String = (
+  HIVES_MAP: array[0..7-1, 0..2-1] of String = (
     ('HKCR\', 'HKEY_CLASSES_ROOT\'),
     ('HKCU\', 'HKEY_CURRENT_USER\'),
     ('HKLM\', 'HKEY_LOCAL_MACHINE\'),
@@ -423,7 +421,7 @@ const
     ('HKDD\', 'HKEY_DYN_DATA\')
   );
 begin
-  result := AKeyFullPath;
+  Result := AKeyFullPath;
   ///
 
   for var i := 0 to High(HIVES_MAP) do begin
@@ -435,15 +433,15 @@ begin
   end;
 end;
 
-class function TRegistryHelper.OpenRegistryKey(const ARegistryHive : HKEY; const AKeyPath : String;
-  const ADesiredAccess : REGSAM) : HKEY;
+class function TRegistryHelper.OpenRegistryKey(const ARegistryHive: HKEY; const AKeyPath: string;
+  const ADesiredAccess: REGSAM) : HKEY;
 begin
-  var AResult := RegOpenKeyExW(ARegistryHive, PWideChar(AKeyPath), 0, ADesiredAccess, result);
+  var AResult := RegOpenKeyExW(ARegistryHive, PWideChar(AKeyPath), 0, ADesiredAccess, Result);
   if AResult <> ERROR_SUCCESS then
     raise EWindowsException.Create('RegOpenKeyW', AResult);
 end;
 
-class procedure TRegistryHelper.SplitRegKeyFullPath(AKeyFullPath: String; out ARootKeyPath, AKeyName: String);
+class procedure TRegistryHelper.SplitRegKeyFullPath(AKeyFullPath: string; out ARootKeyPath, AKeyName: String);
 begin
   if (AKeyFullPath <> '') and (AKeyFullPath[Length(AKeyFullPath)] = '\') then
     SetLength(AKeyFullPath, Length(AKeyFullPath) - 1);
@@ -459,19 +457,19 @@ begin
   end;
 end;
 
-class function TRegistryHelper.OpenRegistryKey(const AKeyFullPath : String; const ADesiredAccess : REGSAM) : HKEY;
+class function TRegistryHelper.OpenRegistryKey(const AKeyFullPath: string; const ADesiredAccess: REGSAM): HKEY;
 begin
-  var AHive : HKEY;
+  var AHive: HKEY;
   var AKeyPath := '';
   ///
 
   ExtractKeyPathInformation(AKeyFullPath, AHive, AKeyPath);
 
   ///
-  result := OpenRegistryKey(AHive, AKeyPath, ADesiredAccess);
+  Result := OpenRegistryKey(AHive, AKeyPath, ADesiredAccess);
 end;
 
-class procedure TRegistryHelper.CheckRegistryPath(const AKeyFullPath : String);
+class procedure TRegistryHelper.CheckRegistryPath(const AKeyFullPath: String);
 begin
   var AKeyHandle := OpenRegistryKey(AKeyFullPath, READ_CONTROL);
 
@@ -479,11 +477,11 @@ begin
   RegCloseKey(AKeyHandle);
 end;
 
-class procedure TRegistryHelper.CreateSubKey(const AKeyFullPath, ANewKeyName : String);
+class procedure TRegistryHelper.CreateSubKey(const AKeyFullPath, ANewKeyName: String);
 begin
   var AKeyHandle := OpenRegistryKey(AKeyFullPath, KEY_CREATE_SUB_KEY);
   try
-    var ANewKeyHandle : HKEY;
+    var ANewKeyHandle: HKEY;
 
     var AResult := RegCreateKeyW(AKeyHandle, PWideChar(ANewKeyName), ANewKeyHandle);
     if AResult <> ERROR_SUCCESS then
@@ -496,7 +494,7 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.CreateSubKey(ANewKeyFullPath : String);
+class procedure TRegistryHelper.CreateSubKey(ANewKeyFullPath: String);
 begin
   var ARootKeyPath := '';
   var AKeyName := '';
@@ -507,7 +505,7 @@ begin
   CreateSubKey(ARootKeyPath, AKeyName);
 end;
 
-class procedure TRegistryHelper.DeleteKey(const AKeyFullPath : String);
+class procedure TRegistryHelper.DeleteKey(const AKeyFullPath: String);
 begin
   var ARootKeyPath := '';
   var AKeyName := '';
@@ -524,8 +522,8 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.SetValue(const hOpenedKey : HKEY; const AName : String; const AValueKind : DWORD;
-  const pData : Pointer; const ADataSize : UInt64);
+class procedure TRegistryHelper.SetValue(const hOpenedKey: HKEY; const AName: string; const AValueKind: DWORD;
+  const pData: Pointer; const ADataSize: UInt64);
 begin
   var AResult := RegSetValueExW(
       hOpenedKey,
@@ -539,8 +537,8 @@ begin
     raise EWindowsException.Create('RegSetValueExW', AResult);
 end;
   
-class procedure TRegistryHelper.SetValue(const AKeyFullPath, AName : String; const AValueKind : DWORD;
-  const pData : Pointer; const ADataSize : UInt64);
+class procedure TRegistryHelper.SetValue(const AKeyFullPath, AName: string; const AValueKind: DWORD;
+  const pData: Pointer; const ADataSize: UInt64);
 begin
   var AKeyHandle := OpenRegistryKey(AKeyFullPath, KEY_SET_VALUE);
   try
@@ -550,21 +548,21 @@ begin
   end;
 end;
 
-class function TRegistryHelper.ValueKindToString(const AValueKind : DWORD) : String;
+class function TRegistryHelper.ValueKindToString(const AValueKind: DWORD): string;
 begin
   case AValueKind of
-    REG_SZ       : result := 'String (SZ)';
-    REG_MULTI_SZ : result := 'Multi Line String (MSZ)';
-    REG_DWORD    : result := 'DWORD';
-    REG_QWORD    : result := 'QWORD';
-    REG_BINARY   : result := 'Binary';
+    REG_SZ: Result := 'String (SZ)';
+    REG_MULTI_SZ: Result := 'Multi Line String (MSZ)';
+    REG_DWORD: Result := 'DWORD';
+    REG_QWORD: Result := 'QWORD';
+    REG_BINARY: Result := 'Binary';
     else
-      result := 'None';
+      Result := 'None';
   end;
 end;
 
-class procedure TRegistryHelper.ReadValue(const hOpenedKey : HKEY; const AValueName : String;
-  out AValueType : DWORD; out pData : Pointer; out ADataSize : DWORD);
+class procedure TRegistryHelper.ReadValue(const hOpenedKey: HKEY; const AValueName: string;
+  out AValueType: DWORD; out pData: Pointer; out ADataSize: DWORD);
 begin
   pData := nil;
   ADataSize := 0;
@@ -572,7 +570,7 @@ begin
 
   var ARet := RegGetValueW(hOpenedKey, nil, PWideChar(AValueName), RRF_RT_ANY, AValueType, nil, ADataSize);
   if (ARet <> ERROR_SUCCESS) and (ARet <> ERROR_MORE_DATA) then
-    Exit();
+    Exit;
   ///
 
   GetMem(pData, ADataSize * SizeOf(WideChar));
@@ -593,8 +591,8 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.ReadValue(const AFullKeyPath : String; const AValueName : String;
-  out AValueType : DWORD; out pData : Pointer; out ADataSize : DWORD);
+class procedure TRegistryHelper.ReadValue(const AFullKeyPath: string; const AValueName: string;
+  out AValueType: DWORD; out pData: Pointer; out ADataSize: DWORD);
 begin
   var AKeyHandle := OpenRegistryKey(AFullKeyPath, KEY_QUERY_VALUE);
   try
@@ -604,14 +602,14 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.RenameKey(const hOpenedKey : HKEY; const ASubKeyName, ANewKeyName : String);
+class procedure TRegistryHelper.RenameKey(const hOpenedKey: HKEY; const ASubKeyName, ANewKeyName: String);
 begin
   var ARet := RegRenameKey(hOpenedKey, PWideChar(ASubKeyName), PWideChar(ANewKeyName));
   if ARet <> ERROR_SUCCESS then
     raise EWindowsException.Create('RegRenameKey', ARet);
 end;
 
-class procedure TRegistryHelper.RenameKey(const AFullKeyPath, ASubKeyName, ANewKeyName : String);
+class procedure TRegistryHelper.RenameKey(const AFullKeyPath, ASubKeyName, ANewKeyName: String);
 begin
   var AKeyHandle := OpenRegistryKey(AFullKeyPath, KEY_WRITE);
   try
@@ -621,14 +619,14 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.DeleteValue(const hOpenedKey : HKEY; const AValueName : String);
+class procedure TRegistryHelper.DeleteValue(const hOpenedKey: HKEY; const AValueName: String);
 begin
   var ARet := RegDeleteValueW(hOpenedKey, PWideChar(AValueName));
   if ARet <> ERROR_SUCCESS then
     raise EWindowsException.Create('RegDeleteValueW');
 end;
 
-class procedure TRegistryHelper.DeleteValue(const AFullKeyPath : String; const AValueName : String);
+class procedure TRegistryHelper.DeleteValue(const AFullKeyPath: string; const AValueName: String);
 begin
   var AKeyHandle := OpenRegistryKey(AFullKeyPath, KEY_SET_VALUE);
   try
@@ -638,15 +636,15 @@ begin
   end;
 end;
 
-class procedure TRegistryHelper.RenameValue(const AFullKeyPath, AValueName, ANewValueName : String);
+class procedure TRegistryHelper.RenameValue(const AFullKeyPath, AValueName, ANewValueName: String);
 begin
   var pData := nil;
-  var ADataSize : DWORD;
+  var ADataSize: DWORD;
   ///
   
   var AKeyHandle := OpenRegistryKey(AFullKeyPath, KEY_QUERY_VALUE or KEY_SET_VALUE);
   try
-    var AValueType : DWORD;        
+    var AValueType: DWORD;        
 
     ReadValue(AKeyHandle, AValueName, AValueType, pData, ADataSize);
     
@@ -665,22 +663,22 @@ end;
 
 (* TRegistryKeyInformation *)
 
-constructor TRegistryKeyInformation.Create(const AName : String; const APath : String = '');
+constructor TRegistryKeyInformation.Create(const AName: string; const APath: String = '');
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FName     := AName;
+  FName := AName;
   FACL_SSDL := TRegistryHelper.TryGetFileACLString(APath);
 
   TRegistryHelper.TryGetCurrentUserRegistryKeyAccess(APath, FPermissions);
 end;
 
-procedure TRegistryKeyInformation.Assign(ASource : TPersistent);
+procedure TRegistryKeyInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TRegistryKeyInformation then begin
-    FName        := TRegistryKeyInformation(ASource).FName;
-    FACL_SSDL    := TRegistryKeyInformation(ASource).FACL_SSDL;
+    FName := TRegistryKeyInformation(ASource).FName;
+    FACL_SSDL := TRegistryKeyInformation(ASource).FACL_SSDL;
     FPermissions := TRegistryKeyInformation(ASource).FPermissions;
   end else
     inherited;
@@ -688,20 +686,20 @@ end;
 
 (* TRegistryValueInformation *)
 
-constructor TRegistryValueInformation.Create(const AName : String; const AType : DWORD; const pData : Pointer;
-  const ADataSize : DWORD);
+constructor TRegistryValueInformation.Create(const AName: string; const AType: DWORD; const pData: Pointer;
+  const ADataSize: DWORD);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FName  := AName;
-  FType  := AType;
+  FName := AName;
+  FType := AType;
 
-  FValue := TOptixMemoryObject.Create();
+  FValue := TOptixMemoryObject.Create;
   FValue.CopyFrom(pData, ADataSize);
 end;
 
-destructor TRegistryValueInformation.Destroy();
+destructor TRegistryValueInformation.Destroy;
 begin
   if Assigned(FValue) then
     FreeAndNil(FValue);
@@ -710,7 +708,7 @@ begin
   inherited;
 end;
 
-procedure TRegistryValueInformation.Assign(ASource : TPersistent);
+procedure TRegistryValueInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TRegistryValueInformation then begin
     FName := TRegistryValueInformation(ASource).FName;
@@ -718,22 +716,22 @@ begin
 
     if Assigned(TRegistryValueInformation(ASource).FValue) then begin
       if not Assigned(FValue) then
-        FValue := TOptixMemoryObject.Create();
+        FValue := TOptixMemoryObject.Create;
 
       ///
-      FValue.CopyFrom(TRegistryValueInformation(ASource).FValue)
+      FValue.CopyFrom(TRegistryValueInformation(ASource).FValue);
     end else
       FValue := nil;
   end else
     inherited;
 end;
 
-function TRegistryValueInformation.GetIsDefault() : Boolean;
+function TRegistryValueInformation.GetIsDefault: Boolean;
 begin
-  result := FName.IsEmpty();
+  Result := FName.IsEmpty;
 end;
 
-function TRegistryValueInformation.ToString() : String;
+function TRegistryValueInformation.ToString: string;
 begin
   if not Assigned(FValue) or not FValue.HasData then
     Exit('');
@@ -741,16 +739,16 @@ begin
 
   case FType of
     REG_SZ, REG_EXPAND_SZ:
-      result := TMemoryUtils.MemoryToString(FValue.Address, FValue.Size);
+      Result := TMemoryUtils.MemoryToString(FValue.Address, FValue.Size);
 
     REG_MULTI_SZ:
-      result := TMemoryUtils.MemoryMultiStringToString(FValue.Address, FValue.Size);
+      Result := TMemoryUtils.MemoryMultiStringToString(FValue.Address, FValue.Size);
 
     REG_DWORD:
-      result := Format('0x%.8X (%d)', [PDWORD(FValue.Address)^, PDWORD(FValue.Address)^]);
+      Result := Format('0x%.8X (%d)', [PDWORD(FValue.Address)^, PDWORD(FValue.Address)^]);
 
     REG_QWORD:
-      result := Format('0x%.16X (%u)', [PUInt64(FValue.Address)^, PUInt64(FValue.Address)^]);
+      Result := Format('0x%.16X (%u)', [PUInt64(FValue.Address)^, PUInt64(FValue.Address)^]);
 
     REG_BINARY: begin
       var AStringBuilder := TStringBuilder.Create(FValue.Size * 3 (* 1 Byte = 2 (Hex) + 1 (Space) *));
@@ -759,37 +757,36 @@ begin
           AStringBuilder.AppendFormat('%.2X ', [PByte(NativeUInt(FValue.Address) + n)^]);
 
         ///
-        result := AStringBuilder.ToString.TrimRight;
-      finally
-        if Assigned(AStringBuilder) then
-          FreeAndNil(AStringBuilder);
+        Result := AStringBuilder.ToString.TrimRight;
+      finally       
+		AStringBuilder.Free;
       end;
     end;
 
     else
-      result := '<could not read>';
+      Result := '<could not read>';
   end;
 end;
 
 (* TOptixEnumRegistry *)
 
-class procedure TOptixEnumRegistry.Enum(const AKeyFullPath : String; var AKeys : TObjectList<TRegistryKeyInformation>;
-  var AValues : TObjectList<TRegistryValueInformation>);
+class procedure TOptixEnumRegistry.Enum(const AKeyFullPath: string; var AKeys: TObjectList<TRegistryKeyInformation>;
+  var AValues: TObjectList<TRegistryValueInformation>);
 begin
-  var hOpenedKey : HKEY;
+  var hOpenedKey: HKEY;
   var ACloseKey := False;
 
   if not Assigned(AKeys) then
     AKeys := TObjectList<TRegistryKeyInformation>.Create(True)
   else
-    AKeys.Clear();
+    AKeys.Clear;
 
   if not Assigned(AValues) then
     AValues := TObjectList<TRegistryValueInformation>.Create(True)
   else
-    AValues.Clear();
+    AValues.Clear;
 
-  var AHive : HKEY;
+  var AHive: HKEY;
   var AKeyPath := '';
   TRegistryHelper.ExtractKeyPathInformation(AKeyFullPath, AHive, AKeyPath);
 
@@ -811,11 +808,11 @@ begin
   end else
     hOpenedKey := AHive;
   try
-    var ASubKeysCount : DWORD;
-    var AMaxKeyNameLength : DWORD;
+    var ASubKeysCount: DWORD;
+    var AMaxKeyNameLength: DWORD;
 
-    var AValuesCount : DWORD;
-    var AMaxValueNameLength : DWORD;
+    var AValuesCount: DWORD;
+    var AMaxValueNameLength: DWORD;
 
     var ARet := RegQueryInfoKeyW(
         hOpenedKey,
@@ -836,23 +833,23 @@ begin
       raise EWindowsException.Create('RegQueryInfoKeyW', ARet);
 
     if (ASubKeysCount = 0) and (AValuesCount = 0) then
-      Exit();
+      Exit;
 
     // Include terminating NULL characters
     Inc(AMaxKeyNameLength);
     Inc(AMaxValueNameLength);
 
-    var ABufferSize : DWORD;
+    var ABufferSize: DWORD;
     if AMaxKeyNameLength > AMaxValueNameLength then
       ABufferSize := AMaxKeyNameLength * SizeOf(WideChar)
     else
       ABufferSize := AMaxValueNameLength * SizeOf(WideChar);
 
-    var pNameBuffer : PWideChar;
+    var pNameBuffer: PWideChar;
     GetMem(pNameBuffer, ABufferSize);
     try
       // Enumerate SubKeys
-      var AKeyLength : DWORD;
+      var AKeyLength: DWORD;
       if ASubKeysCount > 0 then begin
         for var I := 0 to ASubKeysCount -1 do begin
           ZeroMemory(pNameBuffer, AMaxKeyNameLength * SizeOf(WideChar));
@@ -871,8 +868,8 @@ begin
       end;
 
       if AValuesCount > 0 then begin
-        var AValueNameLength : DWORD;
-        var AValueName : String;
+        var AValueNameLength: DWORD;
+        var AValueName: string;
         for var  I := 0 to AValuesCount -1 do begin
           ZeroMemory(pNameBuffer, AMaxKeyNameLength * SizeOf(WideChar));
 
@@ -887,10 +884,10 @@ begin
           if AValueName.IsEmpty then
             ADefaultValueExists := True;
           try
-            var AValueKind    : DWORD;
-            var ADataAsString : String;
-            var pData         : Pointer;
-            var ADataSize     : DWORD;
+            var AValueKind: DWORD;
+            var ADataAsString: string;
+            var pData: Pointer;
+            var ADataSize: DWORD;
 
             TRegistryHelper.ReadValue(hOpenedKey, AValueName, AValueKind, pData, ADataSize);
             try

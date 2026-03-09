@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uFrameRemoteShellInstance;
 
 interface
@@ -75,23 +73,23 @@ type
     procedure EditCommandKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ShellKeyPress(Sender: TObject; var Key: Char);
   private
-    FClosed          : Boolean;
-    FInstanceId      : TGUID;
-    FControlForm     : TBaseFormControl;
+    FClosed: Boolean;
+    FInstanceId: TGUID;
+    FControlForm: TBaseFormControl;
 
     {@M}
-    procedure SendCommandLine();
+    procedure SendCommandLine;
   public
     {@M}
-    procedure AddOutput(const AOutput : String);
-    procedure Close();
+    procedure AddOutput(const AOutput: String);
+    procedure Close;
 
     {@C}
-    constructor Create(const AOwner : TComponent; const AControlForm : TBaseFormControl; const AInstanceId : TGUID); reintroduce;
-    destructor Destroy(); override;
+    constructor Create(const AOwner: TComponent; const AControlForm: TBaseFormControl; const AInstanceId: TGUID); reintroduce;
+    destructor Destroy; override;
 
     {@G}
-    property InstanceId : TGUID read FInstanceId;
+    property InstanceId: TGUID read FInstanceId;
   end;
 
 implementation
@@ -107,18 +105,18 @@ uses
 
 {$R *.dfm}
 
-destructor TFrameRemoteShellInstance.Destroy();
+destructor TFrameRemoteShellInstance.Destroy;
 begin
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFrameRemoteShellInstance.EditCommandKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : begin
-      SendCommandLine();
+    13: begin
+      SendCommandLine;
 
       ///
       Key := 0;
@@ -126,7 +124,7 @@ begin
   end;
 end;
 
-procedure TFrameRemoteShellInstance.Close();
+procedure TFrameRemoteShellInstance.Close;
 begin
   FClosed := True;
 
@@ -141,23 +139,23 @@ begin
   EditCommand.Enabled := False;
 end;
 
-procedure TFrameRemoteShellInstance.SendCommandLine();
+procedure TFrameRemoteShellInstance.SendCommandLine;
 begin
   if not Assigned(FControlForm) or FClosed then
-    Exit();
+    Exit;
   ///
 
   var ACommand := Trim(EditCommand.Text);
 
   if MatchText(ACommand, ['cls', 'clear']) then
-    Shell.Clear()
+    Shell.Clear
   else
     FControlForm.SendCommand(TOptixCommandWriteShellInstance.Create(FInstanceId, ACommand + #13#10));
 
-  EditCommand.Clear();
+  EditCommand.Clear;
 end;
 
-procedure TFrameRemoteShellInstance.AddOutput(const AOutput : String);
+procedure TFrameRemoteShellInstance.AddOutput(const AOutput: String);
 begin
   Shell.SelStart := Length(Shell.Text);
   Shell.SelLength := 0;
@@ -167,20 +165,20 @@ begin
   Shell.Perform(WM_VSCROLL, SB_BOTTOM, 0);
 end;
 
-constructor TFrameRemoteShellInstance.Create(const AOwner : TComponent; const AControlForm : TBaseFormControl; const AInstanceId : TGUID);
+constructor TFrameRemoteShellInstance.Create(const AOwner: TComponent; const AControlForm: TBaseFormControl; const AInstanceId: TGUID);
 begin
   inherited Create(AOwner);
   ///
 
   FControlForm := AControlForm;
-  FInstanceId  := AInstanceId;
-  FClosed      := False;
+  FInstanceId := AInstanceId;
+  FClosed := False;
 end;
 
 procedure TFrameRemoteShellInstance.ShellKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key.IsLetterOrDigit then begin
-    EditCommand.SetFocus();
+    EditCommand.SetFocus;
 
     EditCommand.Perform(WM_CHAR, Ord(Key), 0);
   end;
@@ -189,10 +187,10 @@ end;
 procedure TFrameRemoteShellInstance.ShellLinkClick(Sender: TCustomRichEdit; const URL: string; Button: TMouseButton);
 begin
   case Button of
-    TMouseButton.mbLeft : TOptixHelper.Open(Url);
+    TMouseButton.mbLeft: TOptixHelper.Open(Url);
 
-    TMouseButton.mbRight : ;
-    TMouseButton.mbMiddle : ;
+    TMouseButton.mbRight: ;
+    TMouseButton.mbMiddle: ;
   end;
 end;
 

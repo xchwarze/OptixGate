@@ -45,6 +45,8 @@ object ControlFormProcessManager: TControlFormProcessManager
     OnGetNodeDataSize = VSTGetNodeDataSize
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+    ExplicitWidth = 466
+    ExplicitHeight = 336
     Columns = <
       item
         Position = 0

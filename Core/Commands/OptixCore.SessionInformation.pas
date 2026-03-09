@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.SessionInformation;
 
 interface
@@ -67,127 +65,127 @@ type
   TOptixCommandReceiveSessionInformation = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FWindowsVersion : String;
+    FWindowsVersion: string;
 
     [OptixSerializableAttribute]
-    FUsername : String;
+    FUsername: string;
 
     [OptixSerializableAttribute]
-    FUserSid : String;
+    FUserSid: string;
 
     [OptixSerializableAttribute]
-    FComputer : String;
+    FComputer: string;
 
     [OptixSerializableAttribute]
-    FProcessId : Cardinal;
+    FProcessId: Cardinal;
 
     [OptixSerializableAttribute]
-    FImagePath : String;
+    FImagePath: string;
 
     [OptixSerializableAttribute]
-    FArchitecture : TProcessorArchitecture;
+    FArchitecture: TProcessorArchitecture;
 
     [OptixSerializableAttribute]
-    FWindowsArchitecture : TProcessorArchitecture;
+    FWindowsArchitecture: TProcessorArchitecture;
 
     [OptixSerializableAttribute]
-    FElevatedStatus : TElevatedStatus;
+    FElevatedStatus: TElevatedStatus;
 
     [OptixSerializableAttribute]
-    FLangroup : String;
+    FLangroup: string;
 
     [OptixSerializableAttribute]
-    FDomainName : String;
+    FDomainName: string;
 
     [OptixSerializableAttribute]
-    FIsInAdminGroup : Boolean;
+    FIsInAdminGroup: Boolean;
 
     {@M}
-    function GetProcessDetail() : String;
-    function GetElevatedStatusString() : String;
-    function CheckIfSystemUser() : Boolean;
+    function GetProcessDetail: string;
+    function GetElevatedStatusString: string;
+    function CheckIfSystemUser: Boolean;
   public
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
 
     {@G}
-    property Architecture        : TProcessorArchitecture read FArchitecture;
-    property WindowsArchitecture : TProcessorArchitecture read FWindowsArchitecture;
-    property WindowsVersion      : String                 read FWindowsVersion;
-    property ProcessId           : Cardinal               read FProcessId;
-    property Username            : String                 read FUsername;
-    property Computer            : String                 read FComputer;
-    property ImagePath           : String                 read FImagePath;
-    property ElevatedStatus      : TElevatedStatus        read FElevatedStatus;
-    property Langroup            : String                 read FLangroup;
-    property DomainName          : String                 read FDomainName;
-    property IsInAdminGroup      : Boolean                read FIsInAdminGroup;
-    property UserSid             : String                 read FUserSid;
+    property Architecture: TProcessorArchitecture read FArchitecture;
+    property WindowsArchitecture: TProcessorArchitecture read FWindowsArchitecture;
+    property WindowsVersion: String read FWindowsVersion;
+    property ProcessId: Cardinal read FProcessId;
+    property Username: String read FUsername;
+    property Computer: String read FComputer;
+    property ImagePath: String read FImagePath;
+    property ElevatedStatus: TElevatedStatus read FElevatedStatus;
+    property Langroup: String read FLangroup;
+    property DomainName: String read FDomainName;
+    property IsInAdminGroup: Boolean read FIsInAdminGroup;
+    property UserSid: String read FUserSid;
 
-    property ProcessDetail      : String  read GetProcessDetail;
-    property ElevatedStatus_STR : String  read GetElevatedStatusString;
-    property IsSystem           : Boolean read CheckIfSystemUser;
+    property ProcessDetail: String read GetProcessDetail;
+    property ElevatedStatus_STR: String read GetElevatedStatusString;
+    property IsSystem: Boolean read CheckIfSystemUser;
   end;
 
 implementation
 
 {$IFNDEF SERVER}
-procedure TOptixCommandReceiveSessionInformation.DoAction();
+procedure TOptixCommandReceiveSessionInformation.DoAction;
 begin
-  FWindowsVersion      := TOSVersion.ToString();
-  FArchitecture        := TOptixInformationGathering.CurrentProcessArchitecture;
-  FProcessId           := GetCurrentProcessId();
-  FImagePath           := GetModuleName(hInstance);
-  FUserName            := TOptixInformationGathering.TryGetUserName();
-  FUserSid             := TOptixInformationGathering.TryGetCurrentUserSid();
-  FComputer            := TOptixInformationGathering.TryGetComputerName();
-  FElevatedStatus      := TProcessHelper.IsElevated();
-  FLangroup            := TOptixInformationGathering.GetLangroup;
-  FDomainName          := TOptixInformationGathering.GetDomainName;
-  FIsInAdminGroup      := TOptixInformationGathering.TryIsCurrentUserInAdminGroup();
-  FWindowsArchitecture := TOptixInformationGathering.GetWindowsArchitecture();
+  FWindowsVersion := TOSVersion.ToString;
+  FArchitecture := TOptixInformationGathering.CurrentProcessArchitecture;
+  FProcessId := GetCurrentProcessId;
+  FImagePath := GetModuleName(hInstance);
+  FUserName := TOptixInformationGathering.TryGetUserName;
+  FUserSid := TOptixInformationGathering.TryGetCurrentUserSid;
+  FComputer := TOptixInformationGathering.TryGetComputerName;
+  FElevatedStatus := TProcessHelper.IsElevated;
+  FLangroup := TOptixInformationGathering.GetLangroup;
+  FDomainName := TOptixInformationGathering.GetDomainName;
+  FIsInAdminGroup := TOptixInformationGathering.TryIsCurrentUserInAdminGroup;
+  FWindowsArchitecture := TOptixInformationGathering.GetWindowsArchitecture;
 end;
 {$ENDIF}
 
-procedure TOptixCommandReceiveSessionInformation.Assign(ASource : TPersistent);
+procedure TOptixCommandReceiveSessionInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TOptixCommandReceiveSessionInformation then begin
-    FUsername            := TOptixCommandReceiveSessionInformation(ASource).FUsername;
-    FUserSid             := TOptixCommandReceiveSessionInformation(ASource).FUserSid;
-    FComputer            := TOptixCommandReceiveSessionInformation(ASource).FComputer;
-    FWindowsVersion      := TOptixCommandReceiveSessionInformation(ASource).FWindowsVersion;
-    FProcessId           := TOptixCommandReceiveSessionInformation(ASource).FProcessId;
-    FArchitecture        := TOptixCommandReceiveSessionInformation(ASource).FArchitecture;
-    FImagePath           := TOptixCommandReceiveSessionInformation(ASource).FImagePath;
-    FElevatedStatus      := TOptixCommandReceiveSessionInformation(ASource).FElevatedStatus;
-    FLangroup            := TOptixCommandReceiveSessionInformation(ASource).Langroup;
-    FDomainName          := TOptixCommandReceiveSessionInformation(ASource).DomainName;
-    FIsInAdminGroup      := TOptixCommandReceiveSessionInformation(ASource).IsInAdminGroup;
+    FUsername := TOptixCommandReceiveSessionInformation(ASource).FUsername;
+    FUserSid := TOptixCommandReceiveSessionInformation(ASource).FUserSid;
+    FComputer := TOptixCommandReceiveSessionInformation(ASource).FComputer;
+    FWindowsVersion := TOptixCommandReceiveSessionInformation(ASource).FWindowsVersion;
+    FProcessId := TOptixCommandReceiveSessionInformation(ASource).FProcessId;
+    FArchitecture := TOptixCommandReceiveSessionInformation(ASource).FArchitecture;
+    FImagePath := TOptixCommandReceiveSessionInformation(ASource).FImagePath;
+    FElevatedStatus := TOptixCommandReceiveSessionInformation(ASource).FElevatedStatus;
+    FLangroup := TOptixCommandReceiveSessionInformation(ASource).Langroup;
+    FDomainName := TOptixCommandReceiveSessionInformation(ASource).DomainName;
+    FIsInAdminGroup := TOptixCommandReceiveSessionInformation(ASource).IsInAdminGroup;
     FWindowsArchitecture := TOptixCommandReceiveSessionInformation(ASource).WindowsArchitecture;
   end else
     inherited;
 end;
 
-function TOptixCommandReceiveSessionInformation.GetProcessDetail() : String;
+function TOptixCommandReceiveSessionInformation.GetProcessDetail: string;
 begin
-  result := Format('%d - %s (%s)', [
+  Result := Format('%d - %s (%s)', [
     FProcessId,
     ExtractFileName(FImagePath),
     ProcessArchitectureToString(FArchitecture)
   ]);
 end;
 
-function TOptixCommandReceiveSessionInformation.GetElevatedStatusString() : String;
+function TOptixCommandReceiveSessionInformation.GetElevatedStatusString: string;
 begin
-  result := ElevatedStatusToString(FElevatedStatus);
+  Result := ElevatedStatusToString(FElevatedStatus);
 end;
 
-function TOptixCommandReceiveSessionInformation.CheckIfSystemUser() : Boolean;
+function TOptixCommandReceiveSessionInformation.CheckIfSystemUser: Boolean;
 begin
-  result := String.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := String.Compare(FUserSid, 'S-1-5-18', True) =  0;
 end;
 
 end.

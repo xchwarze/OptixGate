@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.ContentReader;
 
 interface
@@ -66,17 +64,17 @@ type
   TOptixCommandCreateFileContentReader = class(TOptixCommandContentReader)
   private
     [OptixSerializableAttribute]
-    FFilePath : String;
+    FFilePath: string;
 
     [OptixSerializableAttribute]
-    FPageSize : UInt64;
+    FPageSize: UInt64;
   public
     {@C}
-    constructor Create(const AFilePath : String; const APageSize : UInt64); overload;
+    constructor Create(const AFilePath: string; const APageSize: UInt64); overload;
 
     {@G}
-    property FilePath : String read FFilePath;
-    property PageSize : UInt64 read FPageSize;
+    property FilePath: String read FFilePath;
+    property PageSize: UInt64 read FPageSize;
   end;
 
   TOptixCommandDeleteContentReader = class(TOptixCommandContentReader);
@@ -84,60 +82,60 @@ type
   TOptixCommandGetContentReaderPage = class(TOptixCommandContentReader)
   private
     [OptixSerializableAttribute]
-    FPageNumber : UInt64;
+    FPageNumber: UInt64;
 
     [OptixSerializableAttribute]
-    FPageSize : UInt64;
+    FPageSize: UInt64;
   public
     {@G}
-    property PageNumber : UInt64 read FPageNumber;
-    property PageSize   : UInt64 read FPageSize;
+    property PageNumber: UInt64 read FPageNumber;
+    property PageSize: UInt64 read FPageSize;
 
     {@C}
-    constructor Create(const APageNumber : UInt64; const ANewPageSize : UInt64 = 0); overload;
+    constructor Create(const APageNumber: UInt64; const ANewPageSize: UInt64 = 0); overload;
   end;
 
   TOptixCommandReadContentReaderPage = class(TOptixCommandContentReader)
   private
     [OptixSerializableAttribute]
-    FData : TOptixMemoryObject;
+    FData: TOptixMemoryObject;
 
     [OptixSerializableAttribute]
-    FPageNumber : UInt64;
+    FPageNumber: UInt64;
 
     [OptixSerializableAttribute]
-    FPageCount : UInt64;
+    FPageCount: UInt64;
 
     [OptixSerializableAttribute]
-    FPageSize : UInt64;
+    FPageSize: UInt64;
 
     [OptixSerializableAttribute]
-    FTotalSize : UInt64;
+    FTotalSize: UInt64;
 
     [OptixSerializableAttribute]
-    FFilePath : String;
+    FFilePath: string;
 
     {@M}
-    function GetPageOffset() : UInt64;
-    function GetData() : Pointer;
-    function GetDataSize() : UInt64;
+    function GetPageOffset: UInt64;
+    function GetData: Pointer;
+    function GetDataSize: UInt64;
   public
     {@M}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@C}
-    constructor Create(const AWindowGUID : TGUID; const AReader : TContentReader; const APageNumber : UInt64); overload;
-    destructor Destroy(); override;
+    constructor Create(const AWindowGUID: TGUID; const AReader: TContentReader; const APageNumber: UInt64); overload;
+    destructor Destroy; override;
 
     {@G}
-    property Data       : Pointer read GetData;
-    property DataSize   : UInt64  read GetDataSize;
-    property PageNumber : UInt64  read FPageNumber;
-    property PageCount  : UInt64  read FPageCount;
-    property TotalSize  : UInt64  read FTotalSize;
-    property FilePath   : String  read FFilePath;
-    property PageSize   : UInt64  read FPageSize;
-    property PageOffset : UInt64  read GetPageOffset;
+    property Data: Pointer read GetData;
+    property DataSize: UInt64 read GetDataSize;
+    property PageNumber: UInt64 read FPageNumber;
+    property PageCount: UInt64 read FPageCount;
+    property TotalSize: UInt64 read FTotalSize;
+    property FilePath: String read FFilePath;
+    property PageSize: UInt64 read FPageSize;
+    property PageOffset: UInt64 read GetPageOffset;
   end;
 
   TOptixCommandReadContentReaderPageFirstPage = class(TOptixCommandReadContentReaderPage);
@@ -155,20 +153,20 @@ uses
 
 (* TOptixCommandGetContentReaderPage *)
 
-constructor TOptixCommandGetContentReaderPage.Create(const APageNumber : UInt64; const ANewPageSize : UInt64 = 0);
+constructor TOptixCommandGetContentReaderPage.Create(const APageNumber: UInt64; const ANewPageSize: UInt64 = 0);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FPageNumber := APageNumber;
-  FPageSize   := ANewPageSize;
+  FPageSize := ANewPageSize;
 end;
 
 (* TOptixCommandCreateFileContentReader *)
 
-constructor TOptixCommandCreateFileContentReader.Create(const AFilePath : String; const APageSize : UInt64);
+constructor TOptixCommandCreateFileContentReader.Create(const AFilePath: string; const APageSize: UInt64);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FFilePath := AFilePath;
@@ -177,29 +175,29 @@ end;
 
 (* TOptixCommandReadContentReaderPage *)
 
-constructor TOptixCommandReadContentReaderPage.Create(const AWindowGUID : TGUID; const AReader : TContentReader;
-  const APageNumber : UInt64);
+constructor TOptixCommandReadContentReaderPage.Create(const AWindowGUID: TGUID; const AReader: TContentReader;
+  const APageNumber: UInt64);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   if not Assigned(AReader) then
-    Exit();
+    Exit;
 
-  var pBuffer : Pointer;
-  var ABufferSize : UInt64;
+  var pBuffer: Pointer;
+  var ABufferSize: UInt64;
 
   FWindowGUID := AWindowGUID;
   FPageNumber := APageNumber;
-  FPageCount  := AReader.PageCount;
-  FPageSize   := AReader.PageSize;
-  FTotalSize  := AReader.FileSize;
-  FFilePath   := AReader.FilePath;
+  FPageCount := AReader.PageCount;
+  FPageSize := AReader.PageSize;
+  FTotalSize := AReader.FileSize;
+  FFilePath := AReader.FilePath;
 
   AReader.ReadPage(FPageNumber, pBuffer, ABufferSize);
   try
     if Assigned(pBuffer) and (ABufferSize > 0) then begin
-      FData := TOptixMemoryObject.Create();
+      FData := TOptixMemoryObject.Create;
       FData.CopyFrom(pBuffer, ABufferSize);
     end;
   finally
@@ -207,16 +205,16 @@ begin
   end;
 end;
 
-destructor TOptixCommandReadContentReaderPage.Destroy();
+destructor TOptixCommandReadContentReaderPage.Destroy;
 begin
   if Assigned(FData) then
     FreeAndNil(FData);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixCommandReadContentReaderPage.AfterCreate();
+procedure TOptixCommandReadContentReaderPage.AfterCreate;
 begin
   inherited;
   ///
@@ -224,28 +222,28 @@ begin
   FData := nil;
 end;
 
-function TOptixCommandReadContentReaderPage.GetPageOffset() : UInt64;
+function TOptixCommandReadContentReaderPage.GetPageOffset: UInt64;
 begin
   if Assigned(FData) then begin
-    result := FPageNumber * FPageSize;
+    Result := FPageNumber * FPageSize;
   end else
-    result := 0;
+    Result := 0;
 end;
 
-function TOptixCommandReadContentReaderPage.GetData() : Pointer;
+function TOptixCommandReadContentReaderPage.GetData: Pointer;
 begin
   if not Assigned(FData) then
-    result := nil
+    Result := nil
   else
-    result := FData.Address;
+    Result := FData.Address;
 end;
 
-function TOptixCommandReadContentReaderPage.GetDataSize() : UInt64;
+function TOptixCommandReadContentReaderPage.GetDataSize: UInt64;
 begin
   if not Assigned(FData) or not Assigned(FData.Address) then
-    result := 0
+    Result := 0
   else
-    result := FData.Size;
+    Result := FData.Size;
 end;
 
 end.

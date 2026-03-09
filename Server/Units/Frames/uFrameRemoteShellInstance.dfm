@@ -45,12 +45,6 @@ object FrameRemoteShellInstance: TFrameRemoteShellInstance
     Margins.Top = 4
     Margins.Right = 4
     Margins.Bottom = 4
-    BorderTop = 1
-    BorderLeft = 1
-    BorderRight = 1
-    BorderBottom = 1
-    Color = 13554645
-    BorderColor = clBlack
     Align = alBottom
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -63,6 +57,12 @@ object FrameRemoteShellInstance: TFrameRemoteShellInstance
     Padding.Top = 1
     Padding.Right = 1
     Padding.Bottom = 1
+    BorderTop = 1
+    BorderLeft = 1
+    BorderRight = 1
+    BorderBottom = 1
+    Color = 13554645
+    BorderColor = clBlack
     object EditCommand: TFlatEdit
       Left = 1
       Top = 1

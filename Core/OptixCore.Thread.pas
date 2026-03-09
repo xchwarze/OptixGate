@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Thread;
 
 interface
@@ -63,60 +61,60 @@ uses
 type
   TOptixThreadWatchDogThread = class(TThread)
   protected
-    FIntervalEvent : TEvent;
+    FIntervalEvent: TEvent;
 
     {@M}
-    procedure Execute(); override;
+    procedure Execute; override;
 
   public
     {@C}
-    constructor Create(); overload;
-    destructor Destroy(); override;
+    constructor Create; overload;
+    destructor Destroy; override;
 
     {@M}
-    procedure TerminatedSet(); override;
+    procedure TerminatedSet; override;
   end;
 
   TOptixThread = class(TThread)
   private
-    FGuid            : TGUID;
-    FCreatedDate     : TDateTime;
-    FOnThreadExecute : TNotifyEvent;
-    FOnThreadEnd     : TNotifyEvent;
+    FGuid: TGUID;
+    FCreatedDate: TDateTime;
+    FOnThreadExecute: TNotifyEvent;
+    FOnThreadEnd: TNotifyEvent;
   protected
     {@M}
-    procedure Execute(); override;
-    procedure ThreadExecute(); virtual; abstract;
-    function IsRunning() : Boolean;
+    procedure Execute; override;
+    procedure ThreadExecute; virtual; abstract;
+    function IsRunning: Boolean;
   public
     {@C}
-    constructor Create(); overload;
-    destructor Destroy(); override;
+    constructor Create; overload;
+    destructor Destroy; override;
 
     {@M}
-    class function IsThreadRunning(const AThread : TThread): Boolean; static;
-    class function HasRunningInstance(const AThread : TOptixThread; const ATryTerminate : Boolean = False) : Boolean; static;
-    class procedure TerminateInstance(const AThread : TOptixThread); static;
-    class procedure Terminate(const AThread : TThread; const AWaitFor : Boolean = False); overload;
-    class procedure TerminateWait(const AThread : TThread); static;
-    class procedure SignalHiveAndFlush(); static;
-    class procedure FlushDeadThreads(); static;
+    class function IsThreadRunning(const AThread: TThread): Boolean; static;
+    class function HasRunningInstance(const AThread: TOptixThread; const ATryTerminate: Boolean = False): Boolean; static;
+    class procedure TerminateInstance(const AThread: TOptixThread); static;
+    class procedure Terminate(const AThread: TThread; const AWaitFor: Boolean = False); overload;
+    class procedure TerminateWait(const AThread: TThread); static;
+    class procedure SignalHiveAndFlush; static;
+    class procedure FlushDeadThreads; static;
 
     {@S}
-    property OnThreadExecute : TNotifyEvent write FOnThreadExecute;
-    property OnThreadEnd     : TNotifyEvent write FOnThreadEnd;
+    property OnThreadExecute: TNotifyEvent write FOnThreadExecute;
+    property OnThreadEnd: TNotifyEvent write FOnThreadEnd;
 
     {@G}
-    property Guid        : TGUID     read FGUID;
-    property Running     : Boolean   read IsRunning;
-    property CreatedDate : TDateTime read FCreatedDate;
+    property Guid: TGUID read FGUID;
+    property Running: Boolean read IsRunning;
+    property CreatedDate: TDateTime read FCreatedDate;
   end;
 
-  var OPTIX_THREAD_HIVE : TThreadList<TOptixThread>  = nil;
-      OPTIX_WATCHDOG    : TOptixThreadWatchDogThread = nil;
+  var OPTIX_THREAD_HIVE: TThreadList<TOptixThread>  = nil;
+      OPTIX_WATCHDOG: TOptixThreadWatchDogThread = nil;
 
   {$WARN SYMBOL_PLATFORM OFF}
-  function ThreadPriorityToString(const AThreadPriority : TThreadPriority) : String;
+  function ThreadPriorityToString(const AThreadPriority: TThreadPriority): string;
   {$WARN SYMBOL_PLATFORM ON}
 
 implementation
@@ -131,53 +129,53 @@ uses
 (* Local *)
 
 {$WARN SYMBOL_PLATFORM OFF}
-function ThreadPriorityToString(const AThreadPriority : TThreadPriority) : String;
+function ThreadPriorityToString(const AThreadPriority: TThreadPriority): string;
 begin
-  result := 'Unknown';
+  Result := 'Unknown';
   ///
 
   case AThreadPriority of
-    tpIdle         : result := 'Idle';
-    tpLowest       : result := 'Lowest';
-    tpLower        : result := 'Lower';
-    tpNormal       : result := 'Normal';
-    tpHigher       : result := 'Higher';
-    tpHighest      : result := 'Highest';
-    tpTimeCritical : result := 'Time Critical';
+    tpIdle: Result := 'Idle';
+    tpLowest: Result := 'Lowest';
+    tpLower: Result := 'Lower';
+    tpNormal: Result := 'Normal';
+    tpHigher: Result := 'Higher';
+    tpHighest: Result := 'Highest';
+    tpTimeCritical: Result := 'Time Critical';
   end;
 end;
 {$WARN SYMBOL_PLATFORM ON}
 
 (* TOptixThreadWatchDogThread *)
 
-constructor TOptixThreadWatchDogThread.Create();
+constructor TOptixThreadWatchDogThread.Create;
 begin
   inherited Create(False);
 
-  self.Priority := tpLowest; // maybe to be set in idle?
-  self.FreeOnTerminate := False;
+  Priority := tpLowest; // maybe to be set in idle?
+  FreeOnTerminate := False;
 
-  FIntervalEvent := TEvent.Create(nil, True, False, TGUID.NewGuid.ToString());
+  FIntervalEvent := TEvent.Create(nil, True, False, TGUID.NewGuid.ToString);
 end;
 
-destructor TOptixThreadWatchDogThread.Destroy();
+destructor TOptixThreadWatchDogThread.Destroy;
 begin
   if Assigned(FIntervalEvent) then
     FreeAndNil(FIntervalEvent);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixThreadWatchDogThread.Execute();
+procedure TOptixThreadWatchDogThread.Execute;
 begin
   try
     if NOT Assigned(FIntervalEvent) then
-      Exit();
+      Exit;
     ///
 
     while not Terminated do begin
-      TOptixThread.FlushDeadThreads();
+      TOptixThread.FlushDeadThreads;
 
       ///
       FIntervalEvent.WaitFor(1000);
@@ -187,59 +185,59 @@ begin
   end;
 end;
 
-procedure TOptixThreadWatchDogThread.TerminatedSet();
+procedure TOptixThreadWatchDogThread.TerminatedSet;
 begin
-  inherited TerminatedSet();
+  inherited TerminatedSet;
   ///
 
   if Assigned(FIntervalEvent) then
-    FIntervalEvent.SetEvent();
+    FIntervalEvent.SetEvent;
 end;
 
 (* TOptixThread *)
 
-class function TOptixThread.IsThreadRunning(const AThread : TThread): Boolean;
-var AExitCode : DWORD;
+class function TOptixThread.IsThreadRunning(const AThread: TThread): Boolean;
+var AExitCode: DWORD;
 begin
-  result := False;
+  Result := False;
   ///
 
   if not Assigned(AThread) then
-    Exit();
+    Exit;
 
   if not GetExitCodeThread(AThread.Handle, AExitCode) then
-    Exit();
+    Exit;
 
   ///
-  result := (AExitCode = STILL_ACTIVE);
+  Result := (AExitCode = STILL_ACTIVE);
 end;
 
-class procedure TOptixThread.Terminate(const AThread : TThread; const AWaitFor : Boolean = False);
+class procedure TOptixThread.Terminate(const AThread: TThread; const AWaitFor: Boolean = False);
 begin
   if not Assigned(AThread) then
-    Exit();
+    Exit;
 
   if TOptixThread.IsThreadRunning(AThread) then begin
     AThread.Terminate;
 
     if AWaitFor then
-      AThread.WaitFor();
+      AThread.WaitFor;
   end;
 end;
 
-class procedure TOptixThread.TerminateWait(const AThread : TThread);
+class procedure TOptixThread.TerminateWait(const AThread: TThread);
 begin
   Terminate(AThread, True);
 end;
 
-class procedure TOptixThread.SignalHiveAndFlush();
+class procedure TOptixThread.SignalHiveAndFlush;
 begin
   if not Assigned(OPTIX_THREAD_HIVE) then
-    Exit();
+    Exit;
   ///
 
   var AThreadsToFlush := TObjectList<TOptixThread>.Create(True);
-  var AList := OPTIX_THREAD_HIVE.LockList();
+  var AList := OPTIX_THREAD_HIVE.LockList;
   try
     for var AThread in AList do begin
       if not Assigned(AThread) then
@@ -247,26 +245,26 @@ begin
 
       AThreadsToFlush.Add(AThread);
     end;
-    AList.CLear();
+    AList.Clear;
   finally
-    OPTIX_THREAD_HIVE.UnlockList();
+    OPTIX_THREAD_HIVE.UnlockList;
   end;
 
   for var AThread in AThreadsToFlush do
     TerminateWait(AThread);
 
   // Free Threads (:memory)
-  FreeAndNil(AThreadsToFlush);
+  AThreadsToFlush.Free;
 end;
 
-class procedure TOptixThread.FlushDeadThreads();
+class procedure TOptixThread.FlushDeadThreads;
 begin
   if not Assigned(OPTIX_THREAD_HIVE) then
-    Exit();
+    Exit;
   ///
 
   var AThreadsToFlush := TObjectList<TOptixThread>.Create(True);
-  var AList := OPTIX_THREAD_HIVE.LockList();
+  var AList := OPTIX_THREAD_HIVE.LockList;
   try
     for var AThread in AList do
       if Assigned(AThread) and ((not AThread.Running) and (AThread.Started)) then
@@ -274,63 +272,63 @@ begin
   finally
     // Free Threads (:memory)
     if Assigned(AThreadsToFlush) then
-      FreeAndNil(AThreadsToFlush);
+      AThreadsToFlush.Free;
 
-    OPTIX_THREAD_HIVE.UnlockList();
+    OPTIX_THREAD_HIVE.UnlockList;
   end;
 end;
 
-class function TOptixThread.HasRunningInstance(const AThread : TOptixThread; const ATryTerminate : Boolean = False) : Boolean;
+class function TOptixThread.HasRunningInstance(const AThread: TOptixThread; const ATryTerminate: Boolean = False): Boolean;
 begin
-  result := False;
+  Result := False;
   ///
 
   if not Assigned(OPTIX_THREAD_HIVE) then
-    Exit();
+    Exit;
   ///
 
-  var AList := OPTIX_THREAD_HIVE.LockList();
+  var AList := OPTIX_THREAD_HIVE.LockList;
   try
     for var ACandidate in AList do begin
       if (ACandidate = AThread) and (AThread.Running) then begin
-        result := True;
+        Result := True;
 
         ///
         break;
       end;
     end;
   finally
-    OPTIX_THREAD_HIVE.UnlockList();
+    OPTIX_THREAD_HIVE.UnlockList;
   end;
 end;
 
-class procedure TOptixThread.TerminateInstance(const AThread : TOptixThread);
+class procedure TOptixThread.TerminateInstance(const AThread: TOptixThread);
 begin
   if not Assigned(OPTIX_THREAD_HIVE) then
-    Exit();
+    Exit;
   ///
 
-  var AList := OPTIX_THREAD_HIVE.LockList();
+  var AList := OPTIX_THREAD_HIVE.LockList;
   try
     for var ACandidate in AList do begin
       if ACandidate = AThread then begin
-        AThread.Terminate();
+        AThread.Terminate;
 
         ///
         break;
       end;
     end;
   finally
-    OPTIX_THREAD_HIVE.UnlockList();
+    OPTIX_THREAD_HIVE.UnlockList;
   end;
 end;
 
-function TOptixThread.IsRunning() : Boolean;
+function TOptixThread.IsRunning: Boolean;
 begin
-  result := TOptixThread.IsThreadRunning(self);
+  Result := TOptixThread.IsThreadRunning(self);
 end;
 
-procedure TOptixThread.Execute();
+procedure TOptixThread.Execute;
 begin
   try
     if Assigned(FOnThreadExecute) then
@@ -339,7 +337,7 @@ begin
       end);
     ///
 
-    ThreadExecute();
+    ThreadExecute;
   finally
     if Assigned(FOnThreadEnd) then
       Synchronize(procedure begin
@@ -348,7 +346,7 @@ begin
   end;
 end;
 
-constructor TOptixThread.Create();
+constructor TOptixThread.Create;
 begin
   inherited Create(True);
   ///
@@ -356,28 +354,28 @@ begin
   if Assigned(OPTIX_THREAD_HIVE) then
     OPTIX_THREAD_HIVE.Add(self);
 
-  self.FreeOnTerminate := False;
-  self.Priority := tpNormal;
+  FreeOnTerminate := False;
+  Priority := tpNormal;
 
   FCreatedDate := Now;
   FGuid := TGUID.NewGuid;
 
   FOnThreadExecute := nil;
-  FOnThreadEnd     := nil;
+  FOnThreadEnd := nil;
 end;
 
-destructor TOptixThread.Destroy();
+destructor TOptixThread.Destroy;
 begin
   if Assigned(OPTIX_THREAD_HIVE) then
     OPTIX_THREAD_HIVE.Remove(self);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 initialization
-  OPTIX_THREAD_HIVE := TThreadList<TOptixThread>.Create();
-  OPTIX_WATCHDOG := TOptixThreadWatchDogThread.Create();
+  OPTIX_THREAD_HIVE := TThreadList<TOptixThread>.Create;
+  OPTIX_WATCHDOG := TOptixThreadWatchDogThread.Create;
 
 finalization
   if Assigned(OPTIX_WATCHDOG) then begin

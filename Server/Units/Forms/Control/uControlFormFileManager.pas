@@ -49,7 +49,7 @@
 
 {
   TODO:
-    - Lock GUI during refresh (Folders), Unlock if : Refresh Success / Refresh Error
+    - Lock GUI during refresh (Folders), Unlock if: Refresh Success / Refresh Error
 }
 
 unit uControlFormFileManager;
@@ -82,25 +82,25 @@ type
   TFileTreeData = record
   private
     {@M}
-    function GetName() : String;
-    function GetAccess() : TFileAccessAttributes;
+    function GetName: string;
+    function GetAccess: TFileAccessAttributes;
   public
-    DriveInformation : TDriveInformation;
-    FileInformation  : TFileInformation;
-    ImageIndex       : Integer;
+    DriveInformation: TDriveInformation;
+    FileInformation: TFileInformation;
+    ImageIndex: Integer;
 
     {@M}
-    function Path(const IncludeTrailingPathDelimiterIfDirectory : Boolean = False) : String;
+    function Path(const IncludeTrailingPathDelimiterIfDirectory: Boolean = False): string;
 
     {@G}
-    property Name   : String                read GetName;
-    property Access : TFileAccessAttributes read GetAccess;
+    property Name: String read GetName;
+    property Access: TFileAccessAttributes read GetAccess;
   end;
   PFileTreeData = ^TFileTreeData;
 
   TFolderTreeData = record
-    Information : TSimpleFolderInformation;
-    ImageIndex  : Integer;
+    Information: TSimpleFolderInformation;
+    ImageIndex: Integer;
   end;
   PFolderTreeData = ^TFolderTreeData;
 
@@ -202,41 +202,41 @@ type
     procedure PasteToSelectedFolder1Click(Sender: TObject);
     procedure ClearClipboard1Click(Sender: TObject);
   private
-    FHistoryCursor  : Integer;
-    FPathHistory    : TList<String>;
-    FCurrentPathACL : TFileAccessAttributes;
+    FHistoryCursor: Integer;
+    FPathHistory: TList<String>;
+    FCurrentPathACL: TFileAccessAttributes;
 
     {@M}
-    procedure InsertPathToHistory(APath : String);
-    procedure BrowseFromCurrentHistoryLocation();
-    function CanNodeFileBeRead(var pData : PFileTreeData) : Boolean;
-    function CanFileBeUploadedToNodeDirectory(var pData : PFileTreeData) : Boolean;
-    procedure RegisterFoldersInTree(const AParentFolders : TObjectList<TSimpleFolderInformation>;
-      const AFolders : TObjectList<TSimpleFolderInformation>);
-    procedure DisplayDrives(const AList : TOptixCommandEnumDrives);
-    procedure DisplayFiles(const AList : TOptixCommandEnumDirectoryFiles);
-    procedure SetDisplayMode(const AMode : TDisplayMode);
-    procedure BrowsePath(const APath : string; const APushToHistory : Boolean = True);
-    procedure RefreshActionsButtons();
-    procedure RefreshDrives(const APushToHistory : Boolean = True);
-    procedure RefreshFiles();
-    function GetFolderImageIndex(const AFolderAccess : TFileAccessAttributes) : Integer;
-    function GetNodeByFileName(const AFileName : String) : PVirtualNode;
-    procedure CopyOrCutSelectedNode(const ACopyMode : TVirtualClipboardCopyMode);
-    procedure PasteFileOrDirectory(const pNode : PVirtualNode = nil);
-    procedure OnVirtualClipboardUpdate(Sender : TObject);
+    procedure InsertPathToHistory(APath: String);
+    procedure BrowseFromCurrentHistoryLocation;
+    function CanNodeFileBeRead(var pData: PFileTreeData): Boolean;
+    function CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
+    procedure RegisterFoldersInTree(const AParentFolders: TObjectList<TSimpleFolderInformation>;
+      const AFolders: TObjectList<TSimpleFolderInformation>);
+    procedure DisplayDrives(const AList: TOptixCommandEnumDrives);
+    procedure DisplayFiles(const AList: TOptixCommandEnumDirectoryFiles);
+    procedure SetDisplayMode(const AMode: TDisplayMode);
+    procedure BrowsePath(const APath: string; const APushToHistory: Boolean = True);
+    procedure RefreshActionsButtons;
+    procedure RefreshDrives(const APushToHistory: Boolean = True);
+    procedure RefreshFiles;
+    function GetFolderImageIndex(const AFolderAccess: TFileAccessAttributes): Integer;
+    function GetNodeByFileName(const AFileName: String): PVirtualNode;
+    procedure CopyOrCutSelectedNode(const ACopyMode: TVirtualClipboardCopyMode);
+    procedure PasteFileOrDirectory(const pNode: PVirtualNode = nil);
+    procedure OnVirtualClipboardUpdate(Sender: TObject);
   protected
     {@M}
-    function GetContextDescription() : String; override;
-    procedure OnFirstShow(); override;
+    function GetContextDescription: string; override;
+    procedure OnFirstShow; override;
 
-    function RequestFileDownload(const ARemoteFilePath : String = ''; ALocalFilePath : String = '') : TGUID; reintroduce;
-    function RequestFileUpload(ALocalFilePath : String; const ARemoteFilePath : String = ''; const AContext : String = '') : TGUID; reintroduce;
+    function RequestFileDownload(const ARemoteFilePath: String = ''; ALocalFilePath: String = ''): TGUID; reintroduce;
+    function RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: String = ''; const AContext: String = ''): TGUID; reintroduce;
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
-    procedure RegisterNewFile(const APath : String; const AFileInformation : TFileInformation);
-    procedure DeleteFile(const ANewFilePath : string; const AIsDirectory : Boolean);
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
+    procedure RegisterNewFile(const APath: string; const AFileInformation: TFileInformation);
+    procedure DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
   end;
 
 var
@@ -257,42 +257,42 @@ uses
 
 (* TFileTreeData *)
 
-function TFileTreeData.GetName() : String;
+function TFileTreeData.GetName: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if Assigned(DriveInformation) then
-    result := DriveInformation.Letter
+    Result := DriveInformation.Letter
   else if Assigned(FileInformation) then
-    result := FileInformation.Name;
+    Result := FileInformation.Name;
 end;
 
-function TFileTreeData.GetAccess() : TFileAccessAttributes;
+function TFileTreeData.GetAccess: TFileAccessAttributes;
 begin
   if Assigned(FileInformation) then
-    result := FileInformation.Access
+    Result := FileInformation.Access
   else
-    result := [];
+    Result := [];
 end;
 
-function TFileTreeData.Path(const IncludeTrailingPathDelimiterIfDirectory : Boolean = False) : String;
+function TFileTreeData.Path(const IncludeTrailingPathDelimiterIfDirectory: Boolean = False): string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if Assigned(FileInformation) then begin
-    result := FileInformation.Path;
+    Result := FileInformation.Path;
     if IncludeTrailingPathDelimiterIfDirectory and FileInformation.IsDirectory then
-      result := IncludeTrailingPathDelimiter(result);
+      Result := IncludeTrailingPathDelimiter(Result);
   end;
 end;
 
 (* TControlFormFileManager *)
 
-function TControlFormFileManager.GetNodeByFileName(const AFileName : String) : PVirtualNode;
+function TControlFormFileManager.GetNodeByFileName(const AFileName: String): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VSTFiles.Nodes do begin
@@ -300,14 +300,14 @@ begin
     ///
 
     if String.Compare(pData^.Name, AFileName, True) = 0 then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-procedure TControlFormFileManager.RegisterNewFile(const APath : String; const AFileInformation : TFileInformation);
+procedure TControlFormFileManager.RegisterNewFile(const APath: string; const AFileInformation: TFileInformation);
 begin
   if not Assigned(AFileInformation) then
     Exit;
@@ -331,11 +331,11 @@ begin
     if Assigned(pData^.FileInformation) then
       FreeAndNil(pData^.FileInformation);
 
-    pData^.FileInformation := TFileInformation.Create();
+    pData^.FileInformation := TFileInformation.Create;
     pData^.FileInformation.Assign(AFileInformation);
 
     if AFileInformation.IsDirectory then
-      pData^.ImageIndex := TOptixHelper.SystemFolderIcon()
+      pData^.ImageIndex := TOptixHelper.SystemFolderIcon
     else
       pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.Name, True);
   finally
@@ -348,7 +348,7 @@ begin
   end;
 end;
 
-procedure TControlFormFileManager.DeleteFile(const ANewFilePath : string; const AIsDirectory : Boolean);
+procedure TControlFormFileManager.DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
 begin
   if String.Compare(
     IncludeTrailingPathDelimiter(ExtractFilePath(ANewFilePath)),
@@ -373,52 +373,52 @@ begin
   end;
 end;
 
-function TControlFormFileManager.GetFolderImageIndex(const AFolderAccess : TFileAccessAttributes) : Integer;
+function TControlFormFileManager.GetFolderImageIndex(const AFolderAccess: TFileAccessAttributes): Integer;
 begin
-  result := -1;
+  Result := -1;
   ///
 
   if not ColoredFoldersAccessView1.Checked then
-    Exit();
+    Exit;
   ///
 
   if (faRead in AFolderAccess) and (faWrite in AFolderAccess) and (faExecute in AFolderAccess) then
-    result := IMAGE_FOLDER_FULLACCESS
+    Result := IMAGE_FOLDER_FULLACCESS
   else if AFolderAccess = [faRead] then
-    result := IMAGE_FOLDER_READONLY
+    Result := IMAGE_FOLDER_READONLY
   else if AFolderAccess = [faWrite] then
-    result := IMAGE_FOLDER_WRITEONLY
+    Result := IMAGE_FOLDER_WRITEONLY
   else if AFolderAccess = [faExecute] then
-    result := IMAGE_FOLDER_EXECONLY
+    Result := IMAGE_FOLDER_EXECONLY
   else if AFolderAccess = [] then
-    result := IMAGE_FOLDER_DENIED
+    Result := IMAGE_FOLDER_DENIED
   else
-    result := IMAGE_FOLDER_NORMAL;
+    Result := IMAGE_FOLDER_NORMAL;
 end;
 
-procedure TControlFormFileManager.RegisterFoldersInTree(const AParentFolders : TObjectList<TSimpleFolderInformation>;
-  const AFolders : TObjectList<TSimpleFolderInformation>);
+procedure TControlFormFileManager.RegisterFoldersInTree(const AParentFolders: TObjectList<TSimpleFolderInformation>;
+  const AFolders: TObjectList<TSimpleFolderInformation>);
 begin
   TOptixVirtualTreesFolderTreeHelper.UpdateTree<TSimpleFolderInformation>(
     VSTFolders,
     AParentFolders,
     AFolders,
     (
-      function (const pData : Pointer) : String
+      function (const pData: Pointer): String
       begin
-        result := PFolderTreeData(pData)^.Information.Name
+        Result := PFolderTreeData(pData)^.Information.Name
       end
     ),
     (
       function (const AItem: TSimpleFolderInformation): String
       begin
-        result := AItem.Name
+        Result := AItem.Name
       end
     ),
     (
-      procedure (var pNode, pParentNode : PVirtualNode; const AItem : TSimpleFolderInformation)
+      procedure (var pNode, pParentNode: PVirtualNode; const AItem: TSimpleFolderInformation)
       begin
-        var pData : PFolderTreeData;
+        var pData: PFolderTreeData;
         ///
 
         if not Assigned(pNode) then begin
@@ -426,7 +426,7 @@ begin
 
           pData := PFolderTreeData(pNode.GetData);
 
-          pData^.Information := TSimpleFolderInformation.Create();
+          pData^.Information := TSimpleFolderInformation.Create
         end else
           pData := PFolderTreeData(pNode.GetData);
 
@@ -435,13 +435,13 @@ begin
         if AItem.IsRoot then
           pData^.ImageIndex := TOptixHelper.SystemFileIcon(AItem.Path)
         else
-          pData^.ImageIndex := TOptixHelper.SystemFolderIcon();
+          pData^.ImageIndex := TOptixHelper.SystemFolderIcon
       end
     )
   );
 end;
 
-procedure TControlFormFileManager.BrowseFromCurrentHistoryLocation();
+procedure TControlFormFileManager.BrowseFromCurrentHistoryLocation;
 begin
   if (FPathHistory.Count > 0) and (FHistoryCursor >= 0) then begin
     var APath := FPathHistory.Items[FHistoryCursor];
@@ -453,20 +453,20 @@ begin
   end;
 end;
 
-procedure TControlFormFileManager.RefreshActionsButtons();
+procedure TControlFormFileManager.RefreshActionsButtons;
 begin
-  ButtonBack.Enabled         := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
-  ButtonForward.Enabled      := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1);
-  ButtonRefresh.Enabled      := PanelPath.Visible;
-  ButtonUpload.Enabled       := ButtonRefresh.Enabled and (faWrite in FCurrentPathACL);
+  ButtonBack.Enabled := (FPathHistory.Count > 0) and (FHistoryCursor > 0);
+  ButtonForward.Enabled := (FPathHistory.Count > 0) and (FHistoryCursor < FPathHistory.Count -1);
+  ButtonRefresh.Enabled := PanelPath.Visible;
+  ButtonUpload.Enabled := ButtonRefresh.Enabled and (faWrite in FCurrentPathACL);
   ButtonNewDirectory.Enabled := ButtonUpload.Enabled;
-  ButtonPaste.Enabled        := ButtonUpload.Enabled and not FSharedClass.FileClipboard.IsEmpty;
+  ButtonPaste.Enabled := ButtonUpload.Enabled and not FSharedClass.FileClipboard.IsEmpty;
 end;
 
-procedure TControlFormFileManager.InsertPathToHistory(APath : String);
+procedure TControlFormFileManager.InsertPathToHistory(APath: String);
 begin
   if not Assigned(FPathHistory) then
-    Exit();
+    Exit;
   ///
 
   APath := IncludeTrailingPathDelimiter(APath);
@@ -484,45 +484,45 @@ begin
   end;
 
   ///
-  RefreshActionsButtons();
+  RefreshActionsButtons;
 end;
 
-procedure TControlFormFileManager.OnFirstShow();
+procedure TControlFormFileManager.OnFirstShow;
 begin
   inherited;
   ///
 
-  RefreshDrives();
+  RefreshDrives;
 end;
 
-function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath : String = ''; ALocalFilePath : String = '') : TGUID;
+function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: String = ''; ALocalFilePath: String = ''): TGUID;
 begin
   inherited RequestFileDownload(ARemoteFilePath, ALocalFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
 
-function TControlFormFileManager.RequestFileUpload(ALocalFilePath : String; const ARemoteFilePath : String = ''; const AContext : String = '') : TGUID;
+function TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: String = ''; const AContext: String = ''): TGUID;
 begin
   inherited RequestFileUpload(ALocalFilePath, ARemoteFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
 
-procedure TControlFormFileManager.RefreshDrives(const APushToHistory : Boolean = True);
+procedure TControlFormFileManager.RefreshDrives(const APushToHistory: Boolean = True);
 begin
   if APushToHistory then
     InsertPathToHistory('\\:DRIVES:\\');
   ///
 
-  SendCommand(TOptixCommandEnumDrives.Create());
+  SendCommand(TOptixCommandEnumDrives.Create);
 end;
 
-procedure TControlFormFileManager.RefreshFiles();
+procedure TControlFormFileManager.RefreshFiles;
 begin
   BrowsePath(EditPath.Text);
 end;
 
 procedure TControlFormFileManager.ColoredFoldersAccessView1Click(Sender: TObject);
 begin
-  VSTFiles.Refresh();
-  VSTFolders.Refresh();
+  VSTFiles.Refresh;
+  VSTFolders.Refresh;
 end;
 
 procedure TControlFormFileManager.Copy1Click(Sender: TObject);
@@ -530,7 +530,7 @@ begin
   CopyOrCutSelectedNode(vccmCopy);
 end;
 
-procedure TControlFormFileManager.CopyOrCutSelectedNode(const ACopyMode : TVirtualClipboardCopyMode);
+procedure TControlFormFileManager.CopyOrCutSelectedNode(const ACopyMode: TVirtualClipboardCopyMode);
 begin
   if not Assigned(VSTFiles.FocusedNode) then
     Exit;
@@ -540,12 +540,12 @@ begin
   if (faRead in pData^.Access) and (((ACopyMode = vccmCut) and (faWrite in pData^.Access)) or (ACopyMode = vccmCopy))
   then begin
     FSharedClass.FileClipboard.CopyMode := ACopyMode;
-    FSharedClass.FileClipboard.Content  := pData^.FileInformation.Path;
+    FSharedClass.FileClipboard.Content := pData^.FileInformation.Path;
   end;
 
   ///
-  RefreshActionsButtons();
-  VSTFiles.Refresh();
+  RefreshActionsButtons;
+  VSTFiles.Refresh;
 end;
 
 procedure TControlFormFileManager.Paste1Click(Sender: TObject);
@@ -553,7 +553,7 @@ begin
   ButtonPasteClick(ButtonPaste);
 end;
 
-procedure TControlFormFileManager.PasteFileOrDirectory(const pNode : PVirtualNode = nil);
+procedure TControlFormFileManager.PasteFileOrDirectory(const pNode: PVirtualNode = nil);
 begin
   if FSharedClass.FileClipboard.IsEmpty then
     Exit;
@@ -592,13 +592,13 @@ begin
   CopyOrCutSelectedNode(vccmCut);
 end;
 
-procedure TControlFormFileManager.SetDisplayMode(const AMode : TDisplayMode);
+procedure TControlFormFileManager.SetDisplayMode(const AMode: TDisplayMode);
 begin
-  VSTFiles.Clear();
+  VSTFiles.Clear;
   ///
 
   EditPath.Visible := AMode = dmFiles;
-  EditPath.Clear();
+  EditPath.Clear;
 
   LabelAccess.Visible := AMode = dmFiles;
 
@@ -609,7 +609,7 @@ begin
   TOptixVirtualTreesHelper.UpdateColumnVisibility(VSTFiles, 'Last Access', AMode = dmFiles);
 
   ///
-  RefreshActionsButtons();
+  RefreshActionsButtons;
 end;
 
 procedure TControlFormFileManager.ButtonBackClick(Sender: TObject);
@@ -618,9 +618,9 @@ begin
   if FHistoryCursor < 0 then
     FHistoryCursor := 0;
 
-  BrowseFromCurrentHistoryLocation();
+  BrowseFromCurrentHistoryLocation;
 
-  RefreshActionsButtons();
+  RefreshActionsButtons;
 end;
 
 procedure TControlFormFileManager.ButtonForwardClick(Sender: TObject);
@@ -629,9 +629,9 @@ begin
   if FHistoryCursor > FPathHistory.Count -1 then
     FHistoryCursor := FPathHistory.Count -1;
 
-  BrowseFromCurrentHistoryLocation();
+  BrowseFromCurrentHistoryLocation;
 
-  RefreshActionsButtons();
+  RefreshActionsButtons;
 end;
 
 procedure TControlFormFileManager.ButtonGoToClick(Sender: TObject);
@@ -639,7 +639,7 @@ begin
   var APath := '';
 
   if not InputQuery('Go To', 'Path:', APath) then
-    Exit();
+    Exit;
 
   ///
   BrowsePath(APath);
@@ -647,7 +647,7 @@ end;
 
 procedure TControlFormFileManager.ButtonDrivesClick(Sender: TObject);
 begin
-  RefreshDrives();
+  RefreshDrives;
 end;
 
 procedure TControlFormFileManager.ButtonNewDirectoryClick(Sender: TObject);
@@ -679,15 +679,15 @@ end;
 
 procedure TControlFormFileManager.ButtonPasteClick(Sender: TObject);
 begin
-  PasteFileOrDirectory();
+  PasteFileOrDirectory;
 end;
 
 procedure TControlFormFileManager.ButtonRefreshClick(Sender: TObject);
 begin
   if EditPath.Visible then
-    RefreshFiles()
+    RefreshFiles
   else
-    RefreshDrives();
+    RefreshDrives;
 end;
 
 procedure TControlFormFileManager.ButtonUploadClick(Sender: TObject);
@@ -700,37 +700,37 @@ procedure TControlFormFileManager.UploadToFolder1Click(Sender: TObject);
 begin
   var pNode := VSTFiles.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PFileTreeData(pNode.GetData);
   if not CanFileBeUploadedToNodeDirectory(pData) then
-    Exit();
+    Exit;
 
   RequestFileUpload('', IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(EditPath.Text) + pData^.FileInformation.Name));
 end;
 
-function TControlFormFileManager.GetContextDescription() : String;
+function TControlFormFileManager.GetContextDescription: string;
 begin
   var ANodeCount := VSTFiles.RootNodeCount;
   ///
 
   if not EditPath.Visible and (ANodeCount > 0) then
-    result := Format('%d drives enumerated.', [ANodeCount])
+    Result := Format('%d drives enumerated.', [ANodeCount])
   else if ANodeCount > 0 then
-    result := Format('%s', [EditPath.Text])
+    Result := Format('%s', [EditPath.Text]);
 end;
 
-function TControlFormFileManager.CanNodeFileBeRead(var pData : PFileTreeData) : Boolean;
+function TControlFormFileManager.CanNodeFileBeRead(var pData: PFileTreeData): Boolean;
 begin
-  result := False;
+  Result := False;
   ///
 
   if not Assigned(pData) and Assigned(pData^.FileInformation) and (pData^.FileInformation.IsDirectory) then
-    Exit();
+    Exit;
 
   // ?? File is not empty
   // ?? Client has read access
-  result := (pData^.FileInformation.Size > 0) and (faRead in pData^.FileInformation.Access);
+  Result := (pData^.FileInformation.Size > 0) and (faRead in pData^.FileInformation.Access);
 end;
 
 procedure TControlFormFileManager.ClearClipboard1Click(Sender: TObject);
@@ -740,17 +740,17 @@ begin
   VSTFiles.Refresh;
 end;
 
-function TControlFormFileManager.CanFileBeUploadedToNodeDirectory(var pData : PFileTreeData) : Boolean;
+function TControlFormFileManager.CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
 begin
-  result := False;
+  Result := False;
   ///
 
   if not Assigned(pData) and Assigned(pData^.FileInformation) then
-    Exit();
+    Exit;
 
   // ?? A folder
   // ?? Client has write access
-  result := (pData^.FileInformation.IsDirectory) and (faWrite in pData^.FileInformation.Access);
+  Result := (pData^.FileInformation.IsDirectory) and (faWrite in pData^.FileInformation.Access);
 end;
 
 procedure TControlFormFileManager.PopupMenuPopup(Sender: TObject);
@@ -761,11 +761,11 @@ begin
   if EditPath.Visible then begin
     var pNode := VSTFiles.FocusedNode;
     if Assigned(pNode) then begin
-      var pData := PFileTreeData(pNode.GetData());
+      var pData := PFileTreeData(pNode.GetData);
       ///
 
-      Copy1.Visible  := True;
-      Cut1.Visible   := True;
+      Copy1.Visible := True;
+      Cut1.Visible := True;
 
       if Assigned(pData^.FileInformation) then begin
         if pData^.FileInformation.IsDirectory then begin
@@ -774,20 +774,20 @@ begin
           PasteToSelectedFolder1.Visible := True;
           PasteToSelectedFolder1.Enabled := (faWrite in pData^.Access) and not FSharedClass.FileClipboard.IsEmpty;
         end else begin
-          DownloadFile1.Visible          := True;
-          DownloadFile1.Enabled          := CanNodeFileBeRead(pData);
+          DownloadFile1.Visible := True;
+          DownloadFile1.Enabled := CanNodeFileBeRead(pData);
           StreamFileContentOpen1.Visible := DownloadFile1.Visible;
           StreamFileContentOpen1.Enabled := DownloadFile1.Enabled;
         end;
 
         ///
-        Copy1.Enabled  := faRead in pData^.Access;
-        Cut1.Enabled   := (faRead in pData^.Access) and (faWrite in pData^.Access);
+        Copy1.Enabled := faRead in pData^.Access;
+        Cut1.Enabled := (faRead in pData^.Access) and (faWrite in pData^.Access);
       end;
     end;
 
     ///
-    ClearClipboard1.Visible := not FSharedClass.FileClipboard.IsEmpty();
+    ClearClipboard1.Visible := not FSharedClass.FileClipboard.IsEmpty;
     Paste1.Visible := True;
     Paste1.Enabled := not FSharedClass.FileClipboard.IsEmpty and (faWrite in FCurrentPathACL);
   end;
@@ -798,7 +798,7 @@ procedure TControlFormFileManager.VSTFilesBeforeCellPaint(Sender: TBaseVirtualTr
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
   if Column <> 3 then
-    Exit();
+    Exit;
   ///
 
   var pData := PFileTreeData(Node.GetData);
@@ -840,13 +840,13 @@ begin
     Result := 0;
 
     ///
-    Exit(); // Avoid too many nested blocks of code in this specific case.
+    Exit; // Avoid too many nested blocks of code in this specific case.
   end;
 
   // File Mode Sorting -------------------------------------------------------------------------------------------------
   if Assigned(pData1^.FileInformation) and Assigned(pData2^.FileInformation) then begin
     case Column of
-      0 : begin
+      0: begin
         // Always put '..' at the top
         if (pData1^.FileInformation.Name = '..') and
            (pData2^.FileInformation.Name <> '..') then
@@ -873,30 +873,30 @@ begin
         end;
       end;
 
-      1 : Result := CompareText(pData1^.FileInformation.TypeDescription, pData2^.FileInformation.TypeDescription);
-      2 : Result := CompareValue(pData1^.FileInformation.Size, pData2^.FileInformation.Size);
+      1: Result := CompareText(pData1^.FileInformation.TypeDescription, pData2^.FileInformation.TypeDescription);
+      2: Result := CompareValue(pData1^.FileInformation.Size, pData2^.FileInformation.Size);
 
-      3 : Result := CompareText(
+      3: Result := CompareText(
                       AccessSetToReadableString(pData1^.FileInformation.Access),
                       AccessSetToReadableString(pData2^.FileInformation.Access)
                     );
 
-      4 : Result := CompareText(pData1^.FileInformation.ACL_SSDL, pData2^.FileInformation.ACL_SSDL);
-      5 : Result := CompareDateTime(pData1^.FileInformation.CreatedDate, pData2^.FileInformation.CreatedDate);
-      6 : Result := CompareDateTime(pData1^.FileInformation.LastModifiedDate, pData2^.FileInformation.LastModifiedDate);
-      7 : Result := CompareDateTime(pData1^.FileInformation.LastAccessDate, pData2^.FileInformation.LastAccessDate);
+      4: Result := CompareText(pData1^.FileInformation.ACL_SSDL, pData2^.FileInformation.ACL_SSDL);
+      5: Result := CompareDateTime(pData1^.FileInformation.CreatedDate, pData2^.FileInformation.CreatedDate);
+      6: Result := CompareDateTime(pData1^.FileInformation.LastModifiedDate, pData2^.FileInformation.LastModifiedDate);
+      7: Result := CompareDateTime(pData1^.FileInformation.LastAccessDate, pData2^.FileInformation.LastAccessDate);
     end;
   end else if Assigned(pData1^.DriveInformation) and Assigned(pData2^.DriveInformation) then begin
     case Column of
-      0 : Result := CompareText(pData1^.DriveInformation.Letter, pData1^.DriveInformation.Letter);
-      1 : Result := CompareText(pData1^.DriveInformation.Format, pData2^.DriveInformation.Format);
-      2 : Result := CompareValue(pData1^.DriveInformation.TotalSize, pData2^.DriveInformation.TotalSize);
+      0: Result := CompareText(pData1^.DriveInformation.Letter, pData1^.DriveInformation.Letter);
+      1: Result := CompareText(pData1^.DriveInformation.Format, pData2^.DriveInformation.Format);
+      2: Result := CompareValue(pData1^.DriveInformation.TotalSize, pData2^.DriveInformation.TotalSize);
     end;
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormFileManager.BrowsePath(const APath : string; const APushToHistory : Boolean = True);
+procedure TControlFormFileManager.BrowsePath(const APath: string; const APushToHistory: Boolean = True);
 begin
   if APushToHistory then
     InsertPathToHistory(APath);
@@ -908,7 +908,7 @@ end;
 procedure TControlFormFileManager.VSTFilesDblClick(Sender: TObject);
 begin
   if VSTFiles.FocusedNode = nil then
-    Exit();
+    Exit;
 
   var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
 
@@ -934,7 +934,7 @@ procedure TControlFormFileManager.VSTFilesFreeNode(Sender: TBaseVirtualTree;
 begin
   var pData := PFileTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   if Assigned(pData^.DriveInformation) then
@@ -942,6 +942,9 @@ begin
 
   if Assigned(pData^.FileInformation) then
     FreeAndNil(pData^.FileInformation);
+
+  ///
+  // Finalize(pData^);
 end;
 
 procedure TControlFormFileManager.VSTFilesGetImageIndex(Sender: TBaseVirtualTree;
@@ -950,18 +953,18 @@ procedure TControlFormFileManager.VSTFilesGetImageIndex(Sender: TBaseVirtualTree
 begin
   var pData := PFileTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
 //  if Assigned(pData^.DriveInformation) and (Kind = TVTImageKind.ikState) then begin
 //    case pData^.DriveInformation.DriveType of
-//      dtUnknown   : ImageIndex := IMAGE_DRIVE_UNKNOWN;
-//      dtNoRootDir : ImageIndex := IMAGE_DRIVE_NO_ROOT;
-//      dtRemovable : ImageIndex := IMAGE_DRIVE_USB;
-//      dtFixed     : ImageIndex := IMAGE_DRIVE;
-//      dtRemote    : ImageIndex := IMAGE_DRIVE_NETWORK;
-//      dtCDROM     : ImageIndex := IMAGE_DRIVE_CD;
-//      dtRAMDisk   : ImageIndex := IMAGE_DRIVE_HARDWARE;
+//      dtUnknown: ImageIndex := IMAGE_DRIVE_UNKNOWN;
+//      dtNoRootDir: ImageIndex := IMAGE_DRIVE_NO_ROOT;
+//      dtRemovable: ImageIndex := IMAGE_DRIVE_USB;
+//      dtFixed: ImageIndex := IMAGE_DRIVE;
+//      dtRemote: ImageIndex := IMAGE_DRIVE_NETWORK;
+//      dtCDROM: ImageIndex := IMAGE_DRIVE_CD;
+//      dtRAMDisk: ImageIndex := IMAGE_DRIVE_HARDWARE;
 //    end;
   if Assigned(pData^.DriveInformation) and ((Kind = ikNormal) or (Kind = ikSelected)) then
     ImageIndex := pData^.ImageIndex
@@ -973,7 +976,7 @@ begin
           ImageIndex := pData^.ImageIndex;
       end;
 
-      ikState : begin
+      ikState: begin
         if not FSharedClass.FileClipboard.IsEmpty then begin
           if String.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0 then begin
             if FSharedClass.FileClipboard.CopyMode = vccmCopy then
@@ -1011,7 +1014,7 @@ begin
   if Assigned(pData) and Assigned(pData^.DriveInformation) then begin
     // Drives ----------------------------------------------------------------------------------------------------------
     case Column of
-      0 : begin
+      0: begin
         if String.IsNullOrEmpty(pData^.DriveInformation.Name) then
           CellText := pData^.DriveInformation.Letter
         else
@@ -1021,7 +1024,7 @@ begin
           ]);
       end;
 
-      1 : begin
+      1: begin
         var ADriveType := DriveTypeToString(pData^.DriveInformation.DriveType);
         if String.IsNullOrEmpty(pData^.DriveInformation.Format) then
           CellText := ADriveType
@@ -1032,7 +1035,7 @@ begin
           ]);
       end;
 
-      2 : begin
+      2: begin
         if pData^.DriveInformation.TotalSize > 0 then
           CellText := Format('%s(%d%%) / %s', [
             TOptixHelper.FormatFileSize(pData^.DriveInformation.UsedSize),
@@ -1049,23 +1052,23 @@ begin
         CellText := '< .. >';
     end else begin
       case Column of
-        0 : CellText := pData^.FileInformation.Name;
-        1 : CellText := pData^.FileInformation.TypeDescription;
+        0: CellText := pData^.FileInformation.Name;
+        1: CellText := pData^.FileInformation.TypeDescription;
 
-        2 : begin
+        2: begin
           if not pData^.FileInformation.IsDirectory then
             CellText := TOptixHelper.FormatFileSize(pData^.FileInformation.Size);
         end;
 
-        3 : CellText := AccessSetToReadableString(pData^.FileInformation.Access);
-        4 : CellText := pData^.FileInformation.ACL_SSDL;
+        3: CellText := AccessSetToReadableString(pData^.FileInformation.Access);
+        4: CellText := pData^.FileInformation.ACL_SSDL;
       end;
 
       if pData^.FileInformation.DateAreValid then begin
         case column of
-          5 : CellText := DateTimeToStr(pData^.FileInformation.CreatedDate);
-          6 : CellText := DateTimeToStr(pData^.FileInformation.LastModifiedDate);
-          7 : CellText := DateTimeToStr(pData^.FileInformation.LastAccessDate);
+          5: CellText := DateTimeToStr(pData^.FileInformation.CreatedDate);
+          6: CellText := DateTimeToStr(pData^.FileInformation.LastModifiedDate);
+          7: CellText := DateTimeToStr(pData^.FileInformation.LastAccessDate);
         End;
       end;
     end;
@@ -1087,8 +1090,8 @@ begin
     (String.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
   then begin
     case FSharedClass.FileClipboard.CopyMode of
-      vccmCopy : TargetCanvas.Font.Color := clBlue;
-      vccmCut  : TargetCanvas.Font.Color := clRed;
+      vccmCopy: TargetCanvas.Font.Color := clBlue;
+      vccmCut: TargetCanvas.Font.Color := clRed;
     end;
 
   end;
@@ -1111,7 +1114,7 @@ procedure TControlFormFileManager.VSTFoldersDblClick(Sender: TObject);
 begin
   var pNode := VSTFolders.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PFolderTreeData(pNode.GetData);
@@ -1123,8 +1126,15 @@ end;
 procedure TControlFormFileManager.VSTFoldersFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
   var pData := PFolderTreeData(Node.GetData);
-  if Assigned(pData) and Assigned(pData^.Information) then
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  if Assigned(pData^.Information) then
     FreeAndNil(pData^.Information);
+
+  ///
+  // Finalize(pData^);
 end;
 
 procedure TControlFormFileManager.VSTFoldersGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -1132,7 +1142,7 @@ procedure TControlFormFileManager.VSTFoldersGetImageIndex(Sender: TBaseVirtualTr
 begin
   var pData := PFolderTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) or ((Kind <> ikNormal) and (Kind <> ikSelected)) then
-    Exit();
+    Exit;
   ///
 
   ImageIndex := pData^.ImageIndex;
@@ -1152,14 +1162,14 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := pData^.Information.Name;
+      0: CellText := pData^.Information.Name;
     end;
   end;
 
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
 end;
 
-procedure TControlFormFileManager.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormFileManager.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
@@ -1181,7 +1191,7 @@ begin
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormFileManager.DisplayDrives(const AList : TOptixCommandEnumDrives);
+procedure TControlFormFileManager.DisplayDrives(const AList: TOptixCommandEnumDrives);
 begin
   SetDisplayMode(dmDrives);
   ///
@@ -1189,22 +1199,22 @@ begin
   FCurrentPathACL := [];
 
   if not Assigned(AList) then
-    Exit();
+    Exit;
   ///
 
   var AFolders := TObjectList<TSimpleFolderInformation>.Create(True);
 
-  VSTFiles.BeginUpdate();
+  VSTFiles.BeginUpdate;
   try
     for var ADrive in AList.Drives do begin
       var pNode := VSTFiles.AddChild(nil);
       var pData := PFileTreeData(pNode.GetData);
       ///
 
-      pData^.DriveInformation := TDriveInformation.Create();
+      pData^.DriveInformation := TDriveInformation.Create;
       pData^.DriveInformation.Assign(ADrive);
       pData^.FileInformation := nil;
-      pData^.ImageIndex  := TOptixHelper.SystemFileIcon(IncludeTrailingPathDelimiter(ADrive.Letter));
+      pData^.ImageIndex := TOptixHelper.SystemFileIcon(IncludeTrailingPathDelimiter(ADrive.Letter));
 
       ///
       AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, ADrive.Letter, [], True));
@@ -1212,20 +1222,19 @@ begin
   finally
     RegisterFoldersInTree(nil, AFolders);
 
-    VSTFiles.EndUpdate();
+    VSTFiles.EndUpdate;
 
-    if Assigned(AFolders) then
-      FreeAndNil(AFolders);
+    AFolders.Free;
   end;
 end;
 
-procedure TControlFormFileManager.DisplayFiles(const AList : TOptixCommandEnumDirectoryFiles);
+procedure TControlFormFileManager.DisplayFiles(const AList: TOptixCommandEnumDirectoryFiles);
 begin
   SetDisplayMode(dmFiles);
   ///
 
   if not Assigned(AList) then
-    Exit();
+    Exit;
   ///
 
   EditPath.Text := AList.Path;
@@ -1235,7 +1244,7 @@ begin
 
   var AFolders := TObjectList<TSimpleFolderInformation>.Create(True);
 
-  VSTFiles.BeginUpdate();
+  VSTFiles.BeginUpdate;
   try
     for var AFile in AList.Files do begin
       var pNode := VSTFiles.AddChild(nil);
@@ -1243,11 +1252,11 @@ begin
       ///
 
       pData^.DriveInformation := nil;
-      pData^.FileInformation := TFileInformation.Create();
+      pData^.FileInformation := TFileInformation.Create;
       pData^.FileInformation.Assign(AFile);
 
       if AFile.IsDirectory then begin
-        pData^.ImageIndex := TOptixHelper.SystemFolderIcon();
+        pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
 
         ///
         if not MatchStr(pData^.FileInformation.Name, ['.', '..']) then
@@ -1265,13 +1274,12 @@ begin
   finally
     RegisterFoldersInTree(AList.ParentFolders, AFolders);
 
-    VSTFiles.EndUpdate();
+    VSTFiles.EndUpdate;
 
-    RefreshActionsButtons();
+    RefreshActionsButtons;
 
     ///
-    if Assigned(AFolders) then
-      FreeAndNil(AFolders);
+    AFolders.Free;
   end;
 end;
 
@@ -1279,11 +1287,11 @@ procedure TControlFormFileManager.DownloadFile1Click(Sender: TObject);
 begin
   var pNode := VSTFiles.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PFileTreeData(pNode.GetData);
   if not CanNodeFileBeRead(pData) then
-    Exit();
+    Exit;
 
   ///
   RequestFileDownload(IncludeTrailingPathDelimiter(EditPath.Text) + pData^.FileInformation.Name);
@@ -1297,7 +1305,7 @@ end;
 procedure TControlFormFileManager.StreamFileContentOpen1Click(Sender: TObject);
 begin
   if VSTFiles.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
@@ -1308,14 +1316,14 @@ end;
 procedure TControlFormFileManager.FormCreate(Sender: TObject);
 begin
   FHistoryCursor := 0;
-  FPathHistory := TList<String>.Create();
+  FPathHistory := TList<String>.Create;
 
   SetDisplayMode(dmDrives);
 
   FCurrentPathACL := [];
 
   // Setup Constraints
-  Constraints.MinWidth  := ScaleValue(250);
+  Constraints.MinWidth := ScaleValue(250);
 
   var APoint := ButtonOptions.ClientToScreen(Point(0, 0));
 
@@ -1327,7 +1335,7 @@ end;
 
 procedure TControlFormFileManager.FormDestroy(Sender: TObject);
 begin
-  VSTFiles.Clear();
+  VSTFiles.Clear;
   ///
 
   if Assigned(FPathHistory) then
@@ -1344,7 +1352,7 @@ begin
   VSTFolders.FullExpand(nil);
 end;
 
-procedure TControlFormFileManager.OnVirtualClipboardUpdate(Sender : TObject);
+procedure TControlFormFileManager.OnVirtualClipboardUpdate(Sender: TObject);
 begin
   RefreshActionsButtons;
   VSTFolders.Refresh;

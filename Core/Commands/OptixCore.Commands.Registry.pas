@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.Registry;
 
 interface
@@ -68,51 +66,51 @@ type
   TOptixCommandRegistryActionResponse = class(TOptixCommandActionResponse)
   protected
     [OptixSerializableAttribute]
-    FKeyPath : String;
+    FKeyPath: string;
   public
     {@C}
-    constructor Create(const AKeyPath : String); overload; virtual;
+    constructor Create(const AKeyPath: String); overload; virtual;
 
     {@G}
-    property KeyPath : String read FKeyPath;
+    property KeyPath: String read FKeyPath;
   end;
 
   TOptixCommandEnumRegistry = class(TOptixCommandRegistryActionResponse)
   private
     [OptixSerializableAttribute]
-    FPermissions : TRegistryKeyPermissions;
+    FPermissions: TRegistryKeyPermissions;
 
     [OptixSerializableAttribute]
-    FParentKeys : TObjectList<TRegistryKeyInformation>;
+    FParentKeys: TObjectList<TRegistryKeyInformation>;
 
     [OptixSerializableAttribute]
-    FSubKeys : TObjectList<TRegistryKeyInformation>;
+    FSubKeys: TObjectList<TRegistryKeyInformation>;
 
     [OptixSerializableAttribute]
-    FValues : TObjectList<TRegistryValueInformation>;
+    FValues: TObjectList<TRegistryValueInformation>;
 
     {@M}
-    function GetIsRoot() : Boolean;
+    function GetIsRoot: Boolean;
   protected
     {@M}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
   public
     {@C}
-    destructor Destroy(); override;
+    destructor Destroy; override;
 
     {@G}
-    property IsRoot      : Boolean                                read GetIsRoot;
-    property ParentKeys  : TObjectList<TRegistryKeyInformation>   read FParentKeys;
-    property SubKeys     : TObjectList<TRegistryKeyInformation>   read FSubKeys;
-    property Values      : TObjectList<TRegistryValueInformation> read FValues;
-    property Permissions : TRegistryKeyPermissions                read FPermissions;
+    property IsRoot: Boolean read GetIsRoot;
+    property ParentKeys: TObjectList<TRegistryKeyInformation> read FParentKeys;
+    property SubKeys: TObjectList<TRegistryKeyInformation> read FSubKeys;
+    property Values: TObjectList<TRegistryValueInformation> read FValues;
+    property Permissions: TRegistryKeyPermissions read FPermissions;
   end;
 
   TOptixCommandEnumRegistryHives = class(TOptixCommandEnumRegistry)
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
   end;
 
@@ -120,7 +118,7 @@ type
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
   end;
 
@@ -128,7 +126,7 @@ type
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
   end;
 
@@ -136,97 +134,97 @@ type
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
   end;
 
   TOptixCommandSetRegistryValue = class(TOptixCommandRegistryActionResponse)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FKind : DWORD;
+    FKind: DWORD;
 
     [OptixSerializableAttribute]
-    FNewValue : TRegistryValueInformation;
+    FNewValue: TRegistryValueInformation;
   protected
     {@M}
-    procedure BeforeDeserialize(); override;
+    procedure BeforeDeserialize; override;
   public
     {@C}
-    constructor Create(const AKeyPath : String; const AName : String; const AKind : DWORD; const pData : Pointer;
-      const ADataSize : UInt64); overload;
-    destructor Destroy(); override;
+    constructor Create(const AKeyPath: string; const AName: string; const AKind: DWORD; const pData: Pointer;
+      const ADataSize: UInt64); overload;
+    destructor Destroy; override;
 
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
 
     {@G}
-    property Name        : String                    read FName;
-    property Kind        : DWORD                     read FKind;
-    property NewValue    : TRegistryValueInformation read FNewValue;
+    property Name: String read FName;
+    property Kind: DWORD read FKind;
+    property NewValue: TRegistryValueInformation read FNewValue;
   end;
 
   TOptixCommandSetRegistryKeyName = class(TOptixCommandRegistryActionResponse)
   private
     [OptixSerializableAttribute]
-    FExistingName : String;
+    FExistingName: string;
 
     [OptixSerializableAttribute]
-    FNewName : String;
+    FNewName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AExistingName, ANewName : String); overload;
+    constructor Create(const AKeyPath, AExistingName, ANewName: String); overload;
 
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
 
     {@G}
-    property NewName      : String read FNewName;
-    property ExistingName : String read FExistingName;
+    property NewName: String read FNewName;
+    property ExistingName: String read FExistingName;
   end;
 
   TOptixCommandSetRegistryValueName = class(TOptixCommandRegistryActionResponse)
   private
     [OptixSerializableAttribute]
-    FExistingName : String;
+    FExistingName: string;
 
     [OptixSerializableAttribute]
-    FNewName : String;
+    FNewName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AExistingName, ANewName : String); overload;
+    constructor Create(const AKeyPath, AExistingName, ANewName: String); overload;
 
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
 
     {@G}
-    property ExistingName : String read FExistingName;
-    property NewName      : String read FNewName;
+    property ExistingName: String read FExistingName;
+    property NewName: String read FNewName;
   end;
 
   TOptixCommandDeleteRegistryValue = class(TOptixCommandRegistryActionResponse)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AName : String); overload;
+    constructor Create(const AKeyPath, AName: String); overload;
 
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
 
     {@G}
-    property Name : String read FName;
+    property Name: String read FName;
   end;
 
 implementation
@@ -238,9 +236,9 @@ uses
 
 (* TOptixCommandRegistryActionResponse *)
 
-constructor TOptixCommandRegistryActionResponse.Create(const AKeyPath : String);
+constructor TOptixCommandRegistryActionResponse.Create(const AKeyPath: String);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FKeyPath := ExcludeTrailingPathDelimiter(AKeyPath);
@@ -248,16 +246,16 @@ end;
 
 (* TOptixCommandEnumRegistry *)
 
-procedure TOptixCommandEnumRegistry.AfterCreate();
+procedure TOptixCommandEnumRegistry.AfterCreate;
 begin
   FParentKeys := TObjectList<TRegistryKeyInformation>.Create(True);
-  FSubKeys    := TObjectList<TRegistryKeyInformation>.Create(True);
-  FValues     := TObjectList<TRegistryValueInformation>.Create(True);
+  FSubKeys := TObjectList<TRegistryKeyInformation>.Create(True);
+  FValues := TObjectList<TRegistryValueInformation>.Create(True);
 
   FPermissions := [];
 end;
 
-destructor TOptixCommandEnumRegistry.Destroy();
+destructor TOptixCommandEnumRegistry.Destroy;
 begin
   if Assigned(FParentKeys) then
     FreeAndNil(FParentKeys);
@@ -272,15 +270,15 @@ begin
   inherited;
 end;
 
-function TOptixCommandEnumRegistry.GetIsRoot() : Boolean;
+function TOptixCommandEnumRegistry.GetIsRoot: Boolean;
 begin
-  result := String.IsNullOrWhiteSpace(FKeyPath);
+  Result := String.IsNullOrWhiteSpace(FKeyPath);
 end;
 
 (* TOptixCommandEnumRegistryHives *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandEnumRegistryHives.DoAction();
+procedure TOptixCommandEnumRegistryHives.DoAction;
 begin
   for var AHive in TRegistryHelper.RegistryHives.Keys do
     FSubKeys.Add(TRegistryKeyInformation.Create(AHive, AHive));
@@ -290,10 +288,10 @@ end;
 (* TOptixCommandEnumRegistryKeys *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandEnumRegistryKeys.DoAction();
+procedure TOptixCommandEnumRegistryKeys.DoAction;
 begin
   TRegistryHelper.CheckRegistryPath(FKeyPath);
-  FParentKeys.Clear();
+  FParentKeys.Clear;
   ///
 
   TRegistryHelper.TryGetCurrentUserRegistryKeyAccess(FKeyPath, FPermissions);
@@ -301,7 +299,7 @@ begin
   TFileSystemHelper.TraverseDirectories(
     FKeyPath,
     (
-      procedure (const ADirectoryName : String; const AAbsolutePath : String)
+      procedure (const ADirectoryName: string; const AAbsolutePath: String)
       begin
         FParentKeys.Add(TRegistryKeyInformation.Create(ADirectoryName, AAbsolutePath));
       end
@@ -316,7 +314,7 @@ end;
 (* TOptixCommandCreateRegistryKey *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandCreateRegistryKey.DoAction();
+procedure TOptixCommandCreateRegistryKey.DoAction;
 begin
   TRegistryHelper.CreateSubKey(FKeyPath);
   ///
@@ -331,7 +329,7 @@ end;
 (* TOptixCommandDeleteRegistryKey *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandDeleteRegistryKey.DoAction();
+procedure TOptixCommandDeleteRegistryKey.DoAction;
 begin
   TRegistryHelper.DeleteKey(FKeyPath);
 end;
@@ -339,16 +337,16 @@ end;
 
 (* TOptixCommandSetRegistryValue *)
 
-procedure TOptixCommandSetRegistryValue.BeforeDeserialize();
+procedure TOptixCommandSetRegistryValue.BeforeDeserialize;
 begin
   inherited;
   ///
 
-  FNewValue := TRegistryValueInformation.Create();
+  FNewValue := TRegistryValueInformation.Create;
 end;
 
-constructor TOptixCommandSetRegistryValue.Create(const AKeyPath : String; const AName : String; const AKind : DWORD;
-  const pData : Pointer; const ADataSize : UInt64);
+constructor TOptixCommandSetRegistryValue.Create(const AKeyPath: string; const AName: string; const AKind: DWORD;
+  const pData: Pointer; const ADataSize: UInt64);
 begin
   inherited Create(AKeyPath);
   ///
@@ -359,7 +357,7 @@ begin
   FNewValue := TRegistryValueInformation.Create(AName, AKind, pData, ADataSize);
 end;
 
-destructor TOptixCommandSetRegistryValue.Destroy();
+destructor TOptixCommandSetRegistryValue.Destroy;
 begin
   if Assigned(FNewValue) then
     FreeAndNil(FNewValue);
@@ -369,7 +367,7 @@ begin
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandSetRegistryValue.DoAction();
+procedure TOptixCommandSetRegistryValue.DoAction;
 begin
   if not Assigned(FNewValue) or not Assigned(FNewValue.Value) then
     raise EOptixSystemException.Create('{DBBAF446-0898-4242-B566-86AB8C620B21}');
@@ -387,7 +385,7 @@ end;
 
 (* TOptixCommandSetRegistryKeyName *)
 
-constructor TOptixCommandSetRegistryKeyName.Create(const AKeyPath, AExistingName, ANewName : String);
+constructor TOptixCommandSetRegistryKeyName.Create(const AKeyPath, AExistingName, ANewName: String);
 begin
   inherited Create(AKeyPath);
   ///
@@ -397,7 +395,7 @@ begin
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandSetRegistryKeyName.DoAction();
+procedure TOptixCommandSetRegistryKeyName.DoAction;
 begin
   TRegistryHelper.RenameKey(FKeyPath, FExistingName, FNewName);
 end;
@@ -405,7 +403,7 @@ end;
 
 (* TOptixCommandSetRegistryValueName *)
 
-constructor TOptixCommandSetRegistryValueName.Create(const AKeyPath, AExistingName, ANewName : String);
+constructor TOptixCommandSetRegistryValueName.Create(const AKeyPath, AExistingName, ANewName: String);
 begin
   inherited Create(AKeyPath);
   ///
@@ -415,7 +413,7 @@ begin
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandSetRegistryValueName.DoAction();
+procedure TOptixCommandSetRegistryValueName.DoAction;
 begin
   TRegistryHelper.RenameValue(FKeyPath, FExistingName, FNewName);
 end;
@@ -423,7 +421,7 @@ end;
 
 (* TOptixCommandDeleteRegistryValue *)
 
-constructor TOptixCommandDeleteRegistryValue.Create(const AKeyPath, AName : String);
+constructor TOptixCommandDeleteRegistryValue.Create(const AKeyPath, AName: String);
 begin
   inherited Create(AKeyPath);
   ///
@@ -432,7 +430,7 @@ begin
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandDeleteRegistryValue.DoAction();
+procedure TOptixCommandDeleteRegistryValue.DoAction;
 begin
   TRegistryHelper.DeleteValue(FKeyPath, FName);
 end;

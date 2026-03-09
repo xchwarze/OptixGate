@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Protocol.Server;
 
 interface
@@ -68,72 +66,72 @@ uses
 type
   TOptixServerThread = class;
 
-  TOnServerStart    = procedure(Sender : TOptixServerThread; const ASocketFd : TSocket) of object;
-  TOnServerStop     = procedure(Sender : TOptixServerThread) of object;
-  TOnServerError    = procedure(Sender : TOptixServerThread; const AErrorMessage : String) of object;
+  TOnServerStart = procedure(Sender: TOptixServerThread; const ASocketFd: TSocket) of object;
+  TOnServerStop = procedure(Sender: TOptixServerThread) of object;
+  TOnServerError = procedure(Sender: TOptixServerThread; const AErrorMessage: String) of object;
 
   {$IFDEF USETLS}
-  TOnVerifyPeerCertificate = procedure(Sender : TObject; const APeerFingerprint : String; var ASuccess : Boolean) of object;
+  TOnVerifyPeerCertificate = procedure(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean) of object;
   {$ENDIF}
 
   TOnRegisterWorker = procedure(
-    Sender            : TOptixServerThread;
-    const AClient     : TClientSocket;
-    const AHandlerId  : TGUID;
-    const AWorkerKind : TClientKind
+    Sender: TOptixServerThread;
+    const AClient: TClientSocket;
+    const AHandlerId: TGUID;
+    const AWorkerKind: TClientKind
   ) of object;
 
   (* TOptixServerThread *)
   TOptixServerThread = class(TOptixThread)
   private
-    FBindAddress             : String;
-    FBindPort                : Word;
-    FIPVersion               : TIPVersion;
-    FServer                  : TServerSocket;
+    FBindAddress: string;
+    FBindPort: Word;
+    FIPVersion: TIPVersion;
+    FServer: TServerSocket;
 
     {$IFDEF USETLS}
-    FSSLContext              : TOptixOpenSSLContext;
-    FCertificate             : TX509Certificate;
+    FSSLContext: TOptixOpenSSLContext;
+    FCertificate: TX509Certificate;
     {$ENDIF}
 
-    FClientSockets           : TList<TSocket>;
+    FClientSockets: TList<TSocket>;
 
-    FOnServerStart           : TOnServerStart;
-    FOnServerError           : TOnServerError;
-    FOnServerStop            : TOnServerStop;
+    FOnServerStart: TOnServerStart;
+    FOnServerError: TOnServerError;
+    FOnServerStop: TOnServerStop;
 
-    FOnSessionDisconnect     : TOnSessionDisconnect;
-    FOnReceivePacket         : TOnReceivePacket;
-    FOnRegisterWorker        : TOnRegisterWorker;
+    FOnSessionDisconnect: TOnSessionDisconnect;
+    FOnReceivePacket: TOnReceivePacket;
+    FOnRegisterWorker: TOnRegisterWorker;
 
     {$IFDEF USETLS}
-    FOnVerifyPeerCertificate : TOnVerifyPeerCertificate;
+    FOnVerifyPeerCertificate: TOnVerifyPeerCertificate;
     {$ENDIF}
 
     {@M}
-    procedure Close();
+    procedure Close;
   protected
     {@M}
-    procedure ThreadExecute(); override;
-    procedure TerminatedSet(); override;
+    procedure ThreadExecute; override;
+    procedure TerminatedSet; override;
   public
     {@C}
-    constructor Create({$IFDEF USETLS}const ACertificate : TX509Certificate; {$ENDIF}const ABindAddress : String; const ABindPort : Word; const AIPVersion : TIPVersion); overload;
-    destructor Destroy(); override;
+    constructor Create({$IFDEF USETLS}const ACertificate: TX509Certificate; {$ENDIF}const ABindAddress: string; const ABindPort: Word; const AIPVersion: TIPVersion); overload;
+    destructor Destroy; override;
 
     {@G/S}
-    property OnServerStart           : TOnServerStart           read FOnServerStart           write FOnServerStart;
-    property OnServerError           : TOnServerError           read FOnServerError           write FOnServerError;
-    property OnServerStop            : TOnServerStop            read FOnServerStop            write FOnServerStop;
-    property OnSessionDisconnect     : TOnSessionDisconnect     read FOnSessionDisconnect     write FOnSessionDisconnect;
-    property OnReceivePacket         : TOnReceivePacket         read FOnReceivePacket         write FOnReceivePacket;
-    property OnRegisterWorker        : TOnRegisterWorker        read FOnRegisterWorker        write FOnRegisterWorker;
+    property OnServerStart: TOnServerStart read FOnServerStart write FOnServerStart;
+    property OnServerError: TOnServerError read FOnServerError write FOnServerError;
+    property OnServerStop: TOnServerStop read FOnServerStop write FOnServerStop;
+    property OnSessionDisconnect: TOnSessionDisconnect read FOnSessionDisconnect write FOnSessionDisconnect;
+    property OnReceivePacket: TOnReceivePacket read FOnReceivePacket write FOnReceivePacket;
+    property OnRegisterWorker: TOnRegisterWorker read FOnRegisterWorker write FOnRegisterWorker;
     {$IFDEF USETLS}
-    property OnVerifyPeerCertificate : TOnVerifyPeerCertificate read FOnVerifyPeerCertificate write FOnVerifyPeerCertificate;
+    property OnVerifyPeerCertificate: TOnVerifyPeerCertificate read FOnVerifyPeerCertificate write FOnVerifyPeerCertificate;
     {$ENDIF}
 
     {@G}
-    property Port : Word read FBindPort;
+    property Port: Word read FBindPort;
   end;
 
 implementation
@@ -150,13 +148,13 @@ uses
 
 (* TOptixServerThread *)
 
-procedure TOptixServerThread.ThreadExecute();
-var AClient : TClientSocket;
+procedure TOptixServerThread.ThreadExecute;
+var AClient: TClientSocket;
 begin
   try
     try
       FServer := TServerSocket.Create(FBindAddress, FBindPort, FIPVersion);
-      FServer.Listen();
+      FServer.Listen;
 
       if Assigned(FOnServerStart) then
         Synchronize(procedure begin
@@ -187,7 +185,7 @@ begin
           {$ENDIF}
 
           // Preflight packet
-          var APreflight : TOptixPreflightRequest;
+          var APreflight: TOptixPreflightRequest;
           AClient.Recv(APreflight, SizeOf(TOptixPreflightRequest));
 
           if APreflight.ProtocolVersion <> OPTIX_PROTOCOL_VERSION then
@@ -211,7 +209,7 @@ begin
             ASessionHandler.OnSessionDisconnect := OnSessionDisconnect;
             ASessionHandler.OnReceivePacket := OnReceivePacket;
 
-            ASessionHandler.Start();
+            ASessionHandler.Start
             // ---------------------------------------------------------------------------------------------------------
           end else if Assigned(FOnRegisterWorker) then
             Synchronize(procedure begin
@@ -220,7 +218,7 @@ begin
           else
             FreeAndNil(AClient);
         except
-          on E : Exception do begin
+          on E: Exception do begin
             if E is EOptixPreflightException then
               try
                 AClient.Send(EOptixPreflightException(E).ErrorCode, SizeOf(TPreflightErrorCode));
@@ -241,7 +239,7 @@ begin
         end;
       end;
     except
-      on E : Exception do begin
+      on E: Exception do begin
         if Assigned(FOnServerError) then
           Synchronize(procedure begin
             FOnServerError(self, E.Message);
@@ -255,40 +253,40 @@ begin
       end);
 
     ///
-    self.Close();
+    Close;
   end;
 end;
 
-procedure TOptixServerThread.Close();
+procedure TOptixServerThread.Close;
 begin
   if Assigned(FServer) then
-    FServer.Close();
+    FServer.Close;
 end;
 
-procedure TOptixServerThread.TerminatedSet();
+procedure TOptixServerThread.TerminatedSet;
 begin
-  self.Close();
+  Close;
 
   ///
-  inherited TerminatedSet();
+  inherited TerminatedSet;
 end;
 
-constructor TOptixServerThread.Create({$IFDEF USETLS}const ACertificate : TX509Certificate; {$ENDIF}const ABindAddress : String; const ABindPort : Word; const AIPVersion : TIPVersion);
+constructor TOptixServerThread.Create({$IFDEF USETLS}const ACertificate: TX509Certificate; {$ENDIF}const ABindAddress: string; const ABindPort: Word; const AIPVersion: TIPVersion);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FOnServerStart        := nil;
-  FOnServerError        := nil;
-  FOnServerStop         := nil;
-  FOnSessionDisconnect  := nil;
-  FOnReceivePacket      := nil;
-  FOnRegisterWorker     := nil;
+  FOnServerStart := nil;
+  FOnServerError := nil;
+  FOnServerStop := nil;
+  FOnSessionDisconnect := nil;
+  FOnReceivePacket := nil;
+  FOnRegisterWorker := nil;
 
   FBindAddress := ABindAddress;
-  FBindPort    := ABindPort;
-  FIPVersion   := AIPVersion;
-  FServer      := nil;
+  FBindPort := ABindPort;
+  FIPVersion := AIPVersion;
+  FServer := nil;
 
   {$IFDEF USETLS}
   FCertificate := ACertificate;
@@ -297,10 +295,10 @@ begin
   FOnVerifyPeerCertificate := nil;
   {$ENDIF}
 
-  FClientSockets := TList<TSocket>.Create();
+  FClientSockets := TList<TSocket>.Create;
 end;
 
-destructor TOptixServerThread.Destroy();
+destructor TOptixServerThread.Destroy;
 begin
   if Assigned(FClientSockets) then begin
     for var ASocket in FClientSockets do begin
@@ -323,7 +321,7 @@ begin
   {$ENDIF}
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 end.

@@ -281,7 +281,6 @@
         <DCCReference Include="Units\Forms\uFormSelectCertificate.pas">
             <Form>FormSelectCertificate</Form>
         </DCCReference>
-        <None Include="..\Shared\XSuperObject.inc"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -310,20 +309,6 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="5">
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Debug" Class="ProjectFile"/>
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win64">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="bins\OpenSSL\Win32\Debug\OptixGate_OpenSSL.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="bins\OpenSSL\Win32\Debug\OptixGate_OpenSSL.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">

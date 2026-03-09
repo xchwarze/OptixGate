@@ -52,8 +52,6 @@ program OptixGate_OpenSSL;
 uses
   System.SysUtils,
   Vcl.Forms,
-  Vcl.Themes,
-  Vcl.Styles,
   OptixCore.Exceptions in '..\Core\OptixCore.Exceptions.pas',
   OptixCore.Sockets.Helper in '..\Core\Network\OptixCore.Sockets.Helper.pas',
   OptixCore.Sockets.Exceptions in '..\Core\Network\OptixCore.Sockets.Exceptions.pas',

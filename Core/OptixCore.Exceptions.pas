@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Exceptions;
 
 interface
@@ -61,19 +59,19 @@ uses
 type
   EWindowsException = class(Exception)
   private
-    FErrorCode : Integer;
+    FErrorCode: Integer;
   public
     {@C}
-    constructor Create(const WindowsAPIName : String; const AErrorCode : Cardinal = 0); overload;
+    constructor Create(const WindowsAPIName: string; const AErrorCode: Cardinal = 0); overload;
 
     {@G}
-    property ErrorCode : Integer read FErrorCode;
+    property ErrorCode: Integer read FErrorCode;
   end;
 
   EOptixSystemException = class(Exception)
   public
     {@C}
-    constructor Create(const ASystemmErrorIdentifier : TGUID); overload;
+    constructor Create(const ASystemmErrorIdentifier: TGUID); overload;
   end;
 
   TOptixConfigError = (
@@ -83,23 +81,23 @@ type
 
   EOptixConfigException = class(Exception)
   private
-    FError : TOptixConfigError;
+    FError: TOptixConfigError;
   public
     {@C}
-    constructor Create(const AError : TOptixConfigError); reintroduce;
+    constructor Create(const AError: TOptixConfigError); reintroduce;
 
     {@G}
-    property Error : TOptixConfigError read FError;
+    property Error: TOptixConfigError read FError;
   end;
 
 implementation
 
 (* EWindowsException *)
 
-constructor EWindowsException.Create(const WindowsAPIName : String; const AErrorCode : Cardinal = 0);
+constructor EWindowsException.Create(const WindowsAPIName: string; const AErrorCode: Cardinal = 0);
 begin
   if AErrorCode = 0 then
-    FErrorCode := GetLastError()
+    FErrorCode := GetLastError
   else
     FErrorCode := AErrorCode;
   ///
@@ -116,19 +114,19 @@ end;
 
 (* EOptixSystemException *)
 
-constructor EOptixSystemException.Create(const ASystemmErrorIdentifier : TGUID);
+constructor EOptixSystemException.Create(const ASystemmErrorIdentifier: TGUID);
 begin
   inherited Create(Format('Optix System Error: "%s"', [ASystemmErrorIdentifier.ToString]));
 end;
 
 (* EOptixConfigException *)
 
-constructor EOptixConfigException.Create(const AError : TOptixConfigError);
+constructor EOptixConfigException.Create(const AError: TOptixConfigError);
 begin
   var AMessage := '';
   case AError of
-    oceMissingField      : AMessage := 'Missing Field';
-    oceInvalidDataFormat : AMessage := 'Invalid Data Format';
+    oceMissingField: AMessage := 'Missing Field';
+    oceInvalidDataFormat: AMessage := 'Invalid Data Format';
   end;
 
   inherited Create(AMessage);

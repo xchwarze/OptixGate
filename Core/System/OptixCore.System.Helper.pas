@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.Helper;
 
 interface
@@ -64,13 +62,13 @@ type
   TSystemHelper = class
   public
     {@M}
-    class function FileTimeToDateTime(const AFileTime: TFileTime) : TDateTime; static;
-    class function TryFileTimeToDateTime(const AFileTime: TFileTime) : TDateTime; static;
+    class function FileTimeToDateTime(const AFileTime: TFileTime): TDateTime; static;
+    class function TryFileTimeToDateTime(const AFileTime: TFileTime): TDateTime; static;
     class procedure NTSetPrivilege(const APrivilegeName: string; const AEnabled: Boolean); static;
     class procedure TryNTSetPrivilege(const APrivilegeName: string; const AEnabled: Boolean); static;
-    class function AccessCheck(ADesiredAccess : DWORD; const hToken : THandle;
-      const ptrSecurityDescriptor : PSecurityDescriptor) : Boolean; static;
-    class function IncludeTrailingPathDelimiterIfNotEmpty(const AValue : String) : String; static;
+    class function AccessCheck(ADesiredAccess: DWORD; const hToken: THandle;
+      const ptrSecurityDescriptor: PSecurityDescriptor) : Boolean; static;
+    class function IncludeTrailingPathDelimiterIfNotEmpty(const AValue: String): string; static;
   end;
 
 implementation
@@ -84,12 +82,12 @@ uses
 
 class procedure TSystemHelper.NTSetPrivilege(const APrivilegeName: string; const AEnabled: Boolean);
 begin
-  var hToken : THandle;
-  if not OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES or TOKEN_QUERY, hToken) then
+  var hToken: THandle;
+  if not OpenProcessToken(GetCurrentProcess, TOKEN_ADJUST_PRIVILEGES or TOKEN_QUERY, hToken) then
     raise EWindowsException.Create('OpenProcessToken');
 
   try
-    var ATokenPrivilege : TOKEN_PRIVILEGES;
+    var ATokenPrivilege: TOKEN_PRIVILEGES;
 
     if not LookupPrivilegeValue(nil, PChar(APrivilegeName), ATokenPrivilege.Privileges[0].Luid) then
       raise EWindowsException.Create('LookupPrivilegeValue');
@@ -97,8 +95,8 @@ begin
     ATokenPrivilege.PrivilegeCount := 1;
 
     case AEnabled of
-      True  : ATokenPrivilege.Privileges[0].Attributes  := SE_PRIVILEGE_ENABLED;
-      False : ATokenPrivilege.Privileges[0].Attributes  := 0;
+      True: ATokenPrivilege.Privileges[0].Attributes := SE_PRIVILEGE_ENABLED;
+      False: ATokenPrivilege.Privileges[0].Attributes := 0;
     end;
 
     if not AdjustTokenPrivileges(
@@ -130,7 +128,7 @@ begin
   if not FileTimeToLocalFileTime(AFileTime, ALocalFileTime) then
     raise EWindowsException.Create('FileTimeToLocalFileTime');
 
-  var ASystemTime : TSystemTime;
+  var ASystemTime: TSystemTime;
   if not FileTimeToSystemTime(AFileTime, ASystemTime) then
     raise EWindowsException.Create('FileTimeToSystemTime');
 
@@ -141,29 +139,29 @@ end;
 class function TSystemHelper.TryFileTimeToDateTime(const AFileTime: TFileTime): TDateTime;
 begin
   try
-    result := FileTimeToDateTime(AFileTime);
+    Result := FileTimeToDateTime(AFileTime);
   except
-    result := Now;
+    Result := Now;
   end;
 end;
 
-class function TSystemHelper.AccessCheck(ADesiredAccess : DWORD; const hToken : THandle;
-  const ptrSecurityDescriptor : PSecurityDescriptor) : Boolean;
+class function TSystemHelper.AccessCheck(ADesiredAccess: DWORD; const hToken: THandle;
+  const ptrSecurityDescriptor: PSecurityDescriptor) : Boolean;
 begin
-  var AMapping : TGenericMapping;
-  AMapping.GenericRead    := KEY_READ;
-  AMapping.GenericWrite   := KEY_WRITE;
+  var AMapping: TGenericMapping;
+  AMapping.GenericRead := KEY_READ;
+  AMapping.GenericWrite := KEY_WRITE;
   AMapping.GenericExecute := KEY_EXECUTE;
-  AMapping.GenericAll     := KEY_ALL_ACCESS;
+  AMapping.GenericAll := KEY_ALL_ACCESS;
   ///
 
   MapGenericMask(ADesiredAccess, AMapping);
 
-  var APrivilegeSet : TPrivilegeSet;
+  var APrivilegeSet: TPrivilegeSet;
   var APrivilegeSetSize := DWORD(SizeOf(TPrivilegeSet));
 
   var AGrantedAccess := DWORD(0);
-  var AStatus : BOOL;
+  var AStatus: BOOL;
 
   if not Winapi.Windows.AccessCheck(
     ptrSecurityDescriptor,
@@ -175,17 +173,17 @@ begin
     AGrantedAccess,
     AStatus
   ) then
-    result := False
+    Result := False
   else
-    result := AStatus;
+    Result := AStatus;
 end;
 
-class function TSystemHelper.IncludeTrailingPathDelimiterIfNotEmpty(const AValue : String) : String;
+class function TSystemHelper.IncludeTrailingPathDelimiterIfNotEmpty(const AValue: String): string;
 begin
   if not String.IsNullOrWhiteSpace(AValue) then
-    result := IncludeTrailingPathDelimiter(AValue)
+    Result := IncludeTrailingPathDelimiter(AValue)
   else
-    result := AValue;
+    Result := AValue;
 end;
 
 end.

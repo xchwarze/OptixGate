@@ -59,14 +59,14 @@ uses
 type
   TOptixControlSingleton = class
   private
-    FFileClipboard : TVirtualClipboard;
+    FFileClipboard: TVirtualClipboard;
   public
     {@C}
     constructor Create;
     destructor Destroy; override;
 
     {@G}
-    property FileClipboard : TVirtualClipboard read FFileClipboard write FFileClipboard;
+    property FileClipboard: TVirtualClipboard read FFileClipboard write FFileClipboard;
   end;
 
 implementation

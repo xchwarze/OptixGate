@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Sockets.Exceptions;
 
 interface
@@ -62,13 +60,13 @@ uses System.SysUtils,
 type
   ESocketException = class(Exception)
   private
-    FWSALastError : Integer;
+    FWSALastError: Integer;
   public
     {@C}
-    constructor Create(const ASocketAPI : String); overload;
+    constructor Create(const ASocketAPI: String); overload;
 
     {@G}
-    property WSALastError : Integer read FWSALastError;
+    property WSALastError: Integer read FWSALastError;
   end;
 
   const _MSG_SOCKET_NULLDATASIZE = 'NULL Data Size';
@@ -77,10 +75,10 @@ implementation
 
 (* ESocketException *)
 
-constructor ESocketException.Create(const ASocketAPI : String);
-var AFormatedMessage : String;
+constructor ESocketException.Create(const ASocketAPI: String);
+var AFormatedMessage: string;
 begin
-  FWSALastError := WSAGetLastError();
+  FWSALastError := WSAGetLastError;
   ///
 
   AFormatedMessage := Format('(%s): %s.', [

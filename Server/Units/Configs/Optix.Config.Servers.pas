@@ -65,17 +65,17 @@ type
 
   TOptixServerConfigurationEnumerator = record
   private
-    FTarget : TOptixConfigServers;
-    FIndex  : Integer;
+    FTarget: TOptixConfigServers;
+    FIndex: Integer;
 
     {@M}
-    function GetCurrent() : TServerConfiguration;
+    function GetCurrent: TServerConfiguration;
   public
     {@C}
     constructor Create(ATarget: TOptixConfigServers);
 
     {@M}
-    function MoveNext() : Boolean;
+    function MoveNext: Boolean;
 
     {@G}
     property Current: TServerConfiguration read GetCurrent;
@@ -84,14 +84,14 @@ type
   TOptixConfigServers = class(TOptixConfigEnumBase)
   private
     {@M}
-    function GetItem(const AIndex : Integer) : TServerConfiguration;
+    function GetItem(const AIndex: Integer): TServerConfiguration;
   public
     {@M}
-    procedure Add(const AServerConfiguration : TServerConfiguration);
-    function GetEnumerator() : TOptixServerConfigurationEnumerator;
+    procedure Add(const AServerConfiguration: TServerConfiguration);
+    function GetEnumerator: TOptixServerConfigurationEnumerator;
 
     {@G}
-    property Count : Integer read GetCount;
+    property Count: Integer read GetCount;
   end;
 
 implementation
@@ -110,26 +110,26 @@ uses
 constructor TOptixServerConfigurationEnumerator.Create(ATarget: TOptixConfigServers);
 begin
   FTarget := ATarget;
-  FIndex  := -1;
+  FIndex := -1;
 end;
 
-function TOptixServerConfigurationEnumerator.MoveNext() : Boolean;
+function TOptixServerConfigurationEnumerator.MoveNext: Boolean;
 begin
   Inc(FIndex);
 
-  result := FIndex < FTarget.Count;
+  Result := FIndex < FTarget.Count;
 end;
 
-function TOptixServerConfigurationEnumerator.GetCurrent() : TServerConfiguration;
+function TOptixServerConfigurationEnumerator.GetCurrent: TServerConfiguration;
 begin
-  result := FTarget.GetItem(FIndex);
+  Result := FTarget.GetItem(FIndex);
 end;
 
 (* TOptixConfigServers *)
 
-function TOptixConfigServers.GetItem(const AIndex : Integer) : TServerConfiguration;
+function TOptixConfigServers.GetItem(const AIndex: Integer): TServerConfiguration;
 begin
-  ZeroMemory(@result, SizeOf(TServerConfiguration));
+  Result := Default(TServerConfiguration);
   if not Assigned(FItems) then
     Exit;
   ///
@@ -140,35 +140,35 @@ begin
   try
     var ARow := FItems.Items[AIndex];
 
-    var AVersion : Integer;
-    if not ARow.TryGetValue('Address', result.Address) or
-       not ARow.TryGetValue<Word>('Port', result.Port) or
+    var AVersion: Integer;
+    if not ARow.TryGetValue('Address', Result.Address) or
+       not ARow.TryGetValue<Word>('Port', Result.Port) or
        not ARow.TryGetValue('Version', AVersion) or
-       not ARow.TryGetValue('AutoStart', result.AutoStart)
+       not ARow.TryGetValue('AutoStart', Result.AutoStart)
        {$IFDEF USETLS}
-          or not ARow.TryGetValue('CertificateFingerprint', result.CertificateFingerprint)
+          or not ARow.TryGetValue('CertificateFingerprint', Result.CertificateFingerprint)
        {$ENDIF}
     then
       raise EOptixConfigException.Create(oceMissingField);
 
     {$IFDEF USETLS}
-    if not TOptixHelper.IsCertificateFingerprintValid(result.CertificateFingerprint) then
+    if not TOptixHelper.IsCertificateFingerprintValid(Result.CertificateFingerprint) then
       raise EOptixConfigException.Create(oceInvalidDataFormat);
     {$ENDIF}
 
-    result.VersionAsInt := AVersion;
+    Result.VersionAsInt := AVersion;
   except
-    ZeroMemory(@result, SizeOf(TServerConfiguration));
+    Result := Default(TServerConfiguration);
   end;
 end;
 
-procedure TOptixConfigServers.Add(const AServerConfiguration : TServerConfiguration);
+procedure TOptixConfigServers.Add(const AServerConfiguration: TServerConfiguration);
 begin
   if not Assigned(FItems) then
     Exit;
   ///
 
-  var AItem := TJsonObject.Create();
+  var AItem := TJsonObject.Create;
   try
     AItem.AddPair('Address', AServerConfiguration.Address);
     AItem.AddPair('Port', AServerConfiguration.Port);
@@ -178,16 +178,17 @@ begin
     {$IFDEF USETLS}
     AItem.AddPair('CertificateFingerprint', AServerConfiguration.CertificateFingerprint);
     {$ENDIF}
+	
+	///
+	FItems.AddElement(AItem);
   except
-    FreeAndNil(AItem);
-  end;
-
-  FItems.AddElement(AItem);
+    AItem.Free;
+  end;  
 end;
 
-function TOptixConfigServers.GetEnumerator() : TOptixServerConfigurationEnumerator;
+function TOptixConfigServers.GetEnumerator: TOptixServerConfigurationEnumerator;
 begin
-  result := TOptixServerConfigurationEnumerator.Create(Self);
+  Result := TOptixServerConfigurationEnumerator.Create(Self);
 end;
 
 end.

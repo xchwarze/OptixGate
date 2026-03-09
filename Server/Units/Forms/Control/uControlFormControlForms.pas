@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormControlForms;
 
 interface
@@ -72,12 +70,12 @@ uses
 
 type
   TTreeData = record
-    Title              : String;
-    ClassName          : String;
-    ContextDescription : String;
-    FormInformation    : TFormControlInformation;
-    Special            : Boolean;
-    Tick               : UInt64;
+    Title: string;
+    ClassName: string;
+    ContextDescription: string;
+    FormInformation: TFormControlInformation;
+    Special: Boolean;
+    Tick: UInt64;
   end;
   PTreeData = ^TTreeData;
 
@@ -113,19 +111,19 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
   private
-    FTick       : UInt64;
-    FClientData : Pointer;
+    FTick: UInt64;
+    FClientData: Pointer;
 
     {@M}
-    procedure Refresh(const AInitializeRefresh : Boolean = False);
-    function GetNodeByGUID(const AGUID : TGUID) : PVirtualNode;
-    function GetFormByGUID(const AGUID : TGUID) : TBaseFormControl;
-    function GetSelectedNodeState() : TFormControlState;
-    function GetSelectedNodeGUID() : TGUID;
+    procedure Refresh(const AInitializeRefresh: Boolean = False);
+    function GetNodeByGUID(const AGUID: TGUID): PVirtualNode;
+    function GetFormByGUID(const AGUID: TGUID): TBaseFormControl;
+    function GetSelectedNodeState: TFormControlState;
+    function GetSelectedNodeGUID: TGUID;
   public
     {@C}
-    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
-      const pClientData : Pointer); reintroduce;
+    constructor Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton; const AUserIdentifier: string;
+      const pClientData: Pointer); reintroduce;
   end;
 
 var
@@ -144,9 +142,9 @@ uses
 
 {$R *.dfm}
 
-function TControlFormControlForms.GetNodeByGUID(const AGUID : TGUID) : PVirtualNode;
+function TControlFormControlForms.GetNodeByGUID(const AGUID: TGUID): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
@@ -157,7 +155,7 @@ begin
       (pData^.FormInformation.GUID <> AGUID) then
       continue;
 
-    result := pNode;
+    Result := pNode;
 
     break;
   end;
@@ -167,60 +165,60 @@ procedure TControlFormControlForms.PopupMenuChange(Sender: TObject; Source: TMen
   Rebuild: Boolean);
 begin
   var pNode := VST.FocusedNode;
-  var pData : PTreeData := nil;
+  var pData: PTreeData := nil;
   if Assigned(pNode) then
     pData := PTreeData(pNode.GetData);
 
   ///
-  self.Show1.Visible  := Assigned(pData) and (pData^.FormInformation.State <> fcsWaitFree);
-  self.Purge1.Visible := Assigned(pData) and not pData^.Special and not (pData^.FormInformation.State = fcsWaitFree);
+  Show1.Visible := Assigned(pData) and (pData^.FormInformation.State <> fcsWaitFree);
+  Purge1.Visible := Assigned(pData) and not pData^.Special and not (pData^.FormInformation.State = fcsWaitFree);
 end;
 
-function TControlFormControlForms.GetSelectedNodeGUID() : TGUID;
+function TControlFormControlForms.GetSelectedNodeGUID: TGUID;
 begin
-  result := TGUID.Empty;
+  Result := TGUID.Empty;
   ///
 
   var pData := PTreeData(VST.FocusedNode.GetData);
 
   if not Assigned(pData^.FormInformation) then
-    Exit();
+    Exit;
 
-  result := pData^.FormInformation.GUID;
+  Result := pData^.FormInformation.GUID;
 end;
 
-function TControlFormControlForms.GetSelectedNodeState() : TFormControlState;
+function TControlFormControlForms.GetSelectedNodeState: TFormControlState;
 begin
-  result := fcsUnset;
+  Result := fcsUnset;
   ///
 
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(VST.FocusedNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.FormInformation) then
-    Exit();
+    Exit;
   ///
 
-  result := pData^.FormInformation.State;
+  Result := pData^.FormInformation.State;
 end;
 
-function TControlFormControlForms.GetFormByGUID(const AGUID : TGUID) : TBaseFormControl;
+function TControlFormControlForms.GetFormByGUID(const AGUID: TGUID): TBaseFormControl;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   var pNodeClientData := uFormMain.PTreeData(FClientData);
   ///
 
   if (VST.FocusedNode = nil) or (not Assigned(pNodeClientData^.Forms)) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(VST.FocusedNode.GetData);
 
   if not Assigned(pData^.FormInformation) then
-    Exit();
+    Exit;
 
   for var AForm in pNodeClientData^.Forms do begin
     if not Assigned(pData^.FormInformation) or
@@ -228,7 +226,7 @@ begin
       continue;
       ///
 
-    result := AForm;
+    Result := AForm;
 
     ///
     break;
@@ -237,9 +235,9 @@ end;
 
 procedure TControlFormControlForms.Purge1Click(Sender: TObject);
 begin
-  var ATargetGUID := GetSelectedNodeGUID();
+  var ATargetGUID := GetSelectedNodeGUID;
   if ATargetGUID.IsEmpty then
-    Exit();
+    Exit;
   ///
 
   if Application.MessageBox(
@@ -248,23 +246,23 @@ begin
     'Purge Window',
     MB_ICONQUESTION + MB_YESNO
   ) = ID_NO then
-    Exit();
+    Exit;
   ///
 
   FormMain.PurgeControlForm(self, ATargetGUID);
 
   ///
-  Refresh();
+  Refresh;
 end;
 
-constructor TControlFormControlForms.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
-  const AUserIdentifier : String; const pClientData : Pointer);
+constructor TControlFormControlForms.Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton;
+  const AUserIdentifier: string; const pClientData: Pointer);
 begin
   inherited Create(AOwner, ASharedClass, AUserIdentifier, True);
   ///
 
-  FClientData  := pClientData;
-  FTick        := 0;
+  FClientData := pClientData;
+  FTick := 0;
 end;
 
 procedure TControlFormControlForms.FormClose(Sender: TObject;
@@ -278,21 +276,21 @@ begin
   Refresh(True);
 end;
 
-procedure TControlFormControlForms.Refresh(const AInitializeRefresh : Boolean = False);
+procedure TControlFormControlForms.Refresh(const AInitializeRefresh: Boolean = False);
 begin
   var pClientNodeData := uFormMain.PTreeData(FClientData);
 
   if not Assigned(pClientNodeData) or
      not Assigned(pClientNodeData^.Forms) then begin
-    VST.Clear();
-    Exit();
+    VST.Clear;
+    Exit;
   end;
 
   Inc(FTick);
 
-  var AFormsToPurge := TList<TBaseFormControl>.Create();
+  var AFormsToPurge := TList<TBaseFormControl>.Create;
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     // -- Create or update forms -- //
     for var AForm in pClientNodeData^.Forms do begin
@@ -311,7 +309,7 @@ begin
 
       var pData := PTreeData(pNode.GetData);
       if not Assigned(pData^.FormInformation) then begin
-        pData^.FormInformation := TFormControlInformation.Create();
+        pData^.FormInformation := TFormControlInformation.Create;
 
         pData^.Title := AForm.Caption;
         pData^.ClassName := AForm.ClassName;
@@ -325,7 +323,7 @@ begin
       pData^.Tick := FTick;
     end;
 
-    var ANodeArray := TList<PVirtualNode>.Create();
+    var ANodeArray := TList<PVirtualNode>.Create;
     try
       // -- Delete disapeared forms -- //
       for var pNode in VST.Nodes do begin
@@ -335,20 +333,19 @@ begin
       end;
     finally
       if ANodeArray.Count > 0 then
-        VST.DeleteNodes(TNodeArray(ANodeArray.ToArray()));
+        VST.DeleteNodes(TNodeArray(ANodeArray.ToArray));
 
       ///
-      FreeAndNil(ANodeArray);
+      ANodeArray.Free;
     end;
 
     ///
     for var AForm in AFormsToPurge do
       FormMain.PurgeControlForm(self, AForm.GUID);
-  finally
-    if Assigned(AFormsToPurge) then
-      FreeAndNil(AFormsToPurge);
+  finally    
+    AFormsToPurge.Free;
 
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 
   ///
@@ -358,18 +355,18 @@ end;
 
 procedure TControlFormControlForms.Refresh1Click(Sender: TObject);
 begin
-  Refresh();
+  Refresh;
 end;
 
 procedure TControlFormControlForms.Show1Click(Sender: TObject);
 begin
-  if GetSelectedNodeState() = fcsWaitFree then
-    Exit();
+  if GetSelectedNodeState = fcsWaitFree then
+    Exit;
   ///
 
-  var ATargetGUID := GetSelectedNodeGUID();
+  var ATargetGUID := GetSelectedNodeGUID;
   if ATargetGUID.IsEmpty then
-    Exit();
+    Exit;
   ///
 
   var AForm := GetFormByGUID(ATargetGUID);
@@ -379,7 +376,7 @@ end;
 
 procedure TControlFormControlForms.TimerRefreshTimer(Sender: TObject);
 begin
-  Refresh();
+  Refresh;
 end;
 
 procedure TControlFormControlForms.VSTBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -388,7 +385,7 @@ procedure TControlFormControlForms.VSTBeforeCellPaint(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or not Assigned(pData^.FormInformation) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
@@ -427,19 +424,19 @@ begin
       Result := TOptixHelper.CompareObjectAssignement(pData1^.FormInformation, pData2^.FormInformation)
     else begin
       case Column of
-        0 : Result := CompareText(pData1^.Title, pData2^.Title);
-        1 : Result := CompareText(pData1^.ClassName, pData2^.ClassName);
-        2 : Result := CompareValue(Cardinal(pData1^.FormInformation.State), Cardinal(pData2^.FormInformation.State));
-        3 : Result := CompareDateTime(pData1^.FormInformation.CreatedTime, pData2^.FormInformation.CreatedTime);
+        0: Result := CompareText(pData1^.Title, pData2^.Title);
+        1: Result := CompareText(pData1^.ClassName, pData2^.ClassName);
+        2: Result := CompareValue(Cardinal(pData1^.FormInformation.State), Cardinal(pData2^.FormInformation.State));
+        3: Result := CompareDateTime(pData1^.FormInformation.CreatedTime, pData2^.FormInformation.CreatedTime);
 
-        4 : Result := CompareDateTime(
+        4: Result := CompareDateTime(
                         pData1^.FormInformation.LastReceivedDataTime,
                         pData2^.FormInformation.LastReceivedDataTime
                       );
 
-        5 : Result := CompareText(pData1^.ContextDescription, pData2^.ContextDescription);
+        5: Result := CompareText(pData1^.ContextDescription, pData2^.ContextDescription);
 
-        6 : Result := CompareText(
+        6: Result := CompareText(
                         pData1^.FormInformation.GUID.ToString,
                         pData2^.FormInformation.GUID.ToString
                       );
@@ -457,8 +454,15 @@ procedure TControlFormControlForms.VSTFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 begin
   var pData := PTreeData(Node.GetData);
-  if Assigned(pData) and Assigned(pData^.FormInformation) then
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  if Assigned(pData^.FormInformation) then
     FreeAndNil(pData^.FormInformation);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TControlFormControlForms.VSTGetImageIndex(Sender: TBaseVirtualTree;
@@ -467,11 +471,11 @@ procedure TControlFormControlForms.VSTGetImageIndex(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or not Assigned(pData^.FormInformation) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   case Kind of
-    TVTImageKind.ikNormal, TVTImageKind.ikSelected : // begin
+    TVTImageKind.ikNormal, TVTImageKind.ikSelected: // begin
 //      if pData^.FormInformation.HasUnseenData then
 //        ImageIndex := IMAGE_FORM_CONTROL_DATA
 //      else if pData^.FormInformation.HasFocus then
@@ -483,7 +487,7 @@ begin
       ImageIndex := IMAGE_CONTROL_APP;
 //    end;
 
-    TVTImageKind.ikState : begin
+    TVTImageKind.ikState: begin
       if pData^.Special then
         ImageIndex := IMAGE_ANCHOR
       else
@@ -508,19 +512,19 @@ begin
 
   if Assigned(pData) and Assigned(pData^.FormInformation) then begin
     case Column of
-      0 : CellText := pData^.Title;
-      1 : CellText := pData^.ClassName;
-      2 : CellText := FormControlStateToString(pData^.FormInformation.State);
-      3 : CellText := DateTimeToStr(pData^.FormInformation.CreatedTime);
-      4 :begin
+      0: CellText := pData^.Title;
+      1: CellText := pData^.ClassName;
+      2: CellText := FormControlStateToString(pData^.FormInformation.State);
+      3: CellText := DateTimeToStr(pData^.FormInformation.CreatedTime);
+      4: begin
         if pData^.FormInformation.HasReceivedData then
           CellText := TOptixHelper.ElapsedDateTime(
             pData^.FormInformation.LastReceivedDataTime,
             Now
           );
       end;
-      5 : CellText := pData^.ContextDescription;
-      6 : CellText := pData^.FormInformation.GUID.ToString;
+      5: CellText := pData^.ContextDescription;
+      6: CellText := pData^.FormInformation.GUID.ToString;
     end;
   end;
 

@@ -4,7 +4,7 @@
         <ProjectVersion>20.3</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">OptixGate</ProjectName>
         <TargetedPlatforms>3</TargetedPlatforms>
@@ -178,11 +178,6 @@
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.Preflight.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.Exceptions.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Protocol.FileTransfer.pas"/>
-        <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Headers.pas"/>
-        <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Helper.pas"/>
-        <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Exceptions.pas"/>
-        <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Context.pas"/>
-        <DCCReference Include="..\Core\Network\OpenSSL\OptixCore.OpenSSL.Handler.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.SessionInformation.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.Commands.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.Commands.Base.pas"/>
@@ -262,7 +257,6 @@
         <DCCReference Include="Units\Forms\Control\uControlFormRegistryEditor.pas">
             <Form>ControlFormRegistryEditor</Form>
         </DCCReference>
-        <None Include="..\Shared\XSuperObject.inc"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -291,13 +285,6 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="5">
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Debug" Class="ProjectFile"/>
-                <DeployFile LocalName="..\Shared\XSuperObject.inc" Configuration="Release" Class="ProjectFile">
-                    <Platform Name="Win64">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="Win32\Release\OptixGate.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployFile LocalName="bins\NoSSL\Win32\Debug\OptixGate.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="bins\NoSSL\Win64\Release\OptixGate.exe" Configuration="Release" Class="ProjectOutput">

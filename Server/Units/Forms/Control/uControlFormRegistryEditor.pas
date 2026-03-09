@@ -116,36 +116,36 @@ type
     procedure RadioBaseDecimalStateChanged(Sender: TObject);
     procedure RadioBaseHexadecimalStateChanged(Sender: TObject);
   private
-    FManagerGUID    : TGUID;
-    FFullKeyPath    : String;
-    FValueKind      : DWORD;
-    FFrameHexEditor : TFrameHexEditor;
-    FEditMode       : Boolean;
+    FManagerGUID: TGUID;
+    FFullKeyPath: string;
+    FValueKind: DWORD;
+    FFrameHexEditor: TFrameHexEditor;
+    FEditMode: Boolean;
 
     {@M}
-    procedure UpdateQDWordValueBase();
-    procedure SetEditMode(const AValue : Boolean);
-    procedure SetValueKind(const AValue : DWORD);
-    procedure SetFullKeyPath(const AValue : String);
-    procedure DoResize();
+    procedure UpdateQDWordValueBase;
+    procedure SetEditMode(const AValue: Boolean);
+    procedure SetValueKind(const AValue: DWORD);
+    procedure SetFullKeyPath(const AValue: String);
+    procedure DoResize;
   protected
-    function GetContextDescription() : String; override;
-    procedure RefreshCaption(); override;
+    function GetContextDescription: string; override;
+    procedure RefreshCaption; override;
   public
     {@C}
-    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
-      const ASpecialForm : Boolean = False); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton; const AUserIdentifier: string;
+      const ASpecialForm: Boolean = False); override;
+    destructor Destroy; override;
 
     {@M}
-    procedure SetData(const pData : Pointer; const ADataSize : UInt64); overload;
-    procedure SetData(const AValue : TOptixMemoryObject); overload;
+    procedure SetData(const pData: Pointer; const ADataSize: UInt64); overload;
+    procedure SetData(const AValue: TOptixMemoryObject); overload;
 
     {@G/S}
-    property EditMode    : Boolean read FEditMode    write SetEditMode;
-    property ValueKind   : DWORD   read FValueKind   write SetValueKind;
-    property FullKeyPath : String  read FFullKeyPath write SetFullKeyPath;
-    property ManagerGUID : TGUID   read FManagerGUID write FManagerGUID;
+    property EditMode: Boolean read FEditMode write SetEditMode;
+    property ValueKind: DWORD read FValueKind write SetValueKind;
+    property FullKeyPath: String read FFullKeyPath write SetFullKeyPath;
+    property ManagerGUID: TGUID read FManagerGUID write FManagerGUID;
   end;
 
 var
@@ -162,55 +162,55 @@ uses
 
 {$R *.dfm}
 
-procedure TControlFormRegistryEditor.SetData(const pData : Pointer; const ADataSize : UInt64);
+procedure TControlFormRegistryEditor.SetData(const pData: Pointer; const ADataSize: UInt64);
 begin
   if not Assigned(pData) or (ADataSize = 0) then
-    Exit();
+    Exit;
   ///
 
   case FValueKind of
-    REG_SZ :
+    REG_SZ: 
       EditSZ.Text := TMemoryUtils.MemoryToString(pData, ADataSize);
 
-    REG_MULTI_SZ :
+    REG_MULTI_SZ: 
       RichMSZ.Text := TMemoryUtils.MemoryMultiStringToString(pData, ADataSize);
 
-    REG_DWORD, REG_QWORD : begin
+    REG_DWORD, REG_QWORD: begin
       RadioBaseDecimal.Checked := True;
 
       if FValueKind = REG_DWORD then
         EditQDWord.Text := UIntToStr(PDWORD(pData)^)
       else
-        EditQDWord.Text := UIntToStr(PUInt64(pData)^)
+        EditQDWord.Text := UIntToStr(PUInt64(pData)^);
     end;
 
-    REG_BINARY : begin
+    REG_BINARY: begin
       if Assigned(FFrameHexEditor) then
         FFrameHexEditor.LoadData(pData, ADataSize);
     end;
   end;
 end;
 
-procedure TControlFormRegistryEditor.SetData(const AValue : TOptixMemoryObject);
+procedure TControlFormRegistryEditor.SetData(const AValue: TOptixMemoryObject);
 begin
   if not Assigned(AValue) or not AValue.HasData then
-    Exit();
+    Exit;
   ///
 
   SetData(AValue.Address, AValue.Size);
 end;
 
-function TControlFormRegistryEditor.GetContextDescription() : String;
+function TControlFormRegistryEditor.GetContextDescription: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if FEditMode then
-   result := 'Editing '
+   Result := 'Editing '
   else
-   result := 'Creating New ';
+   Result := 'Creating New ';
 
-  result := result + TRegistryHelper.ValueKindToString(FValueKind);
+  Result := Result + TRegistryHelper.ValueKindToString(FValueKind);
 end;
 
 procedure TControlFormRegistryEditor.MultiLineString1Click(Sender: TObject);
@@ -228,37 +228,37 @@ begin
   SetValueKind(REG_QWORD);
 end;
 
-procedure TControlFormRegistryEditor.RefreshCaption();
+procedure TControlFormRegistryEditor.RefreshCaption;
 begin
   inherited;
   ///
 
-  Caption := Caption + ' - ' + GetContextDescription();
+  Caption := Caption + ' - ' + GetContextDescription;
 end;
 
-procedure TControlFormRegistryEditor.DoResize();
+procedure TControlFormRegistryEditor.DoResize;
 begin
   var ANewH := -1;
   var ANewW := -1;
   ///
 
   case FValueKind of
-    REG_SZ : begin
+    REG_SZ: begin
       ANewH := EditSZ.Top + EditSZ.Height + ScaleValue(8);
       ANewW := ScaleValue(400);
     end;
 
-    REG_MULTI_SZ : begin
+    REG_MULTI_SZ: begin
       ANewH := RichMSZ.Top + ScaleValue(200);
       ANewW := ScaleValue(500);
     end;
 
-    REG_DWORD, REG_QWORD : begin
+    REG_DWORD, REG_QWORD: begin
       ANewH := GroupBoxBase.Top + GroupBoxBase.Height + ScaleValue(8);
       ANewW := ScaleValue(400);
     end;
 
-    REG_BINARY : begin
+    REG_BINARY: begin
       ANewH := FFrameHexEditor.Top + ScaleValue(200);
       ANewW := ScaleValue(750);
     end;
@@ -288,7 +288,7 @@ end;
 procedure TControlFormRegistryEditor.ButtonActionClick(Sender: TObject);
 begin
   if (FValueKind = REG_NONE) or String.IsNullOrWhiteSpace(FFullKeyPath) then
-    Exit();
+    Exit;
   ///
 
   if String.IsNullOrWhiteSpace(EditName.Text) and not FEditMode then begin
@@ -301,13 +301,13 @@ begin
   var ADataSize := UInt64(0);
 
   case FValueKind of
-    REG_SZ       : TMemoryUtils.StringToMemory(EditSZ.Text, pData, ADataSize);
-    REG_MULTI_SZ : TMemoryUtils.StringToMemory(RichMSZ.Text, pData, ADataSize);
+    REG_SZ: TMemoryUtils.StringToMemory(EditSZ.Text, pData, ADataSize);
+    REG_MULTI_SZ: TMemoryUtils.StringToMemory(RichMSZ.Text, pData, ADataSize);
 
-    REG_DWORD, REG_QWORD : begin
-      var AValue : UInt64;
+    REG_DWORD, REG_QWORD: begin
+      var AValue: UInt64;
       if not TryStrToUInt64(IfThen(RadioBaseHexadecimal.Checked, '$', '') + EditQDword.Text, AValue) then
-        Exit();
+        Exit;
 
       if FValueKind = REG_DWORD then
         TMemoryUtils.DwordToMemory(DWORD(AValue), pData, ADataSize)
@@ -315,9 +315,9 @@ begin
         TMemoryUtils.QwordToMemory(AValue, pData, ADataSize);
     end;
 
-    REG_BINARY : begin
+    REG_BINARY: begin
       if Assigned(FFrameHexEditor) then begin
-        pData     := FFrameHexEditor.Data;
+        pData := FFrameHexEditor.Data;
         ADataSize := FFrameHexEditor.DataSize;
       end;
     end;
@@ -339,14 +339,14 @@ begin
 //    'Registry Editor',
 //    MB_ICONQUESTION + MB_YESNO
 //  ) = ID_NO then
-//    Exit();
+//    Exit;
 //  ///
 
   Close;
 end;
 
-constructor TControlFormRegistryEditor.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
-  const AUserIdentifier : String; const ASpecialForm : Boolean = False);
+constructor TControlFormRegistryEditor.Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton;
+  const AUserIdentifier: string; const ASpecialForm: Boolean = False);
 begin
   inherited;
   ///
@@ -361,23 +361,23 @@ begin
   FValueKind := REG_NONE;
 end;
 
-destructor TControlFormRegistryEditor.Destroy();
+destructor TControlFormRegistryEditor.Destroy;
 begin
   if Assigned(FFrameHexEditor) then
     FreeAndNil(FFrameHexEditor);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TControlFormRegistryEditor.UpdateQDWordValueBase();
+procedure TControlFormRegistryEditor.UpdateQDWordValueBase;
 begin
   if (FValueKind <> REG_DWORD) and (FValueKind <> REG_QWORD) then
-    Exit();
+    Exit;
   try
-    var AValue : UInt64;
+    var AValue: UInt64;
     if not TryStrToUInt64(IfThen(RadioBaseDecimal.Checked, '$', '') + EditQDword.Text, AValue) then
-      Exit();
+      Exit;
 
     if RadioBaseDecimal.Checked then
       EditQDWord.Text := UIntToStr(AValue)
@@ -398,7 +398,7 @@ end;
 procedure TControlFormRegistryEditor.EditQDwordKeyPress(Sender: TObject; var Key: Char);
 begin
   if ((FValueKind <> REG_DWORD) and (FValueKind <> REG_QWORD)) or (Key < #32) then
-    Exit();
+    Exit;
   ///
 
   var AEditFinalValue := Copy(TEdit(Sender).Text, 1, TEdit(Sender).SelStart) +
@@ -412,12 +412,12 @@ begin
   if CharInSet(ACandidate, ['a'..'f']) then
     ACandidate := UpCase(ACandidate);
 
-  var AValue : UInt64;
+  var AValue: UInt64;
   if not TryStrToUInt64(IfThen(RadioBaseHexadecimal.Checked, '$', '') + AEditFinalValue, AValue) then
-    Exit();
+    Exit;
 
   if (FValueKind = REG_DWORD) and (AValue > High(DWORD)) or ((FValueKind = REG_QWORD) and (AValue > High(UInt64))) then
-    Exit();
+    Exit;
 
   ///
   Key := ACandidate;
@@ -436,12 +436,12 @@ end;
 procedure TControlFormRegistryEditor.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (FValueKind = REG_BINARY) or (FValueKind = REG_MULTI_SZ) then
-    Exit();
+    Exit;
   ///
 
   case Key of
-    13 : ButtonActionClick(ButtonAction);
-    27 : ButtonCancelClick(ButtonCancel);
+    13: ButtonActionClick(ButtonAction);
+    27: ButtonCancelClick(ButtonCancel);
   end;
 end;
 
@@ -451,28 +451,28 @@ begin
     EditName.SetFocus
   else begin
     case FValueKind of
-      REG_SZ       : EditSZ.SetFocus;
-      REG_MULTI_SZ : RichMSZ.SetFocus;
+      REG_SZ: EditSZ.SetFocus;
+      REG_MULTI_SZ: RichMSZ.SetFocus;
       REG_DWORD,
-      REG_QWORD    : EditQDword.SetFocus;
+      REG_QWORD: EditQDword.SetFocus;
     end;
   end;
   ///
 
-  DoResize();
+  DoResize;
 end;
 
 procedure TControlFormRegistryEditor.RadioBaseDecimalStateChanged(Sender: TObject);
 begin
-  UpdateQDWordValueBase();
+  UpdateQDWordValueBase;
 end;
 
 procedure TControlFormRegistryEditor.RadioBaseHexadecimalStateChanged(Sender: TObject);
 begin
-  UpdateQDWordValueBase();
+  UpdateQDWordValueBase;
 end;
 
-procedure TControlFormRegistryEditor.SetEditMode(const AValue : Boolean);
+procedure TControlFormRegistryEditor.SetEditMode(const AValue: Boolean);
 begin
   FEditMode := AValue;
 
@@ -484,11 +484,11 @@ begin
     ButtonAction.Caption := 'Create';
 end;
 
-procedure TControlFormRegistryEditor.SetValueKind(const AValue : DWORD);
+procedure TControlFormRegistryEditor.SetValueKind(const AValue: DWORD);
 // TODO: Simplify this touchy method
 begin
   if AValue = FValueKind then
-    Exit();
+    Exit;
   ///
 
   var AOldValueKind := FValueKind;
@@ -497,86 +497,86 @@ begin
   var ANoteBookIndex := 0;
 
   case FValueKind of
-    REG_SZ : begin
+    REG_SZ: begin
       case AOldValueKind of
-        REG_MULTI_SZ :
+        REG_MULTI_SZ: 
           EditSZ.Text := StringReplace(RichMSZ.Text, #13#10, '\0', [rfReplaceAll]);
 
-        REG_DWORD, REG_QWORD :
+        REG_DWORD, REG_QWORD: 
           EditSZ.Text := EditQDWord.Text;
 
-        REG_BINARY :
+        REG_BINARY: 
           EditSZ.Text := TContentFormater.ExtractStrings(
             FFrameHexEditor.Data,
             FFrameHexEditor.DataSize
           ).Replace(#13#10, '\0', [rfReplaceAll]);
         else
-          EditSZ.Clear();
+          EditSZ.Clear;
       end;
 
       ///
       ANoteBookIndex := 0;
     end;
 
-    REG_MULTI_SZ : begin
+    REG_MULTI_SZ: begin
       case AOldValueKind of
-        REG_SZ :
+        REG_SZ: 
           RichMSZ.Text := EditSZ.Text;
 
-        REG_DWORD, REG_QWORD :
+        REG_DWORD, REG_QWORD: 
           RichMSZ.Text := EditQDWord.Text;
 
-        REG_BINARY :
+        REG_BINARY: 
           RichMSZ.Text := TContentFormater.ExtractStrings(
             FFrameHexEditor.Data,
             FFrameHexEditor.DataSize
           );
         else
-          RichMSZ.Clear();
+          RichMSZ.Clear;
       end;
 
       ///
       ANoteBookIndex := 1;
     end;
 
-    REG_DWORD, REG_QWORD : begin
+    REG_DWORD, REG_QWORD: begin
       RadioBaseDecimal.Checked := True;
       ///
 
       case AOldValueKind of
-        REG_SZ, REG_MULTI_SZ : begin
+        REG_SZ, REG_MULTI_SZ: begin
           EditQDword.Text := '0';
 
-          var AString : String;
+          var AString: string;
           if AOldValueKind = REG_SZ then
             AString := EditSZ.Text
           else
             AString := RichMSZ.Text;
 
           if FValueKind = REG_DWORD then begin
-            var ACandidate : DWORD;
-            if TryStrToUInt(AString.Trim(), ACandidate) then
-              EditQDWord.Text := AString.Trim();
+            var ACandidate: DWORD;
+            if TryStrToUInt(AString.Trim, ACandidate) then
+              EditQDWord.Text := AString.Trim;
           end else begin
-            var ACandidate : UInt64;
-            if TryStrToUInt64(AString.Trim(), ACandidate) then
-              EditQDWord.Text := AString.Trim();
+            var ACandidate: UInt64;
+            if TryStrToUInt64(AString.Trim, ACandidate) then
+              EditQDWord.Text := AString.Trim;
           end;
         end;
 
         REG_DWORD: ;
 
-        REG_QWORD : begin
-          var ACandidate : UInt64;
+        REG_QWORD: begin
+          var ACandidate: UInt64;
           if TryStrToUInt64(EditQDWord.Text, ACandidate) then
             EditQDWord.Text := UIntToStr(DWORD(ACandidate));
         end;
 
-        REG_BINARY : begin
+        REG_BINARY: begin
           if (FValueKind = REG_DWORD) and (FFrameHexEditor.DataSize >= SizeOf(DWORD)) then
             EditQDWord.Text := UIntToStr(PDWORD(FFrameHexEditor.Data)^)
           else if (FVAlueKind = REG_QWORD) and (FFrameHexEditor.DataSize >= SizeOf(UInt64)) then
-            EditQDWord.Text := UIntToStr(PUInt64(FFrameHexEditor.Data)^)
+            EditQDWord.Text := UIntToStr(PUInt64(FFrameHexEditor.Data)^);
         end;
 
         else
@@ -587,27 +587,27 @@ begin
       ANoteBookIndex := 2;
     end;
 
-    REG_BINARY : begin
+    REG_BINARY: begin
       case AOldValueKind of
-        REG_SZ :
+        REG_SZ: 
           FFrameHexEditor.LoadData(PWideChar(EditSZ.Text), Length(EditSZ.Text) * SizeOf(WideChar));
 
-        REG_MULTI_SZ :
+        REG_MULTI_SZ: 
           FFrameHexEditor.LoadData(PWideChar(RichMSZ.Text), Length(RichMSZ.Text) * SizeOf(WideChar));
 
-        REG_DWORD : begin
-          var ACandidate : DWORD;
+        REG_DWORD: begin
+          var ACandidate: DWORD;
           if TryStrToUInt(EditQDWord.Text, ACandidate) then
             FFrameHexEditor.LoadData(@ACandidate, SizeOf(DWORD));
         end;
 
-        REG_QWORD : begin
-          var ACandidate : UInt64;
+        REG_QWORD: begin
+          var ACandidate: UInt64;
           if TryStrToUInt64(EditQDWord.Text, ACandidate) then
             FFrameHexEditor.LoadData(@ACandidate, SizeOf(UInt64));
         end;
         else
-          FFrameHexEditor.Clear();
+          FFrameHexEditor.Clear;
       end;
 
       ///
@@ -617,16 +617,16 @@ begin
 
   Notebook.PageIndex := ANoteBookIndex;
 
-  StringSZ1.Enabled           := FValueKind <> REG_SZ;
+  StringSZ1.Enabled := FValueKind <> REG_SZ;
   MultiLineStringMSZ1.Enabled := FValueKind <> REG_MULTI_SZ;
-  DWORD1.Enabled              := FValueKind <> REG_DWORD;
-  QWORD1.Enabled              := FValueKind <> REG_QWORD;
-  Binary1.Enabled             := FValueKind <> REG_BINARY;
+  DWORD1.Enabled := FValueKind <> REG_DWORD;
+  QWORD1.Enabled := FValueKind <> REG_QWORD;
+  Binary1.Enabled := FValueKind <> REG_BINARY;
 
-  RefreshCaption();
+  RefreshCaption;
 
   ///
-  DoResize();
+  DoResize;
 end;
 
 procedure TControlFormRegistryEditor.String1Click(Sender: TObject);
@@ -639,10 +639,10 @@ begin
   SetValueKind(REG_SZ);
 end;
 
-procedure TControlFormRegistryEditor.SetFullKeyPath(const AValue : String);
+procedure TControlFormRegistryEditor.SetFullKeyPath(const AValue: String);
 begin
   if FFullKeyPath = AValue then
-    Exit();
+    Exit;
   ///
 
   FFullKeyPath := AValue;

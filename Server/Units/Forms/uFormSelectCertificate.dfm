@@ -47,7 +47,7 @@ object FormSelectCertificate: TFormSelectCertificate
       AlignWithMargins = True
       Left = 8
       Top = 8
-      Width = 394
+      Width = 89
       Height = 13
       Margins.Left = 0
       Margins.Top = 0
@@ -55,7 +55,6 @@ object FormSelectCertificate: TFormSelectCertificate
       Margins.Bottom = 0
       Align = alTop
       Caption = 'Server Certificate:'
-      ExplicitWidth = 89
     end
     object ComboCertificate: TFlatComboBox
       Left = 8

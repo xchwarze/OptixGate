@@ -197,8 +197,8 @@ type
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
   protected
-    function GetSettingsSection: String; virtual;
-    function GetSettingsIdent: String; virtual;
+    function GetSettingsSection: string; virtual;
+    function GetSettingsIdent: string; virtual;
 
     procedure CalcSizing(X, Y: Integer; var aSizing: Boolean; var aSizingSplitterIndex: Integer);
     function GetSizingRect(SplitterIndex: Integer): TRect;
@@ -380,7 +380,7 @@ procedure TOCustomMultiPanel.CalcSizing(X, Y: Integer; var aSizing: Boolean;
 
   function NextTo(Pos1, Pos2: Double): Boolean;
   begin
-    result := (Abs(Pos1 - Pos2) < SplitterSize);
+    Result := (Abs(Pos1 - Pos2) < SplitterSize);
   end;
 
 var
@@ -596,12 +596,12 @@ begin
   Result := fSplitterHoverColor;
 end;
 
-function TOCustomMultiPanel.GetSettingsIdent: String;
+function TOCustomMultiPanel.GetSettingsIdent: string;
 var
   xControl: TWinControl;
 begin
-  Result := Self.Name;
-  xControl := Self.Parent;
+  Result := Name;
+  xControl := Parent;
   while Assigned(xControl) do
   begin
     Result := xControl.Name+'.'+Result;
@@ -609,7 +609,7 @@ begin
   end;
 end;
 
-function TOCustomMultiPanel.GetSettingsSection: String;
+function TOCustomMultiPanel.GetSettingsSection: string;
 begin
   Result := 'OMultiPanel';
 end;
@@ -682,7 +682,7 @@ begin
       {$IFDEF MSWINDOWS}
       InvalidateRect(Handle, @xR, False);
       {$ELSE}
-      Self.Invalidate;
+      Invalidate;
       {$ENDIF}
     {$ENDIF}
     end;
@@ -841,7 +841,7 @@ begin
         RedrawWindow(Handle, nil, 0,
           RDW_ERASE or RDW_FRAME or RDW_INVALIDATE or RDW_ALLCHILDREN);
         {$ELSE}
-        Self.Invalidate;
+        Invalidate;
         {$ENDIF}
       end;
     end;
@@ -1159,7 +1159,7 @@ begin
   if (Message.CursorWnd = Handle) and not (csDesigning in ComponentState) and (Message.HitTest = HTCLIENT) then
   begin
     if not fSizing then
-      CalcSizing(Self.FHitTest.X, Self.FHitTest.Y, {%H-}SizeState, {%H-}I);
+      CalcSizing(FHitTest.X, FHitTest.Y, {%H-}SizeState, {%H-}I);
 
     if fSizing or SizeState then
     begin
@@ -1191,9 +1191,9 @@ begin
   if Dest is TOMultiPanelItem then
   begin
     xDest := TOMultiPanelItem(Dest);
-    xDest.fPosition := Self.fPosition;
-    xDest.fControl := Self.fControl;
-    xDest.fVisible := Self.Visible;
+    xDest.fPosition := fPosition;
+    xDest.fControl := fControl;
+    xDest.fVisible := Visible;
   end;
 end;
 
@@ -1287,7 +1287,7 @@ procedure TOMultiPanelItem.SetPosition(const Value: Double);
 begin
   if fPosition <> Value then
   begin
-    fPosition  := Value;
+    fPosition := Value;
 
     if not (csLoading in MPOwner.ComponentState) and
        not (csUpdating in MPOwner.ComponentState) and
@@ -1305,7 +1305,7 @@ procedure TOMultiPanelItem.SetPositionOnlyWithCheck(const Value: Double);
 begin
   if fPosition <> Value then
   begin
-    fPosition  := Value;
+    fPosition := Value;
 
     if not (csLoading in MPOwner.ComponentState) and
        not (csUpdating in MPOwner.ComponentState) and

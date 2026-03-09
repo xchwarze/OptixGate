@@ -66,20 +66,20 @@ uses
 type
   TOptixFileTransferOrchestratorThread = class(TOptixClientThread)
   private
-    FHandler       : TOptixClientHandlerThread;
-    FTransferQueue : TThreadedQueue<TOptixCommandTransfer>;
+    FHandler: TOptixClientHandlerThread;
+    FTransferQueue: TThreadedQueue<TOptixCommandTransfer>;
   protected
     {@M}
-    function InitializePreflightRequest() : TOptixPreflightRequest; override;
-    procedure ClientExecute(); override;
-    procedure Initialize(); override;
-    procedure Finalize(); override;
+    function InitializePreflightRequest: TOptixPreflightRequest; override;
+    procedure ClientExecute; override;
+    procedure Initialize; override;
+    procedure Finalize; override;
   public
     {@M}
-    procedure AddTransfer(const ATransfer : TOptixCommandTransfer);
+    procedure AddTransfer(const ATransfer: TOptixCommandTransfer);
 
     {@C}
-    constructor Create(const AHandler : TOptixClientHandlerThread); reintroduce;
+    constructor Create(const AHandler: TOptixClientHandlerThread); reintroduce;
   end;
 
 implementation
@@ -96,25 +96,25 @@ uses
   {$IFDEF USETLS}, OptixCore.OpenSSL.Exceptions{$ENDIF};
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixFileTransferOrchestratorThread.AddTransfer(const ATransfer : TOptixCommandTransfer);
+procedure TOptixFileTransferOrchestratorThread.AddTransfer(const ATransfer: TOptixCommandTransfer);
 begin
   if not Assigned(ATransfer) then
-    Exit();
+    Exit;
   ///
 
   FTransferQueue.PushItem(ATransfer);
 end;
 
-procedure TOptixFileTransferOrchestratorThread.ClientExecute();
+procedure TOptixFileTransferOrchestratorThread.ClientExecute;
 begin
   if not Assigned(FTransferQueue) then
-    Exit();
+    Exit;
   ///
 
   var ATasks := TObjectDictionary<TOptixCommandTransfer, TOptixTransferTask>.Create([doOwnsKeys, doOwnsValues]);
-  var ATerminatedTransfers := TList<TOptixCommandTransfer>.Create();
-  var AChunk : array[0..FILE_CHUNK_SIZE-1] of Byte;
-  var AStopwatch : TStopwatch;
+  var ATerminatedTransfers := TList<TOptixCommandTransfer>.Create;
+  var AChunk: array[0..FILE_CHUNK_SIZE-1] of Byte;
+  var AStopwatch: TStopwatch;
   try
     ZeroMemory(@AChunk, Length(AChunk));
     ///
@@ -122,14 +122,14 @@ begin
     while not Terminated do begin
       // This call is used to detect a potential disconnection from the server and to exit the loop if necessary.
       // It does not consume any network data; it serves solely as a network exit control mechanism.
-      if not FClient.IsSocketAlive() then
+      if not FClient.IsSocketAlive then
         break;
 
-      var ATransfer : TOptixCommandTransfer := nil;
+      var ATransfer: TOptixCommandTransfer := nil;
       ///
 
       if AStopwatch.IsRunning then
-        AStopwatch.Stop();
+        AStopwatch.Stop;
 
       // Polling Transfer Request --------------------------------------------------------------------------------------
       while (FTransferQueue.PopItem(ATransfer) = TWaitResult.wrSignaled) do begin
@@ -137,7 +137,7 @@ begin
           break;
         ///
 
-        var ATask : TOptixTransferTask;
+        var ATask: TOptixTransferTask;
         try
           // Server Req File Download
           if ATransfer is TOptixCommandDownloadFile then
@@ -155,7 +155,7 @@ begin
           ///
           ATasks.Add(ATransfer, ATask);
         except
-          on E : Exception do begin
+          on E: Exception do begin
             if Assigned(FHandler) then
               FHandler.AddPacket(TOptixCommandReceiveTransferException.Create(ATransfer.TransferId, E.Message, 'Transfer Initialization'));
 
@@ -168,8 +168,8 @@ begin
 
       // Process Transfer ----------------------------------------------------------------------------------------------
       if ATasks.Count > 0 then begin
-        AStopwatch.Reset();
-        AStopwatch.Start();
+        AStopwatch.Reset;
+        AStopwatch.Start;
         ///
 
         while not Terminated do begin
@@ -179,14 +179,14 @@ begin
               break;
             ///
 
-            var ATask : TOptixTransferTask := nil;
+            var ATask: TOptixTransferTask := nil;
 
             if not ATasks.TryGetValue(ATransfer, ATask) or (ATask.State = otsEnd) then
               continue;
 
             FClient.Send(ATransfer.TransferId, SizeOf(TGUID));
 
-            var ASuccess : Boolean;
+            var ASuccess: Boolean;
             FClient.Recv(ASuccess, SizeOf(Boolean));
             if not ASuccess then begin
               ATerminatedTransfers.Add(ATransfer);
@@ -204,7 +204,7 @@ begin
                 TOptixUploadTask(ATask).UploadChunk(FClient);
               end else if ATask is TOptixDownloadTask then begin
                 if ATask.State = otsBegin then begin
-                  var AFileSize : Int64;
+                  var AFileSize: Int64;
 
                   FClient.Recv(AFileSize, SizeOf(Int64));
 
@@ -215,7 +215,7 @@ begin
                 TOptixDownloadTask(ATask).DownloadChunk(FClient);
               end;
             except
-              on E : Exception do begin
+              on E: Exception do begin
                 if (E is ESocketException) {$IFDEF USETLS}or (E is EOpenSSLBaseException){$ENDIF} then
                   raise
                 else begin
@@ -239,7 +239,7 @@ begin
               ATasks.Remove(ATransfer);
 
             ///
-            ATerminatedTransfers.Clear();
+            ATerminatedTransfers.Clear;
           end;
 
           // Exit work loop if one of those two condition are met. Then poll new
@@ -251,17 +251,17 @@ begin
       // ---------------------------------------------------------------------------------------------------------------
     end;
   finally
-    FreeAndNil(ATerminatedTransfers);
-    FreeAndNil(ATasks);
+    ATerminatedTransfers.Free;
+    ATasks.Free;
   end;
 end;
 
-function TOptixFileTransferOrchestratorThread.InitializePreflightRequest() : TOptixPreflightRequest;
+function TOptixFileTransferOrchestratorThread.InitializePreflightRequest: TOptixPreflightRequest;
 begin
-  result.ClientKind := ckFileTransfer;
+  Result.ClientKind := ckFileTransfer;
 end;
 
-procedure TOptixFileTransferOrchestratorThread.Initialize();
+procedure TOptixFileTransferOrchestratorThread.Initialize;
 begin
   inherited;
   ///
@@ -270,10 +270,10 @@ begin
   FTransferQueue := TThreadedQueue<TOptixCommandTransfer>.Create(1024, INFINITE, 100);
 end;
 
-constructor TOptixFileTransferOrchestratorThread.Create(const AHandler : TOptixClientHandlerThread);
+constructor TOptixFileTransferOrchestratorThread.Create(const AHandler: TOptixClientHandlerThread);
 begin
   {$IFDEF USETLS}
-  var ACertificate : TX509Certificate;
+  var ACertificate: TX509Certificate;
 
   TOptixOpenSSLHelper.CopyCertificate(AHandler.Certificate, ACertificate);
   {$ENDIF}
@@ -292,19 +292,19 @@ begin
   FServerCertificateFingerprint := AHandler.ServerCertificateFingerprint;
   {$ENDIF}
 
-  FHandler  := AHandler;
+  FHandler := AHandler;
   FClientId := AHandler.ClientId; // Same Group
 end;
 
-procedure TOptixFileTransferOrchestratorThread.Finalize();
+procedure TOptixFileTransferOrchestratorThread.Finalize;
 begin
   inherited;
   ///
 
   if Assigned(FTransferQueue) then begin
-    FTransferQueue.DoShutDown();
+    FTransferQueue.DoShutDown;
 
-    var ATransfer : TOptixCommandTransfer;
+    var ATransfer: TOptixCommandTransfer;
     while True do begin
       ATransfer := FTransferQueue.PopItem;
       if not Assigned(ATransfer) then

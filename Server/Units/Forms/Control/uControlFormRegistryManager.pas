@@ -71,15 +71,15 @@ uses
 
 type
   TKeysTreeData = record
-    KeyInformation : TRegistryKeyInformation;
-    ImageIndex     : Integer;
-    Path           : String;
+    KeyInformation: TRegistryKeyInformation;
+    ImageIndex: Integer;
+    Path: string;
   end;
   PKeysTreeData = ^TKeysTreeData;
 
   TValuesTreeData = record
-    ValueInformation : TRegistryValueInformation;
-    ValueAsString    : String;
+    ValueInformation: TRegistryValueInformation;
+    ValueAsString: string;
   end;
   PValuesTreeData = ^TValuesTreeData;
 
@@ -163,34 +163,34 @@ type
     procedure RenameSelectedValue1Click(Sender: TObject);
     procedure DeleteSelectedValue1Click(Sender: TObject);
   private
-    FCurrentKeyPath        : String;
-    FCurrentKeyPermissions : TRegistryKeyPermissions;
+    FCurrentKeyPath: string;
+    FCurrentKeyPermissions: TRegistryKeyPermissions;
 
     {@M}
-    procedure BrowsePath(const AKeyFullPath : String);
-    procedure DisplayKeys(const AList : TOptixCommandEnumRegistry); overload;
-    procedure DisplayKeys(const AParentKeys, ALevelKeys : TObjectList<TRegistryKeyInformation>); overload;
-    procedure AddNewValueNode(const AValueInformation : TRegistryValueInformation);
-    procedure DisplayValues(const AList : TOptixCommandEnumRegistry);
-    function GetNodeByKeyPath(const AKeyPath : String) : PVirtualNode;
-    function GetNodeByValueName(const AKeyPath, AValueName : String) : PVirtualNode;
-    procedure RefreshNodesVisibility();
-    procedure CreateOrEditRegistryValue(const AValueKind : DWORD;
-      const AExistingValue : TRegistryValueInformation = nil);
-    function GetValueNode(const AFullKeyPath, AValueName : String) : PVirtualNode;
+    procedure BrowsePath(const AKeyFullPath: String);
+    procedure DisplayKeys(const AList: TOptixCommandEnumRegistry); overload;
+    procedure DisplayKeys(const AParentKeys, ALevelKeys: TObjectList<TRegistryKeyInformation>); overload;
+    procedure AddNewValueNode(const AValueInformation: TRegistryValueInformation);
+    procedure DisplayValues(const AList: TOptixCommandEnumRegistry);
+    function GetNodeByKeyPath(const AKeyPath: String): PVirtualNode;
+    function GetNodeByValueName(const AKeyPath, AValueName: String): PVirtualNode;
+    procedure RefreshNodesVisibility;
+    procedure CreateOrEditRegistryValue(const AValueKind: DWORD;
+      const AExistingValue: TRegistryValueInformation = nil);
+    function GetValueNode(const AFullKeyPath, AValueName: String): PVirtualNode;
 
-    function GetIsRoot() : Boolean;
+    function GetIsRoot: Boolean;
   protected
     {@M}
-    procedure OnFirstShow(); override;
-    procedure CreateNewRegistryKey(const ANewKeyFullPath : String);
-    procedure CreateNewRegistryKeyEx(const ANewKeyBaseFullPath : String);
+    procedure OnFirstShow; override;
+    procedure CreateNewRegistryKey(const ANewKeyFullPath: String);
+    procedure CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: String);
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
 
     {@G}
-    property IsRoot : Boolean read GetIsRoot;
+    property IsRoot: Boolean read GetIsRoot;
   end;
 
 var
@@ -211,18 +211,18 @@ uses
 
 {$R *.dfm}
 
-function TControlFormRegistryManager.GetIsRoot() : Boolean;
+function TControlFormRegistryManager.GetIsRoot: Boolean;
 begin
-  result := String.IsNullOrWhiteSpace(FCurrentKeyPath.Trim());
+  Result := String.IsNullOrWhiteSpace(FCurrentKeyPath.Trim);
 end;
 
-function TControlFormRegistryManager.GetValueNode(const AFullKeyPath, AValueName : String) : PVirtualNode;
+function TControlFormRegistryManager.GetValueNode(const AFullKeyPath, AValueName: String): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if String.Compare(FCurrentKeyPath, AFullKeyPath, True) <> 0 then
-    Exit();
+    Exit;
 
   for var pNode in VSTValues.Nodes do begin
     var pData := PValuesTreeData(pNode.GetData);
@@ -231,26 +231,26 @@ begin
     ///
 
     if String.Compare(AValueName, pData^.ValueInformation.Name, True) = 0 then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-procedure TControlFormRegistryManager.CreateOrEditRegistryValue(const AValueKind : DWORD;
-  const AExistingValue : TRegistryValueInformation = nil);
+procedure TControlFormRegistryManager.CreateOrEditRegistryValue(const AValueKind: DWORD;
+  const AExistingValue: TRegistryValueInformation = nil);
 begin
   if not (rkpSetValue in FCurrentKeyPermissions) then
-    Exit();
+    Exit;
   ///
 
   var AForm := TControlFormRegistryEditor(FormMain.CreateNewControlForm(self, TControlFormRegistryEditor, False));
   if not Assigned(AForm) then
-    Exit();
+    Exit;
 
   AForm.ManagerGUID := GUID;
-  AForm.ValueKind   := AValueKind;
+  AForm.ValueKind := AValueKind;
   AForm.FullKeyPath := FCurrentKeyPath;
 
   if Assigned(AExistingValue) then begin
@@ -264,9 +264,9 @@ begin
   TOptixHelper.ShowForm(AForm);
 end;
 
-function TControlFormRegistryManager.GetNodeByKeyPath(const AKeyPath : String) : PVirtualNode;
+function TControlFormRegistryManager.GetNodeByKeyPath(const AKeyPath: String): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VSTKeys.Nodes do begin
@@ -276,7 +276,7 @@ begin
     ///
 
     if String.Compare(pData^.Path, AKeyPath, True) = 0 then begin
-      result := pNode;
+      Result := pNode;
 
       ///
       break;
@@ -284,13 +284,13 @@ begin
   end;
 end;
 
-function TControlFormRegistryManager.GetNodeByValueName(const AKeyPath, AValueName : String) : PVirtualNode;
+function TControlFormRegistryManager.GetNodeByValueName(const AKeyPath, AValueName: String): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if String.Compare(AKeyPath, FCurrentKeyPath, True) <> 0 then
-    Exit();
+    Exit;
 
   for var pNode in VSTValues.Nodes do begin
     var pData := PValuesTreeData(pNode.GetData);
@@ -299,7 +299,7 @@ begin
     ///
 
     if String.Compare(pData^.ValueInformation.Name, AValueName, True) = 0 then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
@@ -311,7 +311,7 @@ begin
   var APath := '';
 
   if not InputQuery('Create New Registry Key', 'Key Full Path:', APath) then
-    Exit();
+    Exit;
 
   APath := TRegistryHelper.ExpandHiveShortName(APath);
 
@@ -319,17 +319,17 @@ begin
     CreateNewRegistryKey(IncludeTrailingPathDelimiter(APath));
 end;
 
-procedure TControlFormRegistryManager.CreateNewRegistryKey(const ANewKeyFullPath : String);
+procedure TControlFormRegistryManager.CreateNewRegistryKey(const ANewKeyFullPath: String);
 begin
   SendCommand(TOptixCommandCreateRegistryKey.Create(ANewKeyFullPath));
 end;
 
-procedure TControlFormRegistryManager.CreateNewRegistryKeyEx(const ANewKeyBaseFullPath : String);
+procedure TControlFormRegistryManager.CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: String);
 begin
   var ANewKeyName := '';
   if not InputQuery('Create New Registry Key', 'New Key Name:', ANewKeyName) or
      String.IsNullOrWhiteSpace(ANewKeyName) then
-      Exit();
+      Exit;
   ///
 
   CreateNewRegistryKey(IncludeTrailingPathDelimiter(ANewKeyBaseFullPath) + ANewKeyName);
@@ -338,13 +338,13 @@ end;
 procedure TControlFormRegistryManager.CreateSubKey1Click(Sender: TObject);
 begin
   if VSTKeys.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PKeysTreeData(VSTKeys.FocusedNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.KeyInformation) or
      (not (rkpCreateSubKey in pData^.KeyInformation.Permissions)) then
-    Exit();
+    Exit;
   ///
 
   CreateNewRegistryKeyEx(pData^.Path);
@@ -359,14 +359,14 @@ end;
 procedure TControlFormRegistryManager.Refresh2Click(Sender: TObject);
 begin
   if String.IsNullOrWhiteSpace(FCurrentKeyPath) then
-    Exit();
+    Exit;
 
   BrowsePath(FCurrentKeyPath);
 end;
 
-procedure TControlFormRegistryManager.RefreshNodesVisibility();
+procedure TControlFormRegistryManager.RefreshNodesVisibility;
 begin
-  VSTKeys.BeginUpdate();
+  VSTKeys.BeginUpdate;
   try
     for var pNode in VSTKeys.Nodes do begin
       var pData := PKeysTreeData(pNode.GetData);
@@ -378,14 +378,14 @@ begin
       VSTKeys.IsVisible[pNode] := not AExclude;
     end;
   finally
-    VSTKeys.EndUpdate();
+    VSTKeys.EndUpdate;
   end;
 end;
 
-procedure TControlFormRegistryManager.DisplayKeys(const AParentKeys, ALevelKeys : TObjectList<TRegistryKeyInformation>);
+procedure TControlFormRegistryManager.DisplayKeys(const AParentKeys, ALevelKeys: TObjectList<TRegistryKeyInformation>);
 begin
   if not Assigned(AParentKeys) and not Assigned(ALevelKeys) then
-    Exit();
+    Exit;
   ///
   try
     TOptixVirtualTreesFolderTreeHelper.UpdateTree<TRegistryKeyInformation>(
@@ -393,32 +393,32 @@ begin
       AParentKeys,
       ALevelKeys,
       (
-        function (const pData : Pointer) : String
+        function (const pData: Pointer): String
         begin
-          result := PKeysTreeData(pData)^.KeyInformation.Name;
+          Result := PKeysTreeData(pData)^.KeyInformation.Name;
         end
       ),
       (
         function (const AItem: TRegistryKeyInformation): String
         begin
           if Assigned(AItem) then
-            result := AItem.Name
+            Result := AItem.Name
           else
-            result := '';
+            Result := '';
         end
       ),
       (
-        procedure (var pNode, pParentNode : PVirtualNode; const AItem : TRegistryKeyInformation)
+        procedure (var pNode, pParentNode: PVirtualNode; const AItem: TRegistryKeyInformation)
         begin
-          var pData : PKeysTreeData;
+          var pData: PKeysTreeData;
           if not Assigned(pNode) then begin
             pNode := VSTKeys.AddChild(pParentNode);
 
             pData := PKeysTreeData(pNode.GetData);
 
-            pData^.KeyInformation := TRegistryKeyInformation.Create();
+            pData^.KeyInformation := TRegistryKeyInformation.Create;
 
-            pData^.ImageIndex := TOptixHelper.SystemFolderIcon();
+            pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
 
             if Assigned(pParentNode) then begin
               var pParentData := PKeysTreeData(pParentNode.GetData);
@@ -436,20 +436,20 @@ begin
       )
     );
   finally
-    RefreshNodesVisibility();
+    RefreshNodesVisibility;
   end;
 end;
 
 procedure TControlFormRegistryManager.DeleteSelectedKey1Click(Sender: TObject);
 begin
   if VSTKeys.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PKeysTreeData(VSTKeys.FocusedNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.KeyInformation) or
      (not (rkpDelete in pData^.KeyInformation.Permissions)) then
-    Exit();
+    Exit;
   ///
 
   if Application.MessageBox(
@@ -463,7 +463,7 @@ begin
     'Delete Selected Key',
      MB_ICONQUESTION + MB_YESNO
   ) = ID_NO then
-    Exit();
+    Exit;
 
   ///
   SendCommand(TOptixCommandDeleteRegistryKey.Create(pData^.Path));
@@ -472,13 +472,13 @@ end;
 procedure TControlFormRegistryManager.DeleteSelectedValue1Click(Sender: TObject);
 begin
   if VSTValues.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PValuesTreeData(VSTValues.FocusedNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.ValueInformation) or
      (not (rkpSetValue in FCurrentKeyPermissions)) then
-    Exit();
+    Exit;
   ///
 
   if Application.MessageBox(
@@ -491,51 +491,51 @@ begin
     'Delete Selected Value',
      MB_ICONQUESTION + MB_YESNO
   ) = ID_NO then
-    Exit();
+    Exit;
 
   ///
   SendCommand(TOptixCommandDeleteRegistryValue.Create(FCurrentKeyPath, pData^.ValueInformation.Name));
 end;
 
-procedure TControlFormRegistryManager.DisplayKeys(const AList : TOptixCommandEnumRegistry);
+procedure TControlFormRegistryManager.DisplayKeys(const AList: TOptixCommandEnumRegistry);
 begin
   if not Assigned(AList) then
-    Exit();
+    Exit;
   ///
 
   DisplayKeys(AList.ParentKeys, AList.SubKeys);
 end;
 
-procedure TControlFormRegistryManager.AddNewValueNode(const AValueInformation : TRegistryValueInformation);
+procedure TControlFormRegistryManager.AddNewValueNode(const AValueInformation: TRegistryValueInformation);
 begin
   if not Assigned(AValueInformation) then
-    Exit();
+    Exit;
   ///
 
   var pNode := VSTValues.AddChild(nil);
   var pData := PValuesTreeData(pNode.GetData);
   ///
 
-  pData^.ValueInformation := TRegistryValueInformation.Create();
+  pData^.ValueInformation := TRegistryValueInformation.Create;
   pData^.ValueInformation.Assign(AValueInformation);
   pData^.ValueAsString := AValueInformation.ToString;
 end;
 
-procedure TControlFormRegistryManager.DisplayValues(const AList : TOptixCommandEnumRegistry);
+procedure TControlFormRegistryManager.DisplayValues(const AList: TOptixCommandEnumRegistry);
 begin
-  VSTValues.Clear();
+  VSTValues.Clear;
   ///
 
   if not Assigned(AList) and (AList.Values.Count > 0) then
-    Exit();
+    Exit;
   ///
 
-  VSTValues.BeginUpdate();
+  VSTValues.BeginUpdate;
   try
     for var AItem in AList.Values do
       AddNewValueNode(AItem);
   finally
-    VSTValues.EndUpdate();
+    VSTValues.EndUpdate;
   end;
 end;
 
@@ -543,23 +543,23 @@ procedure TControlFormRegistryManager.RenameSelectedKey1Click(Sender: TObject);
 begin
   var pNode := VSTKeys.FocusedNode;
   if IsRoot or (pNode = nil) or (pNode.Parent = nil) then
-    Exit();
+    Exit;
   ///
 
   var pData := PKeysTreeData(VSTKeys.FocusedNode.GetData);
   var pParentData := PKeysTreeData(pNode.Parent.GetData);
   if not Assigned(pData) or not Assigned(pData^.KeyInformation) or not Assigned(pParentData) or
      (not (rkpWrite in pData^.KeyInformation.Permissions)) then
-    Exit();
+    Exit;
   ///
 
   var ANewKeyName := pData^.KeyInformation.Name;
 
   if not InputQuery('Edit Registry Key Name', 'New Name:', ANewKeyName) then
-    Exit();
+    Exit;
 
   if String.IsNullOrWhiteSpace(ANewKeyName) then
-    Exit();
+    Exit;
 
   if GetNodeByKeyPath(IncludeTrailingPathDelimiter(pParentData^.Path) + ANewKeyName) <> nil then
     raise Exception.Create('That key name already exists in it current path.');
@@ -571,7 +571,7 @@ end;
 procedure TControlFormRegistryManager.EditSelectedValue1Click(Sender: TObject);
 begin
   if VSTValues.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PValuesTreeData(VSTValues.FocusedNode.GetData);
@@ -582,25 +582,25 @@ end;
 procedure TControlFormRegistryManager.RenameSelectedValue1Click(Sender: TObject);
 begin
   if VSTValues.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PValuesTreeData(VSTValues.FocusedNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.ValueInformation) or
      not (rkpSetValue in FCurrentKeyPermissions) or not (rkpQueryValue in FCurrentKeyPermissions) then
-    Exit();
+    Exit;
   ///
 
   var ANewValueName := pData^.ValueInformation.Name;
 
   if not InputQuery('Edit Registry Value Name', 'New Name:', ANewValueName) then
-    Exit();
+    Exit;
 
   if String.IsNullOrWhiteSpace(ANewValueName) then
-    Exit();
+    Exit;
 
   if String.Compare(pData^.ValueInformation.Name, ANewValueName) = 0 then
-    Exit();
+    Exit;
 
   if GetNodeByValueName(FCurrentKeyPath, ANewValueName) <> nil then
     raise Exception.Create(
@@ -613,8 +613,8 @@ end;
 
 procedure TControlFormRegistryManager.FormCreate(Sender: TObject);
 begin
-  FCurrentKeyPath          := '';
-  FCurrentKeyPermissions   := [];
+  FCurrentKeyPath := '';
+  FCurrentKeyPermissions := [];
   FFlatWindow.MenuDropDown := MainMenu;
 end;
 
@@ -633,7 +633,7 @@ begin
   var APath := '';
 
   if not InputQuery('Go To', 'Key Path:', APath) then
-    Exit();
+    Exit;
 
   APath := TRegistryHelper.ExpandHiveShortName(APath);
 
@@ -643,7 +643,7 @@ end;
 
 procedure TControlFormRegistryManager.HideUnenumerableKeys1Click(Sender: TObject);
 begin
-  RefreshNodesVisibility();
+  RefreshNodesVisibility;
 end;
 
 procedure TControlFormRegistryManager.NewBinaryValue1Click(Sender: TObject);
@@ -659,10 +659,10 @@ end;
 procedure TControlFormRegistryManager.NewKey1Click(Sender: TObject);
 begin
   if String.IsNullOrWhiteSpace(FCurrentKeyPath) or not (rkpCreateSubKey in FCurrentKeyPermissions) then
-    Exit();
+    Exit;
   ///
 
-  CreateNewRegistryKeyEx(FCurrentKeyPath)
+  CreateNewRegistryKeyEx(FCurrentKeyPath);
 end;
 
 procedure TControlFormRegistryManager.NewMultiLineStringValue1Click(Sender: TObject);
@@ -680,7 +680,7 @@ begin
   CreateOrEditRegistryValue(REG_SZ);
 end;
 
-procedure TControlFormRegistryManager.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormRegistryManager.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
@@ -703,26 +703,26 @@ begin
     ///
 
     var pNode := GetNodeByKeyPath(AResult.KeyPath);
-    VSTKeys.BeginUpdate();
+    VSTKeys.BeginUpdate;
     try
       VSTKeys.DeleteNode(pNode);
     finally
-      VSTKeys.EndUpdate();
+      VSTKeys.EndUpdate;
     end;
 
     if String.Compare(FCurrentKeyPath, AResult.KeyPath, True) = 0 then begin
-      VSTValues.Clear();
+      VSTValues.Clear;
 
       FCurrentKeyPath := '';
       FCurrentKeyPermissions := [];
-      EditPath.Clear();
+      EditPath.Clear;
     end;
   // -------------------------------------------------------------------------------------------------------------------
   end else if AOptixPacket is TOptixCommandSetRegistryValue then begin
     var AResult := TOptixCommandSetRegistryValue(AOptixPacket);
     ///
 
-    VSTValues.BeginUpdate();
+    VSTValues.BeginUpdate;
     try
       var pNode := GetValueNode(AResult.KeyPath, AResult.Name);
       if not Assigned(pNode) then
@@ -736,19 +736,19 @@ begin
         end;
       end;
     finally
-      VSTValues.EndUpdate();
+      VSTValues.EndUpdate;
     end;
   // -------------------------------------------------------------------------------------------------------------------
   end else if AOptixPacket is TOptixCommandSetRegistryKeyName then begin
     var AResult := TOptixCommandSetRegistryKeyName(AOptixPacket);
     ///
 
-    VSTKeys.BeginUpdate();
+    VSTKeys.BeginUpdate;
     try
       var AExistingKeyPath := IncludeTrailingPathDelimiter(AResult.KeyPath) + AResult.ExistingName;
       var pNode := GetNodeByKeyPath(AExistingKeyPath);
       if not Assigned(pNode) then
-        Exit();
+        Exit;
       ///
 
       var pData := PKeysTreeData(pNode.GetData);
@@ -765,58 +765,58 @@ begin
         end;
       end;
     finally
-      VSTKeys.EndUpdate();
+      VSTKeys.EndUpdate;
     end;
   // -------------------------------------------------------------------------------------------------------------------
   end else if AOptixPacket is TOptixCommandDeleteRegistryValue then begin
     var AResult := TOptixCommandDeleteRegistryValue(AOptixPacket);
     ///
 
-    VSTValues.BeginUpdate();
+    VSTValues.BeginUpdate;
     try
       var pNode := GetNodeByValueName(AResult.KeyPath, AResult.Name);
       if not Assigned(pNode) then
-        Exit();
+        Exit;
       ///
 
       VSTValues.DeleteNode(pNode);
     finally
-      VSTValues.EndUpdate();
+      VSTValues.EndUpdate;
     end;
   // -------------------------------------------------------------------------------------------------------------------
   end else if AOptixPacket is TOptixCommandSetRegistryValueName then begin
     var AResult := TOptixCommandSetRegistryValueName(AOptixPacket);
     ///
 
-    VSTValues.BeginUpdate();
+    VSTValues.BeginUpdate;
     try
       var pNode := GetNodeByValueName(AResult.KeyPath, AResult.ExistingName);
       if not Assigned(pNode) then
-        Exit();
+        Exit;
       ///
 
       var pData := PValuesTreeData(pNode.GetData);
       if Assigned(pData) and Assigned(pData^.ValueInformation) then
         pData^.ValueInformation.Name := AResult.NewName;
     finally
-      VSTValues.EndUpdate();
+      VSTValues.EndUpdate;
     end;
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormRegistryManager.BrowsePath(const AKeyFullPath : String);
+procedure TControlFormRegistryManager.BrowsePath(const AKeyFullPath: String);
 begin
   SendCommand(TOptixCommandEnumRegistryKeys.Create(AKeyFullPath));
 end;
 
-procedure TControlFormRegistryManager.OnFirstShow();
+procedure TControlFormRegistryManager.OnFirstShow;
 begin
-  VSTKeys.Clear();
-  VSTValues.Clear();
+  VSTKeys.Clear;
+  VSTValues.Clear;
 
   ///
-  SendCommand(TOptixCommandEnumRegistryHives.Create());
+  SendCommand(TOptixCommandEnumRegistryHives.Create);
 end;
 
 procedure TControlFormRegistryManager.PopupKeysPopup(Sender: TObject);
@@ -828,12 +828,12 @@ begin
 
   var AIsDataAssigned := Assigned(pData) and Assigned(pData^.KeyInformation);
 
-  CreateSubKey1.Visible      := AIsDataAssigned;
+  CreateSubKey1.Visible := AIsDataAssigned;
   DeleteSelectedKey1.Visible := AIsDataAssigned;
   RenameSelectedKey1.Visible := AIsDataAssigned;
 
   ///
-  CreateSubKey1.Enabled      := rkpCreateSubKey in pData^.KeyInformation.Permissions;
+  CreateSubKey1.Enabled := rkpCreateSubKey in pData^.KeyInformation.Permissions;
   DeleteSelectedKey1.Enabled := (rkpDelete in pData^.KeyInformation.Permissions) and not IsRoot;
   RenameSelectedKey1.Enabled := (rkpWrite in pData^.KeyInformation.Permissions) and not IsRoot;
 end;
@@ -846,15 +846,15 @@ begin
   NewKey1.Enabled := rkpCreateSubKey in FCurrentKeyPermissions;
 
   // New Values
-  NewStringValue1.Enabled          := rkpSetValue in FCurrentKeyPermissions;
+  NewStringValue1.Enabled := rkpSetValue in FCurrentKeyPermissions;
   NewMultiLineStringValue1.Enabled := NewStringValue1.Enabled;
-  NewDWORDValue1.Enabled           := NewStringValue1.Enabled;
-  NewQWORDValue1.Enabled           := NewStringValue1.Enabled;
-  NewBinaryValue1.Enabled          := NewStringValue1.Enabled;
+  NewDWORDValue1.Enabled := NewStringValue1.Enabled;
+  NewQWORDValue1.Enabled := NewStringValue1.Enabled;
+  NewBinaryValue1.Enabled := NewStringValue1.Enabled;
 
   // Edit Values
-  EditSelectedValue1.Visible   := VSTValues.FocusedNode <> nil;
-  EditSelectedValue1.Enabled   := NewStringValue1.Enabled;
+  EditSelectedValue1.Visible := VSTValues.FocusedNode <> nil;
+  EditSelectedValue1.Enabled := NewStringValue1.Enabled;
 
   RenameSelectedValue1.Visible := EditSelectedValue1.Visible;
   RenameSelectedValue1.Enabled := (rkpQueryValue in FCurrentKeyPermissions) and (rkpSetValue in FCurrentKeyPermissions);
@@ -882,11 +882,11 @@ procedure TControlFormRegistryManager.VSTKeysDblClick(Sender: TObject);
 begin
   var pNode := VSTKeys.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PKeysTreeData(pNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.KeyInformation) then
-    Exit();
+    Exit;
 
   ///
   BrowsePath(pData^.Path);
@@ -896,23 +896,26 @@ procedure TControlFormRegistryManager.VSTKeysFreeNode(Sender: TBaseVirtualTree; 
 begin
   var pData := PKeysTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   if Assigned(pData^.KeyInformation) then
     FreeAndNil(pData^.KeyInformation);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TControlFormRegistryManager.VSTKeysGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
   Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if (Column <> 0) or ((Kind <> ikNormal) and (Kind <> ikSelected)) then
-    Exit();
+    Exit;
   ///
 
   var pData := PKeysTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   ImageIndex := pData^.ImageIndex;
@@ -928,7 +931,7 @@ procedure TControlFormRegistryManager.VSTKeysGetText(Sender: TBaseVirtualTree; N
 begin
   var pData := PKeysTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   CellText := pData^.KeyInformation.Name;
@@ -946,9 +949,9 @@ begin
     Result := TOptixHelper.CompareObjectAssignement(pData1^.ValueInformation, pData2^.ValueInformation)
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.ValueInformation.Name, pData2^.ValueInformation.Name);
-      1 : Result := CompareValue(pData1^.ValueInformation._Type, pData2^.ValueInformation._Type);
-      2 : Result := CompareText(pData1^.ValueAsString, pData2^.ValueAsString);
+      0: Result := CompareText(pData1^.ValueInformation.Name, pData2^.ValueInformation.Name);
+      1: Result := CompareValue(pData1^.ValueInformation._Type, pData2^.ValueInformation._Type);
+      2: Result := CompareText(pData1^.ValueAsString, pData2^.ValueAsString);
     end;
   end;
 end;
@@ -961,22 +964,29 @@ end;
 procedure TControlFormRegistryManager.VSTValuesFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
   var pData := PValuesTreeData(Node.GetData);
-  if Assigned(pData) and Assigned(pData^.ValueInformation) then
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  if Assigned(pData^.ValueInformation) then
     FreeAndNil(pData^.ValueInformation);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TControlFormRegistryManager.VSTValuesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
   Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if Column <> 0 then
-    Exit();
+    Exit;
 
   var pData := PValuesTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
 
   case Kind of
-    ikNormal, ikSelected :
+    ikNormal, ikSelected: 
       case pData^.ValueInformation._Type of
         REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ:
           ImageIndex := IMAGE_PAGE;
@@ -1003,7 +1013,7 @@ begin
   var pData := PValuesTreeData(Node.GetData);
   if Assigned(pData) and Assigned(pData^.ValueInformation) then begin
     case Column of
-      0 : begin
+      0: begin
         // TODO Ternary op when Delphi 13 CE released
         if pData^.ValueInformation.IsDefault then
           CellText := '(Default)'
@@ -1011,9 +1021,9 @@ begin
           CellText := pData^.ValueInformation.Name;
       end;
 
-      1 : CellText := TRegistryHelper.ValueKindToString(pData^.ValueInformation._Type);
+      1: CellText := TRegistryHelper.ValueKindToString(pData^.ValueInformation._Type);
 
-      2 : begin
+      2: begin
         // TODO Ternary op when Delphi 13 CE released
         if pData^.ValueInformation.IsDefault and (pData^.ValueAsString = '') then
           CellText := '(value not set)'

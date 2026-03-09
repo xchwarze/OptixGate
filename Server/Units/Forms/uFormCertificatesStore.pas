@@ -68,7 +68,7 @@ uses
 
 type
   TTreeData = record
-    Certificate : TX509Certificate;
+    Certificate: TX509Certificate;
   end;
   PTreeData = ^TTreeData;
 
@@ -101,7 +101,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure Import1Click(Sender: TObject);
-    function GetCertificateFromNode(const pNode : PVirtualNode) : PX509Certificate;
+    function GetCertificateFromNode(const pNode: PVirtualNode): PX509Certificate;
     procedure PopupMenuPopup(Sender: TObject);
     procedure ExportPublicKey1Click(Sender: TObject);
     procedure ExportCertificate1Click(Sender: TObject);
@@ -117,19 +117,19 @@ type
     procedure Import2Click(Sender: TObject);
   private
     {@M}
-    function GetNodeByFingerprint(const AFingerPrint : String) : PVirtualNode;
-    procedure ExportCertificate(const pNode : PVirtualNode; const AExportWhich : TOpenSSLCertificateKeyTypes = []);
-    procedure RegisterCertificate(const ACertificate : TX509Certificate);
-    function GetCertificateCount() : Integer;
-    procedure Save();
-    procedure Load();
+    function GetNodeByFingerprint(const AFingerPrint: String): PVirtualNode;
+    procedure ExportCertificate(const pNode: PVirtualNode; const AExportWhich: TOpenSSLCertificateKeyTypes = []);
+    procedure RegisterCertificate(const ACertificate: TX509Certificate);
+    function GetCertificateCount: Integer;
+    procedure Save;
+    procedure Load;
   public
     {@M}
-    function GetCertificateKeys(const AFingerPrint : String; var ACertificate : TX509Certificate) : Boolean;
-    function GetCertificatesFingerprints() : TList<String>;
+    function GetCertificateKeys(const AFingerPrint: string; var ACertificate: TX509Certificate): Boolean;
+    function GetCertificatesFingerprints: TList<String>;
 
     {@G}
-    property CertificateCount : Integer read GetCertificateCount;
+    property CertificateCount: Integer read GetCertificateCount;
   end;
 
 var
@@ -157,16 +157,16 @@ procedure TFormCertificatesStore.GenerateNew1Click(Sender: TObject);
 begin
   var AForm := TFormGenerateNewCertificate.Create(self);
   try
-    AForm.ShowModal();
+    AForm.ShowModal;
     ///
 
     if AForm.ModalResult <> mrOk then
-      Exit();
+      Exit;
 
-    var ACertificate : TX509Certificate;
-    Zeromemory(@ACertificate, SizeOf(TX509Certificate));
+    var ACertificate: TX509Certificate;
+    ACertificate := Default(TX509Certificate);
     try
-      ACertificate.pPrivKey := TOptixOpenSSLHelper.NewPrivateKey();
+      ACertificate.pPrivKey := TOptixOpenSSLHelper.NewPrivateKey;
 
       ACertificate.pX509 := TOptixOpenSSLHelper.NewX509(
         ACertificate.pPrivKey,
@@ -180,14 +180,14 @@ begin
       ///
       RegisterCertificate(ACertificate);
     except
-      on E : Exception do begin
+      on E: Exception do begin
         Application.MessageBox(PWideChar(E.Message), 'Generate New Certificate', MB_ICONHAND);
 
         TOptixOpenSSLHelper.FreeCertificate(ACertificate);
       end;
     end;
   finally
-    FreeAndNil(AForm);
+    AForm.Free;
   end;
 end;
 
@@ -196,59 +196,59 @@ begin
   GenerateNew1Click(GenerateNew1);
 end;
 
-function TFormCertificatesStore.GetCertificateCount() : Integer;
+function TFormCertificatesStore.GetCertificateCount: Integer;
 begin
-  result := VST.RootNodeCount;
+  Result := VST.RootNodeCount;
 end;
 
-function TFormCertificatesStore.GetCertificatesFingerprints() : TList<String>;
+function TFormCertificatesStore.GetCertificatesFingerprints: TList<String>;
 begin
-  result := TList<String>.Create();
+  Result := TList<String>.Create;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
     ///
-    result.Add(pData^.Certificate.Fingerprint);
+    Result.Add(pData^.Certificate.Fingerprint);
   end;
 end;
 
-function TFormCertificatesStore.GetNodeByFingerprint(const AFingerPrint : String) : PVirtualNode;
+function TFormCertificatesStore.GetNodeByFingerprint(const AFingerPrint: String): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
     if String.Compare(pData^.Certificate.Fingerprint, AFingerPrint, True) = 0 then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-function TFormCertificatesStore.GetCertificateKeys(const AFingerPrint : String; var ACertificate : TX509Certificate) : Boolean;
+function TFormCertificatesStore.GetCertificateKeys(const AFingerPrint: string; var ACertificate: TX509Certificate): Boolean;
 begin
-  result := False;
+  Result := False;
 
   var pNode := GetNodeByFingerprint(AFingerPrint);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
   TOptixOpenSSLHelper.CopyCertificate(pData^.Certificate, ACertificate);
 
   ///
-  result := True;
+  Result := True;
 end;
 
-procedure TFormCertificatesStore.Save();
+procedure TFormCertificatesStore.Save;
 begin
   try
-    var AConfig := TOptixConfigCertificatesStore.Create();
+    var AConfig := TOptixConfigCertificatesStore.Create;
     try
       for var pNode in VST.Nodes do begin
         var pData := PTreeData(pNode.GetData);
@@ -264,17 +264,17 @@ begin
       CONFIG_HELPER.Write('Certificates', AConfig);
 
       ///
-      FreeAndNil(AConfig);
+      AConfig.Free;
     end;
   except
 
   end;
 end;
 
-procedure TFormCertificatesStore.Load();
-var ACertificate : TX509Certificate;
+procedure TFormCertificatesStore.Load;
+var ACertificate: TX509Certificate;
 begin
-  VST.Clear();
+  VST.Clear;
   ///
 
   {$IFDEF DEBUG}
@@ -289,9 +289,9 @@ begin
 
   var AConfig := TOptixConfigCertificatesStore(CONFIG_HELPER.Read('Certificates'));
   if not Assigned(AConfig) then
-    Exit();
+    Exit;
   try
-    VST.BeginUpdate();
+    VST.BeginUpdate;
     try
       for ACertificate in AConfig do begin
         if not Assigned(ACertificate.pX509) or not Assigned(ACertificate.pPrivKey) then
@@ -301,10 +301,10 @@ begin
         RegisterCertificate(ACertificate);
       end;
     finally
-      VST.EndUpdate();
+      VST.EndUpdate;
     end;
   finally
-    FreeAndNil(AConfig);
+    AConfig.Free;
   end;
 end;
 
@@ -313,47 +313,47 @@ begin
   TOptixHelper.HideAllPopupMenuRootItems(TPopupMenu(Sender));
 
   GenerateNew2.Visible := True;
-  Import2.Visible      := True;
+  Import2.Visible := True;
 
   var pCertificate := GetCertificateFromNode(VST.FocusedNode);
   if not Assigned(pCertificate) then
-    Exit();
+    Exit;
 
-  ExportCertificate1.Visible       := Assigned(pCertificate);
-  ExportPublicKey1.Visible         := Assigned(pCertificate);
-  ExportPrivateKey1.Visible        := Assigned(pCertificate);
-  RemoveCertificate1.Visible       := Assigned(pCertificate);
+  ExportCertificate1.Visible := Assigned(pCertificate);
+  ExportPublicKey1.Visible := Assigned(pCertificate);
+  ExportPrivateKey1.Visible := Assigned(pCertificate);
+  RemoveCertificate1.Visible := Assigned(pCertificate);
   CopySelectedFingerprint1.Visible := Assigned(pCertificate);
 end;
 
-procedure TFormCertificatesStore.RegisterCertificate(const ACertificate : TX509Certificate);
+procedure TFormCertificatesStore.RegisterCertificate(const ACertificate: TX509Certificate);
 begin
   if GetNodeByFingerprint(ACertificate.Fingerprint) <> nil then begin
     Application.MessageBox('The certificate already exists in the store and cannot be added again.', 'Register Certificate', MB_ICONERROR);
-    Exit();
+    Exit;
   end;
   ///
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     var pNode := VST.AddChild(nil);
     var pData := PTreeData(pNode.GetData);
 
     pData^.Certificate := ACertificate;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
 procedure TFormCertificatesStore.RemoveCertificate1Click(Sender: TObject);
 begin
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
   {$IFDEF SERVER}
   var pData := PTreeData(VST.FocusedNode.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
 
   if FormServers.ServerCertificateIsInUse(pData^.Certificate.Fingerprint) then
     raise Exception.Create(
@@ -366,7 +366,7 @@ begin
     'This action will delete the certificate and its associated information. If you do not have any physical backups,' +
     ' the certificate will be permanently lost. Are you sure?',
     'Delete Certificate', MB_ICONQUESTION + MB_YESNO) = ID_NO then
-      Exit();
+      Exit;
 
   ///
   VST.DeleteNode(VST.FocusedNode);
@@ -378,7 +378,7 @@ begin
   {$IFDEF DEBUG}
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
@@ -404,29 +404,36 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.Certificate.C, pData2^.Certificate.C);
-      1 : Result := CompareText(pData1^.Certificate.O, pData2^.Certificate.O);
-      2 : Result := CompareText(pData1^.Certificate.CN, pData2^.Certificate.CN);
-      3 : Result := CompareText(pData1^.Certificate.Fingerprint, pData2^.Certificate.Fingerprint);
+      0: Result := CompareText(pData1^.Certificate.C, pData2^.Certificate.C);
+      1: Result := CompareText(pData1^.Certificate.O, pData2^.Certificate.O);
+      2: Result := CompareText(pData1^.Certificate.CN, pData2^.Certificate.CN);
+      3: Result := CompareText(pData1^.Certificate.Fingerprint, pData2^.Certificate.Fingerprint);
     end;
   end;
 end;
 
 procedure TFormCertificatesStore.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
+
   var pData := PTreeData(Node.GetData);
-  if Assigned(pData) then
-    TOptixOpenSSLHelper.FreeCertificate(pData^.Certificate);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  TOptixOpenSSLHelper.FreeCertificate(pData^.Certificate);
+
+  ///
+  Finalize(pData^);
 end;
 
 procedure TFormCertificatesStore.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
   Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if Column <> 0 then
-    Exit();
+    Exit;
 
   case Kind of
-    TVTImageKind.ikNormal, TVTImageKind.ikSelected : begin
+    TVTImageKind.ikNormal, TVTImageKind.ikSelected: begin
       {$IFDEF DEBUG}
       var pData := PTreeData(Node.GetData);
 
@@ -456,10 +463,10 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := pData^.Certificate.C;
-      1 : CellText := pData^.Certificate.O;
-      2 : CellText := pData^.Certificate.CN;
-      3 : CellText := pData^.Certificate.Fingerprint;
+      0: CellText := pData^.Certificate.C;
+      1: CellText := pData^.Certificate.O;
+      2: CellText := pData^.Certificate.CN;
+      3: CellText := pData^.Certificate.Fingerprint;
     end;
   end;
 
@@ -467,31 +474,31 @@ begin
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
 end;
 
-function TFormCertificatesStore.GetCertificateFromNode(const pNode : PVirtualNode) : PX509Certificate;
+function TFormCertificatesStore.GetCertificateFromNode(const pNode: PVirtualNode): PX509Certificate;
 begin
-  result := nil;
+  Result := nil;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
   if not Assigned(pData^.Certificate.pX509) or not Assigned(pData^.Certificate.pPrivKey) then
-    Exit();
+    Exit;
 
   ///
-  result := PX509Certificate(@pData^.Certificate);
+  Result := PX509Certificate(@pData^.Certificate);
 end;
 
 procedure TFormCertificatesStore.CopySelectedFingerprint1Click(Sender: TObject);
 begin
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
   var pData := PTreeData(VST.FocusedNode.GetData);
 
   Clipboard.AsText := pData^.Certificate.Fingerprint;
 end;
 
-procedure TFormCertificatesStore.ExportCertificate(const pNode : PVirtualNode; const AExportWhich : TOpenSSLCertificateKeyTypes = []);
+procedure TFormCertificatesStore.ExportCertificate(const pNode: PVirtualNode; const AExportWhich: TOpenSSLCertificateKeyTypes = []);
 begin
   SD.FileName := '';
 
@@ -502,12 +509,12 @@ begin
   else if cktPrivate in AExportWhich then
     SD.DefaultExt := 'key';
 
-  if not SD.Execute() then
-    Exit();
+  if not SD.Execute then
+    Exit;
 
   var pCertificate := GetCertificateFromNode(pNode);
   if not Assigned(pCertificate) then
-    Exit();
+    Exit;
 
   TOptixOpenSSLHelper.ExportCertificate(SD.FileName, pCertificate^, AExportWhich);
 end;
@@ -529,45 +536,45 @@ end;
 
 procedure TFormCertificatesStore.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Save();
+  Save;
 end;
 
 procedure TFormCertificatesStore.FormCreate(Sender: TObject);
 begin
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
   {$ENDIF}
 
-  Load();
+  Load;
 end;
 
 procedure TFormCertificatesStore.Import1Click(Sender: TObject);
 
-  function GetErrorMessage(const AKeyName : String) : String;
+  function GetErrorMessage(const AKeyName: String): string;
   begin
     var ATemplate := 'Could not import the certificate. The %s key is either missing, corrupted, or in a format ' +
                      'that does not match the expected file format (must contain both the private and public keys).';
 
-    result := Format(ATemplate, [AKeyName]);
+    Result := Format(ATemplate, [AKeyName]);
   end;
 
 begin
-  if not OD.Execute() then
-    Exit();
+  if not OD.Execute then
+    Exit;
   ///
 
-  var ACertificate : TX509Certificate;
+  var ACertificate: TX509Certificate;
 
   var AErrorMessage := '';
 
   try
     TOptixOpenSSLHelper.ImportCertificate(OD.FileName, ACertificate);
   except
-    on E : EOpenSSLPrivateKeyException do
+    on E: EOpenSSLPrivateKeyException do
       AErrorMessage := GetErrorMessage('private');
 
-    on E : EOpenSSLPublicKeyException do
+    on E: EOpenSSLPublicKeyException do
       AErrorMessage := GetErrorMessage('public');
   end;
 

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Protocol.Exceptions;
 
 interface
@@ -69,36 +67,36 @@ type
 
   EOptixPreflightException = class(Exception)
   private
-    FErrorCode : TPreflightErrorCode;
+    FErrorCode: TPreflightErrorCode;
   public
     {@C}
-    constructor Create(const AMessage : String; const AErrorCode : TPreflightErrorCode);
+    constructor Create(const AMessage: string; const AErrorCode: TPreflightErrorCode);
 
     {@G}
-    property ErrorCode : TPreflightErrorCode read FErrorCode;
+    property ErrorCode: TPreflightErrorCode read FErrorCode;
   end;
 
-  function PreflightErrorCodeToString(const AValue : TPreflightErrorCode) : String;
+  function PreflightErrorCodeToString(const AValue: TPreflightErrorCode): string;
 
 implementation
 
 (* Local *)
 
-function PreflightErrorCodeToString(const AValue : TPreflightErrorCode) : String;
+function PreflightErrorCodeToString(const AValue: TPreflightErrorCode): string;
 begin
   case AValue of
-    pecVersionMismatch : result := 'Protocol Version Mismatch';
+    pecVersionMismatch: Result := 'Protocol Version Mismatch';
     {$IFDEF USETLS}
-    pecUntrustedPeer   : result := 'Untrusted Peer Certificate';
+    pecUntrustedPeer: Result := 'Untrusted Peer Certificate';
     {$ENDIF}
     else
-      result := 'Success';
+      Result := 'Success';
   end;
 end;
 
 (* EOptixPreflightException *)
 
-constructor EOptixPreflightException.Create(const AMessage : String; const AErrorCode : TPreflightErrorCode);
+constructor EOptixPreflightException.Create(const AMessage: string; const AErrorCode: TPreflightErrorCode);
 begin
   FErrorCode := AErrorCode;
 

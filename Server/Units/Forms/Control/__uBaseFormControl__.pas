@@ -77,69 +77,69 @@ type
 
   TFormControlInformation = class(TPersistent)
   private
-    FGUID                 : TGUID;
-    FUserIdentifier       : String;
-    FCreatedTime          : TDateTime;
-    FHasReceivedData      : Boolean;
-    FLastReceivedDataTime : TDateTime;
-    FHasUnseenData        : Boolean;
-    FHasFocus             : Boolean;
-    FState                : TFormControlState;
+    FGUID: TGUID;
+    FUserIdentifier: string;
+    FCreatedTime: TDateTime;
+    FHasReceivedData: Boolean;
+    FLastReceivedDataTime: TDateTime;
+    FHasUnseenData: Boolean;
+    FHasFocus: Boolean;
+    FState: TFormControlState;
 
     {@M}
-    procedure SetHasFocus(const AValue : Boolean);
-    procedure SetHasUnseenData(const AValue : Boolean);
-    procedure SetState(const AValue : TFormControlState);
+    procedure SetHasFocus(const AValue: Boolean);
+    procedure SetHasUnseenData(const AValue: Boolean);
+    procedure SetState(const AValue: TFormControlState);
   public
     {@C}
-    constructor Create();
+    constructor Create;
 
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property CreatedTime : TDateTime read FCreatedTime;
+    property CreatedTime: TDateTime read FCreatedTime;
 
     {@G/S}
-    property LastReceivedDataTime : TDateTime         read FLastReceivedDataTime write FLastReceivedDataTime;
-    property HasReceivedData      : Boolean           read FHasReceivedData      write FHasReceivedData;
-    property HasUnseenData        : Boolean           read FHasUnseenData        write SetHasUnseenData;
-    property UserIdentifier       : String            read FUserIdentifier       write FUserIdentifier;
-    property HasFocus             : Boolean           read FHasFocus             write SetHasFocus;
-    property State                : TFormControlState read FState                write SetState;
-    property GUID                 : TGUID             read FGUID                 write FGUID;
+    property LastReceivedDataTime: TDateTime read FLastReceivedDataTime write FLastReceivedDataTime;
+    property HasReceivedData: Boolean read FHasReceivedData write FHasReceivedData;
+    property HasUnseenData: Boolean read FHasUnseenData write SetHasUnseenData;
+    property UserIdentifier: String read FUserIdentifier write FUserIdentifier;
+    property HasFocus: Boolean read FHasFocus write SetHasFocus;
+    property State: TFormControlState read FState write SetState;
+    property GUID: TGUID read FGUID write FGUID;
   end;
 
   TBaseFormControl = class(TForm)
   private
-    FOriginalCaption : String;
-    FFirstShow       : Boolean;
+    FOriginalCaption: string;
+    FFirstShow: Boolean;
 
     {@M}
-    function GetGUID() : TGUID;
+    function GetGUID: TGUID;
   protected
-    FFlatWindow      : TFlatWindow;
-    FSpecialForm     : Boolean;
-    FFormInformation : TFormControlInformation;
-    FSharedClass     : TOptixControlSingleton;
+    FFlatWindow: TFlatWindow;
+    FSpecialForm: Boolean;
+    FFormInformation: TFormControlInformation;
+    FSharedClass: TOptixControlSingleton;
 
     {@M}
-    function GetContextDescription() : String; virtual;
-    procedure RefreshCaption(); virtual;
+    function GetContextDescription: string; virtual;
+    procedure RefreshCaption; virtual;
 
-    function RequestFileDownload(ARemoteFilePath : String = ''; ALocalFilePath : String = '';
-      const AContext : String = '') : TGUID; virtual;
-    function RequestFileUpload(ALocalFilePath : String = ''; ARemoteFilePath : String = '';
-      const AContext : String = '') : TGUID; virtual;
+    function RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = '';
+      const AContext: String = '') : TGUID; virtual;
+    function RequestFileUpload(ALocalFilePath: String = ''; ARemoteFilePath: String = '';
+      const AContext: String = '') : TGUID; virtual;
 
-    procedure StreamFileContent(const AFilePath : String; const APageSize : UInt64 = 1024);
+    procedure StreamFileContent(const AFilePath: string; const APageSize: UInt64 = 1024);
 
-    procedure DoShow(); override;
+    procedure DoShow; override;
     procedure DoClose(var Action: TCloseAction); override;
 
     procedure CreateParams(var Params: TCreateParams); override;
 
-    procedure OnFirstShow(); virtual;
+    procedure OnFirstShow; virtual;
 
     procedure CMVisibleChanged(var AMessage: TMessage); message CM_VISIBLECHANGED;
     procedure WMActivateApp(var AMessage: TWMActivateApp); message WM_ACTIVATEAPP;
@@ -148,29 +148,29 @@ type
     procedure WMWindowPosChanging(var AMessage: TWMWindowPosChanging); message WM_WINDOWPOSCHANGING;
   public
     {@M}
-    procedure SendCommand(const ACommand : TOptixCommand); overload;
-    procedure SendCommand(const ACommand : TOptixCommand; const AControlFormGUIDForCallBack : TGUID); overload;
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); virtual;
-    procedure PurgeRequest(); virtual;
-    procedure RegisterNewFileOnFileManagers(const ABasePath : String; const ANewFileInformation : TFileInformation);
-    procedure DeleteFileFromFileManagers(const ADeletedFilePath : String; const AIsDirectory : Boolean);
-    procedure __WARNING__OverrideWindowGUID(const ANewGUID : TGUID); (* Warning | TODO: Safer method *)
+    procedure SendCommand(const ACommand: TOptixCommand); overload;
+    procedure SendCommand(const ACommand: TOptixCommand; const AControlFormGUIDForCallBack: TGUID); overload;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); virtual;
+    procedure PurgeRequest; virtual;
+    procedure RegisterNewFileOnFileManagers(const ABasePath: string; const ANewFileInformation: TFileInformation);
+    procedure DeleteFileFromFileManagers(const ADeletedFilePath: string; const AIsDirectory: Boolean);
+    procedure __WARNING__OverrideWindowGUID(const ANewGUID: TGUID); (* Warning | TODO: Safer method *)
 
     {@C}
-    constructor Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton; const AUserIdentifier : String;
-      const ASpecialForm : Boolean = False); reintroduce; virtual;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton; const AUserIdentifier: string;
+      const ASpecialForm: Boolean = False); reintroduce; virtual;
+    destructor Destroy; override;
 
     {@G}
-    property GUID                : TGUID                   read GetGUID;
-    property SpecialForm         : Boolean                 read FSpecialForm;
-    property FormInformation     : TFormControlInformation read FFormInformation;
-    property ContextInformation  : String                  read GetContextDescription;
+    property GUID: TGUID read GetGUID;
+    property SpecialForm: Boolean read FSpecialForm;
+    property FormInformation: TFormControlInformation read FFormInformation;
+    property ContextInformation: String read GetContextDescription;
   end;
 
   TBaseFormControlClass = class of TBaseFormControl;
 
-  function FormControlStateToString(const AValue : TFormControlState) : String;
+  function FormControlStateToString(const AValue: TFormControlState): string;
 
 implementation
 
@@ -187,50 +187,50 @@ uses
 
 (* Local *)
 
-function FormControlStateToString(const AValue : TFormControlState) : String;
+function FormControlStateToString(const AValue: TFormControlState): string;
 begin
   case AValue of
-    fcsVisible   : result := 'Visible';
-    fcsMinimized : result := 'Minimized';
-    fcsClosed    : result := 'Closed';
-    fcsWaitFree  : result := 'Wait Free';
+    fcsVisible: Result := 'Visible';
+    fcsMinimized: Result := 'Minimized';
+    fcsClosed: Result := 'Closed';
+    fcsWaitFree: Result := 'Wait Free';
 
     else
-      result := 'Unset';
+      Result := 'Unset';
   end;
 end;
 
 (* TFormControlInformation *)
 
-constructor TFormControlInformation.Create();
+constructor TFormControlInformation.Create;
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FGUID            := TGUID.NewGuid;
-  FUserIdentifier  := '';
-  FCreatedTime     := Now;
+  FGUID := TGUID.NewGuid;
+  FUserIdentifier := '';
+  FCreatedTime := Now;
   FHasReceivedData := False;
-  FHasUnseenData   := False;
-  FState           := fcsUnset;
+  FHasUnseenData := False;
+  FState := fcsUnset;
 end;
 
-procedure TFormControlInformation.Assign(ASource : TPersistent);
+procedure TFormControlInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TFormControlInformation then begin
-    FGUID                 := TFormControlInformation(ASource).FGUID;
-    FUserIdentifier       := TFormControlInformation(ASource).FUserIdentifier;
-    FCreatedTime          := TFormControlInformation(ASource).FCreatedTime;
-    FHasReceivedData      := TFormControlInformation(ASource).FHasReceivedData;
+    FGUID := TFormControlInformation(ASource).FGUID;
+    FUserIdentifier := TFormControlInformation(ASource).FUserIdentifier;
+    FCreatedTime := TFormControlInformation(ASource).FCreatedTime;
+    FHasReceivedData := TFormControlInformation(ASource).FHasReceivedData;
     FLastReceivedDataTime := TFormControlInformation(ASource).FLastReceivedDataTime;
-    FHasUnseenData        := TFormControlInformation(ASource).FHasUnseenData;
-    FHasFocus             := TFormControlInformation(ASource).FHasFocus;
-    FState                := TFormControlInformation(ASource).FState;
+    FHasUnseenData := TFormControlInformation(ASource).FHasUnseenData;
+    FHasFocus := TFormControlInformation(ASource).FHasFocus;
+    FState := TFormControlInformation(ASource).FState;
   end else
     inherited;
 end;
 
-procedure TFormControlInformation.SetHasFocus(const AValue : Boolean);
+procedure TFormControlInformation.SetHasFocus(const AValue: Boolean);
 begin
   if AValue then
     FHasUnseenData := False;
@@ -239,7 +239,7 @@ begin
   FHasFocus := AValue;
 end;
 
-procedure TFormControlInformation.SetHasUnseenData(const AValue : Boolean);
+procedure TFormControlInformation.SetHasUnseenData(const AValue: Boolean);
 begin
   if AValue then
     FHasUnseenData := not FHasFocus
@@ -247,10 +247,10 @@ begin
     FHasUnseenData := AValue;
 end;
 
-procedure TFormControlInformation.SetState(const AValue : TFormControlState);
+procedure TFormControlInformation.SetState(const AValue: TFormControlState);
 begin
   if (FState = AValue) or (FState = fcsWaitFree) then
-    Exit();
+    Exit;
 
   ///
   FState := AValue;
@@ -258,22 +258,22 @@ end;
 
 (* TBaseFormControl *)
 
-function TBaseFormControl.GetContextDescription() : String;
+function TBaseFormControl.GetContextDescription: string;
 begin
-  result := '';
+  Result := '';
   ///
 end;
 
-procedure TBaseFormControl.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TBaseFormControl.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   if not Assigned(AOptixPacket) then
-    Exit();
+    Exit;
   ///
 
   AHandleMemory := False;
 
-  FFormInformation.HasUnseenData        := True;
-  FFormInformation.HasReceivedData      := True;
+  FFormInformation.HasUnseenData := True;
+  FFormInformation.HasReceivedData := True;
   FFormInformation.LastReceivedDataTime := Now;
 end;
 
@@ -287,7 +287,7 @@ begin
   Params.WndParent := 0;
 end;
 
-procedure TBaseFormControl.DoShow();
+procedure TBaseFormControl.DoShow;
 begin
   inherited;
   ///
@@ -296,7 +296,7 @@ begin
     FFirstShow := False;
 
     ///
-    OnFirstShow();
+    OnFirstShow;
   end;
 end;
 
@@ -313,13 +313,13 @@ begin
   end;
 end;
 
-procedure TBaseFormControl.OnFirstShow();
+procedure TBaseFormControl.OnFirstShow;
 begin
   Height := Height +1;
 end;
 
-constructor TBaseFormControl.Create(AOwner : TComponent; const ASharedClass : TOptixControlSingleton;
-  const AUserIdentifier : String; const ASpecialForm : Boolean = False);
+constructor TBaseFormControl.Create(AOwner: TComponent; const ASharedClass: TOptixControlSingleton;
+  const AUserIdentifier: string; const ASpecialForm: Boolean = False);
 begin
   inherited Create(AOwner);
   ///
@@ -329,15 +329,15 @@ begin
   FFlatWindow := TFlatWindow.Create(self);
 
   FOriginalCaption := Caption; // Default
-  FSpecialForm     := ASpecialForm;
-  FFirstShow       := True;
-  FFormInformation := TFormControlInformation.Create();
+  FSpecialForm := ASpecialForm;
+  FFirstShow := True;
+  FFormInformation := TFormControlInformation.Create;
 
   FFormInformation.UserIdentifier := AUserIdentifier;
   FFormInformation.State := fcsClosed;
 end;
 
-destructor TBaseFormControl.Destroy();
+destructor TBaseFormControl.Destroy;
 begin
   if Assigned(FFormInformation) then
     FreeAndNil(FFormInformation);
@@ -349,7 +349,7 @@ begin
   inherited;
 end;
 
-procedure TBaseFormControl.SendCommand(const ACommand : TOptixCommand);
+procedure TBaseFormControl.SendCommand(const ACommand: TOptixCommand);
 begin
   ACommand.WindowGUID := FFormInformation.GUID;
 
@@ -357,7 +357,7 @@ begin
   FormMain.SendCommand(self, ACommand);
 end;
 
-procedure TBaseFormControl.SendCommand(const ACommand : TOptixCommand; const AControlFormGUIDForCallBack : TGUID);
+procedure TBaseFormControl.SendCommand(const ACommand: TOptixCommand; const AControlFormGUIDForCallBack: TGUID);
 begin
   ACommand.WindowGUID := AControlFormGUIDForCallBack;
 
@@ -365,24 +365,24 @@ begin
   FormMain.SendCommand(self, ACommand);
 end;
 
-function TBaseFormControl.RequestFileDownload(ARemoteFilePath : String = ''; ALocalFilePath : String = ''; const AContext : String = '') : TGUID;
+function TBaseFormControl.RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = ''; const AContext: String = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
     AForm.RequestFileDownload(ARemoteFilePath, ALocalFilePath, AContext);
 end;
 
-function TBaseFormControl.RequestFileUpload(ALocalFilePath : String = ''; ARemoteFilePath : String = ''; const AContext : String = '') : TGUID;
+function TBaseFormControl.RequestFileUpload(ALocalFilePath: String = ''; ARemoteFilePath: String = ''; const AContext: String = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
     AForm.RequestFileUpload(ALocalFilePath, ARemoteFilePath, AContext);
 end;
 
-procedure TBaseFormControl.StreamFileContent(const AFilePath : String; const APageSize : UInt64 = 1024);
+procedure TBaseFormControl.StreamFileContent(const AFilePath: string; const APageSize: UInt64 = 1024);
 begin
   if String.IsNullOrWhiteSpace(AFilePath) then
-    Exit();
+    Exit;
   ///
 
   SendCommand(TOptixCommandCreateFileContentReader.Create(AFilePath, APageSize));
@@ -393,19 +393,19 @@ begin
   inherited;
   ///
 
-  if self.Visible then
-    RefreshCaption();
+  if Visible then
+    RefreshCaption;
 
   if not Assigned(FFormInformation) then
-    Exit();
+    Exit;
 
-  if self.Visible then
+  if Visible then
     FFormInformation.State := fcsVisible
   else
     FFormInformation.State := fcsClosed;
 end;
 
-procedure TBaseFormControl.RefreshCaption();
+procedure TBaseFormControl.RefreshCaption;
 begin
   if String.IsNullOrEmpty(FFormInformation.UserIdentifier) then
     Caption := FOriginalCaption
@@ -416,9 +416,9 @@ begin
     ]);
 end;
 
-function TBaseFormControl.GetGUID() : TGUID;
+function TBaseFormControl.GetGUID: TGUID;
 begin
-  result := FFormInformation.GUID
+  Result := FFormInformation.GUID;
 end;
 
 procedure TBaseFormControl.WMActivateApp(var AMessage: TWMActivateApp);
@@ -426,11 +426,11 @@ begin
   inherited;
 
   if not Assigned(FFormInformation) then
-    Exit();
+    Exit;
 
   var AIsActive := AMessage.Active;
 
-  if AMessage.Active and (self.Handle <> GetForegroundWindow()) then
+  if AMessage.Active and (Handle <> GetForegroundWindow) then
     AIsActive := False;
 
 
@@ -444,7 +444,7 @@ begin
   ///
 
   if not Assigned(FFormInformation) then
-    Exit();
+    Exit;
 
   ///
   FFormInformation.SetHasFocus(True);
@@ -456,7 +456,7 @@ begin
   ///
 
   if not Assigned(FFormInformation) then
-    Exit();
+    Exit;
 
   ///
   FFormInformation.SetHasFocus(False);
@@ -468,27 +468,27 @@ begin
   ///
 
   if not Assigned(FFormInformation) then
-    Exit();
+    Exit;
 
   case WindowState of
-    TWindowState.wsNormal    : FFormInformation.State := fcsVisible;
-    TWindowState.wsMinimized : FFormInformation.State := fcsMinimized;
-    TWindowState.wsMaximized : ;
+    TWindowState.wsNormal: FFormInformation.State := fcsVisible;
+    TWindowState.wsMinimized: FFormInformation.State := fcsMinimized;
+    TWindowState.wsMaximized: ;
   end;
 end;
 
-procedure TBaseFormControl.PurgeRequest();
+procedure TBaseFormControl.PurgeRequest;
 begin
   ///
 end;
 
-procedure TBaseFormControl.__WARNING__OverrideWindowGUID(const ANewGUID : TGUID);
+procedure TBaseFormControl.__WARNING__OverrideWindowGUID(const ANewGUID: TGUID);
 begin
   FFormInformation.GUID := ANewGUID;
 end;
 
-procedure TBaseFormControl.RegisterNewFileOnFileManagers(const ABasePath : String;
-  const ANewFileInformation : TFileInformation);
+procedure TBaseFormControl.RegisterNewFileOnFileManagers(const ABasePath: string;
+  const ANewFileInformation: TFileInformation);
 begin
   if not Assigned(ANewFileInformation) then
     Exit;
@@ -505,7 +505,7 @@ begin
   end;
 end;
 
-procedure TBaseFormControl.DeleteFileFromFileManagers(const ADeletedFilePath : String; const AIsDirectory : Boolean);
+procedure TBaseFormControl.DeleteFileFromFileManagers(const ADeletedFilePath: string; const AIsDirectory: Boolean);
 begin
   var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
   if not Assigned(AForms) then

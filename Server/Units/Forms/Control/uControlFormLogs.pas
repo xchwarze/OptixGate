@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormLogs;
 
 interface
@@ -70,10 +68,10 @@ uses
 
 type
   TTreeData = record
-    LogMessage : String;
-    Context    : String;
-    LogKind    : TLogKind;
-    LogDate    : TDateTime;
+    LogMessage: string;
+    Context: string;
+    LogKind: TLogKind;
+    LogDate: TDateTime;
   end;
   PTreeData = ^TTreeData;
 
@@ -92,13 +90,13 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormDestroy(Sender: TObject);
-    procedure VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    procedure AddLog(const AMessage, AContext : String; const AKind : TLogKind);
+    procedure AddLog(const AMessage, AContext: string; const AKind: TLogKind);
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
   end;
 
 var
@@ -117,32 +115,32 @@ uses
 
 {$R *.dfm}
 
-procedure TControlFormLogs.AddLog(const AMessage, AContext : String; const AKind : TLogKind);
+procedure TControlFormLogs.AddLog(const AMessage, AContext: string; const AKind: TLogKind);
 begin
   var pNode := VST.AddChild(nil);
   var pData := PTreeData(pNode.GetData);
 
-  pData^.LogDate    := Now;
+  pData^.LogDate := Now;
 
   pData^.LogMessage := AMessage;
-  pData^.Context    := AContext;
-  pData^.LogKind    := AKind;
+  pData^.Context := AContext;
+  pData^.LogKind := AKind;
 
   ///
-  VST.Update();
+  VST.Update;
 end;
 
 procedure TControlFormLogs.FormDestroy(Sender: TObject);
 begin
-  VST.Clear();
+  VST.Clear;
 end;
 
-procedure TControlFormLogs.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormLogs.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
 
-  var ALogNotifier : TOptixCommandReceiveLogMessage := nil;
+  var ALogNotifier: TOptixCommandReceiveLogMessage := nil;
   try
     // -----------------------------------------------------------------------------------------------------------------
     if AOptixPacket is TOptixCommandReceiveLogMessage then
@@ -170,13 +168,13 @@ procedure TControlFormLogs.VSTBeforeCellPaint(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
 
   case pData^.LogKind of
-    lkException : AColor := COLOR_LIST_RED;
+    lkException: AColor := COLOR_LIST_RED;
   end;
 
   if AColor <> clNone then begin
@@ -197,12 +195,19 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.LogMessage, pData2^.LogMessage);
-      1 : Result := CompareText(pData1^.Context, pData2^.Context);
-      2 : Result := CompareValue(Cardinal(pData1^.LogKind), Cardinal(pData2^.LogKind));
-      3 : Result := CompareDateTime(pData1^.LogDate, pData2^.LogDate);
+      0: Result := CompareText(pData1^.LogMessage, pData2^.LogMessage);
+      1: Result := CompareText(pData1^.Context, pData2^.Context);
+      2: Result := CompareValue(Cardinal(pData1^.LogKind), Cardinal(pData2^.LogKind));
+      3: Result := CompareDateTime(pData1^.LogDate, pData2^.LogDate);
     end;
   end;
+end;
+
+procedure TControlFormLogs.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
 end;
 
 procedure TControlFormLogs.VSTGetImageIndex(Sender: TBaseVirtualTree;
@@ -211,13 +216,13 @@ procedure TControlFormLogs.VSTGetImageIndex(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   case Kind of
-    TVTImageKind.ikNormal, TVTImageKind.ikSelected : begin
+    TVTImageKind.ikNormal, TVTImageKind.ikSelected: begin
       case pData^.LogKind of
-        lkException : ImageIndex := IMAGE_APP_ERROR;
+        lkException: ImageIndex := IMAGE_APP_ERROR;
         // ... //
       end;
     end;
@@ -239,20 +244,15 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := pData^.LogMessage;
-      1 : CellText := pData^.Context;
-      2 : CellText := LogKindToString(pData^.LogKind);
-      3 : CellText := DateTimeToStr(pData^.LogDate);
+      0: CellText := pData^.LogMessage;
+      1: CellText := pData^.Context;
+      2: CellText := LogKindToString(pData^.LogKind);
+      3: CellText := DateTimeToStr(pData^.LogDate);
     end;
   end;
 
   ///
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
-end;
-
-procedure TControlFormLogs.VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
 end;
 
 end.

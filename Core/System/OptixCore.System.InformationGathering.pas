@@ -63,25 +63,25 @@ uses
 type
   TOptixInformationGathering = class
   public
-    class function ComputerName() : string; static;
-    class function TryGetComputerName() : string; static;
-    class function UserName() : string; static;
-    class function TryGetUserName() : string; static;
-    class function CurrentProcessArchitecture() : TProcessorArchitecture; static;
-    class function GetUserSidByType(const AUserName : String; ASidType : TSidNameUse = SidTypeUser) : String; static;
-    class function GetWindowsDirectory() : string; static;
-    class function GetHardDriveSerial() : String; static;
-    class function GetUserUID(const AIntegrateOptionalExtraInformation : String = '') : TGUID; static;
-    class function GetCurrentUserSid() : String; static;
-    class function TryGetCurrentUserSid() : String; static;
-    class function GetLangroup() : String; static;
-    class function GetDomainName() : String; static;
-    class function IsCurrentUserInAdminGroup() : Boolean; static;
-    class function TryIsCurrentUserInAdminGroup() : Boolean; static;
-    class function GetWindowsArchitecture() : TProcessorArchitecture; static;
+    class function ComputerName: string; static;
+    class function TryGetComputerName: string; static;
+    class function UserName: string; static;
+    class function TryGetUserName: string; static;
+    class function CurrentProcessArchitecture: TProcessorArchitecture; static;
+    class function GetUserSidByType(const AUserName: string; ASidType: TSidNameUse = SidTypeUser): string; static;
+    class function GetWindowsDirectory: string; static;
+    class function GetHardDriveSerial: string; static;
+    class function GetUserUID(const AIntegrateOptionalExtraInformation: String = ''): TGUID; static;
+    class function GetCurrentUserSid: string; static;
+    class function TryGetCurrentUserSid: string; static;
+    class function GetLangroup: string; static;
+    class function GetDomainName: string; static;
+    class function IsCurrentUserInAdminGroup: Boolean; static;
+    class function TryIsCurrentUserInAdminGroup: Boolean; static;
+    class function GetWindowsArchitecture: TProcessorArchitecture; static;
   end;
 
-  function ProcessArchitectureToString(const AValue : TProcessorArchitecture) : String;
+  function ProcessArchitectureToString(const AValue: TProcessorArchitecture): string;
 
 implementation
 
@@ -94,33 +94,33 @@ uses
 
 (* Local *)
 
-function ProcessArchitectureToString(const AValue : TProcessorArchitecture) : String;
+function ProcessArchitectureToString(const AValue: TProcessorArchitecture): string;
 begin
-  result := '';
+  Result := '';
   ///
 
   case AValue of
-    pa86_32 : result := 'x32';
-    pa86_64 : result := 'x64';
+    pa86_32: Result := 'x32';
+    pa86_64: Result := 'x64';
   end;
 end;
 
 (* TOptixInformationGathering *)
 
-class function TOptixInformationGathering.CurrentProcessArchitecture() : TProcessorArchitecture;
+class function TOptixInformationGathering.CurrentProcessArchitecture: TProcessorArchitecture;
 begin
   {$IFDEF WIN32}
-    result := pa86_32;
+    Result := pa86_32;
   {$ELSE IF WIN64}
-    result := pa86_64;
+    Result := pa86_64;
   {$ELSE}
-    result := paUnknown;
+    Result := paUnknown;
   {$ENDIF}
 end;
 
-class function TOptixInformationGathering.UserName() : string;
+class function TOptixInformationGathering.UserName: string;
 begin
-  var ABuffer : array[0..UNLEN] of WideChar;
+  var ABuffer: array[0..UNLEN] of WideChar;
   var ABufferLen := DWORD(Length(ABuffer));
 
   if not GetUserNameW(ABuffer, ABufferLen) then
@@ -130,55 +130,55 @@ begin
   SetString(Result, ABuffer, ABufferLen - 1);
 end;
 
-class function TOptixInformationGathering.TryGetUserName() : String;
+class function TOptixInformationGathering.TryGetUserName: string;
 begin
-  result := '';
+  Result := '';
   try
-    result := UserName();
+    Result := UserName
   except
-    on E : EWindowsException do begin
+    on E: EWindowsException do begin
       // Ignore, we just try but we can log
     end;
   end;
 end;
 
-class function TOptixInformationGathering.ComputerName() : string;
+class function TOptixInformationGathering.ComputerName: string;
 begin
-  var ABuffer : array[0..MAX_COMPUTERNAME_LENGTH] of WideChar;
+  var ABuffer: array[0..MAX_COMPUTERNAME_LENGTH] of WideChar;
   var ABufferLen := DWORD(Length(ABuffer));
 
   if not GetComputerNameW(ABuffer, ABufferLen) then
     raise EWindowsException.Create('GetComputerNameW');
 
   ///
-  SetString(result, ABuffer, ABufferLen);
+  SetString(Result, ABuffer, ABufferLen);
 end;
 
-class function TOptixInformationGathering.TryGetComputerName() : String;
+class function TOptixInformationGathering.TryGetComputerName: string;
 begin
-  result := '';
+  Result := '';
   try
-    result := ComputerName();
+    Result := ComputerName
   except
-    on E : EWindowsException do begin
+    on E: EWindowsException do begin
       // Ignore, we just try but we can log
     end;
   end;
 end;
 
-class function TOptixInformationGathering.GetUserSidByType(const AUserName : String; ASidType : TSidNameUse = SidTypeUser) : String;
-var ptrSID         : PSID;
-    ASidSize       : Cardinal;
-    ARefDomainSize : Cardinal;
-    ASidNameUse    : SID_NAME_USE;
-    ARefDomain     : String;
-    ARet           : Boolean;
-    ASid           : PWideChar;
+class function TOptixInformationGathering.GetUserSidByType(const AUserName: string; ASidType: TSidNameUse = SidTypeUser): string;
+var ptrSID: PSID;
+    ASidSize: Cardinal;
+    ARefDomainSize: Cardinal;
+    ASidNameUse: SID_NAME_USE;
+    ARefDomain: string;
+    ARet: Boolean;
+    ASid: PWideChar;
 begin
-  result := '';
+  Result := '';
   ///
 
-  ASidSize       := 0;
+  ASidSize := 0;
   ARefDomainSize := 0;
 
   ASidNameUse := Cardinal(ASidType);
@@ -202,7 +202,7 @@ begin
     if ARet then begin
       ConvertSidToStringSidW(ptrSID, ASid);
       try
-        result := String(ASid);
+        Result := String(ASid);
       finally
         LocalFree(ASid);
       end;
@@ -212,52 +212,52 @@ begin
   end;
 end;
 
-class function TOptixInformationGathering.GetCurrentUserSid() : String;
+class function TOptixInformationGathering.GetCurrentUserSid: string;
 begin
-  result := GetUserSidByType(TOptixInformationGathering.UserName);
+  Result := GetUserSidByType(TOptixInformationGathering.UserName);
 end;
 
-class function TOptixInformationGathering.TryGetCurrentUserSid() : String;
+class function TOptixInformationGathering.TryGetCurrentUserSid: string;
 begin
   try
-    result := TOptixInformationGathering.GetCurrentUserSid();
+    Result := TOptixInformationGathering.GetCurrentUserSid
   except
 
   end;
 end;
 
-class function TOptixInformationGathering.GetWindowsDirectory() : string;
-var ALen  : Cardinal;
+class function TOptixInformationGathering.GetWindowsDirectory: string;
+var ALen: Cardinal;
 begin
-  SetLength(result, MAX_PATH);
+  SetLength(Result, MAX_PATH);
 
-  ALen := WinAPI.Windows.GetWindowsDirectory(@result[1], MAX_PATH);
+  ALen := WinAPI.Windows.GetWindowsDirectory(@Result[1], MAX_PATH);
 
-  SetLength(result, ALen);
+  SetLength(Result, ALen);
   if ALen > MAX_PATH then
-    WinAPI.Windows.GetWindowsDirectory(@result[1], ALen);
+    WinAPI.Windows.GetWindowsDirectory(@Result[1], ALen);
 
   ///
-  result := IncludeTrailingPathDelimiter(result);
+  Result := IncludeTrailingPathDelimiter(Result);
 end;
 
-class function TOptixInformationGathering.GetHardDriveSerial() : String;
+class function TOptixInformationGathering.GetHardDriveSerial: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   var hFile := CreateFileW('\\.\PhysicalDrive0', 0, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
   if hFile = INVALID_HANDLE_VALUE then
     raise EWindowsException.Create('CreateFileW');
   try
-    var AStoragePropertyQuery : TStoragePropertyQuery;
+    var AStoragePropertyQuery: TStoragePropertyQuery;
     ZeroMemory(@AStoragePropertyQuery, SizeOf(TStoragePropertyQuery));
 
     AStoragePropertyQuery.PropertyId := StorageDeviceProperty;
     AStoragePropertyQuery.QueryType := PropertyStandardQuery;
 
-    var AStorageDescriptorHeader : TStorageDescriptorHeader;
-    var ABytesReturned : DWORD;
+    var AStorageDescriptorHeader: TStorageDescriptorHeader;
+    var ABytesReturned: DWORD;
 
     if not DeviceIoControl(
       hFile,
@@ -271,7 +271,7 @@ begin
     ) then
       raise EWindowsException.Create('DeviceIoControl(1)');
 
-    var pBuffer : Pointer;
+    var pBuffer: Pointer;
     GetMem(pBuffer, AStorageDescriptorHeader.Size);
     try
       if not DeviceIoControl(
@@ -287,7 +287,7 @@ begin
         raise EWindowsException.Create('DeviceIoControl(2)');
 
      ///
-     result := String(PAnsiChar(NativeUInt(pBuffer) + PStorageDeviceDescriptor(pBuffer)^.SerialNumberOffset));
+     Result := String(PAnsiChar(NativeUInt(pBuffer) + PStorageDeviceDescriptor(pBuffer)^.SerialNumberOffset));
     finally
       FreeMem(pBuffer, AStorageDescriptorHeader.Size);
     end;
@@ -296,67 +296,67 @@ begin
   end;
 end;
 
-class function TOptixInformationGathering.GetUserUID(const AIntegrateOptionalExtraInformation : String = '') : TGUID;
+class function TOptixInformationGathering.GetUserUID(const AIntegrateOptionalExtraInformation: String = ''): TGUID;
 begin
   var A128BitHash := THashMD5.GetHashBytes(
     GetHardDriveSerial +                                  // Uniqueness in machine level
     GetCurrentUserSid +                                   // Uniqueness in user level
-    IntToStr(Cardinal(TProcessHelper.IsElevated())) +     // Uniqueness in elevation level
-    IntToStr(Cardinal(CurrentProcessArchitecture())) +    // Uniqueness in process architecture
+    IntToStr(Cardinal(TProcessHelper.IsElevated)) +     // Uniqueness in elevation level
+    IntToStr(Cardinal(CurrentProcessArchitecture)) +    // Uniqueness in process architecture
     AIntegrateOptionalExtraInformation                    // Optional
   );
 
-  Move(A128BitHash[0], result, SizeOf(TGUID));
+  Move(A128BitHash[0], Result, SizeOf(TGUID));
 end;
 
-class function TOptixInformationGathering.GetLangroup() : String;
+class function TOptixInformationGathering.GetLangroup: string;
 begin
-  result := '';
+  Result := '';
   ///
 
-  var pWkstaInfo : PWkstaInfo100;
+  var pWkstaInfo: PWkstaInfo100;
 
   if NetWkstaGetInfo(nil, 100, Pointer(pWkstaInfo)) = NERR_Success then begin
-    result := string(pWkstaInfo.wki100_langroup);
+    Result := string(pWkstaInfo.wki100_langroup);
 
     ///
     NetApiBufferFree(pWkstaInfo);
   end;
 end;
 
-class function TOptixInformationGathering.GetDomainName() : String;
+class function TOptixInformationGathering.GetDomainName: string;
 begin
-  result := '';
+  Result := '';
   ///
 
-  var pDcInfo : PDomainControllerInfo;
+  var pDcInfo: PDomainControllerInfo;
 
   if DsGetDcNameW(nil, nil, nil, nil, DS_DIRECTORY_SERVICE_REQUIRED, pDcInfo) = ERROR_SUCCESS then begin
-    result := pDcInfo^.DomainName;
+    Result := pDcInfo^.DomainName;
 
     ///
     NetApiBufferFree(pDcInfo);
   end;
 end;
 
-class function TOptixInformationGathering.IsCurrentUserInAdminGroup() : Boolean;
+class function TOptixInformationGathering.IsCurrentUserInAdminGroup: Boolean;
 begin
-  result := False;
+  Result := False;
   ///
 
-  var hToken : THandle := 0;
-  var pAdminSID : PSID := nil;
+  var hToken: THandle := 0;
+  var pAdminSID: PSID := nil;
   try
-    if not OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, hToken) then
+    if not OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, hToken) then
       raise EWindowsException.Create('OpenProcessToken');
 
-    var AReturnLength : DWORD;
+    var AReturnLength: DWORD;
 
     GetTokenInformation(hToken, TokenGroups, nil, 0, AReturnLength);
-    if GetLastError() <> ERROR_INSUFFICIENT_BUFFER then
+    if GetLastError <> ERROR_INSUFFICIENT_BUFFER then
       raise EWindowsException.Create('GetTokenInformation(1)');
 
-    var pTokenInfo : PTokenGroups;
+    var pTokenInfo: PTokenGroups;
     GetMem(pTokenInfo, AReturnLength);
     try
       if not GetTokenInformation(hToken, TokenGroups, pTokenInfo, AReturnLength, AReturnLength) then
@@ -380,9 +380,9 @@ begin
       {$R-}
       for var I := 0 to pTokenInfo^.GroupCount -1 do begin
         if EqualSID(pAdminSID, pTokenInfo^.Groups[I].Sid) then begin
-          result := True;
+          Result := True;
 
-          break
+          break;
         end;
       end;
       {$R+}
@@ -398,28 +398,28 @@ begin
   end;
 end;
 
-class function TOptixInformationGathering.TryIsCurrentUserInAdminGroup() : Boolean;
+class function TOptixInformationGathering.TryIsCurrentUserInAdminGroup: Boolean;
 begin
-  result := False;
+  Result := False;
   try
-    result := IsCurrentUserInAdminGroup();
+    Result := IsCurrentUserInAdminGroup
   except
 
   end;
 end;
 
-class function TOptixInformationGathering.GetWindowsArchitecture() : TProcessorArchitecture;
+class function TOptixInformationGathering.GetWindowsArchitecture: TProcessorArchitecture;
 begin
-  var ASystemInfo : TSystemInfo;
+  var ASystemInfo: TSystemInfo;
   GetNativeSystemInfo(ASystemInfo);
 
   case ASystemInfo.wProcessorArchitecture of
-    PROCESSOR_ARCHITECTURE_INTEL : result := pa86_32;
-    PROCESSOR_ARCHITECTURE_AMD64 : result := pa86_64;
-    PROCESSOR_ARCHITECTURE_ARM   : result := paARM;
-    PROCESSOR_ARCHITECTURE_ARM64 : result := paARM64;
+    PROCESSOR_ARCHITECTURE_INTEL: Result := pa86_32;
+    PROCESSOR_ARCHITECTURE_AMD64: Result := pa86_64;
+    PROCESSOR_ARCHITECTURE_ARM: Result := paARM;
+    PROCESSOR_ARCHITECTURE_ARM64: Result := paARM64;
     else
-      result := paUnknown;
+      Result := paUnknown;
   end;
 end;
 

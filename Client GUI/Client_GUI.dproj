@@ -4,7 +4,7 @@
         <ProjectVersion>20.3</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">Client_GUI</ProjectName>
         <TargetedPlatforms>3</TargetedPlatforms>
@@ -157,29 +157,38 @@
         </DelphiCompile>
         <DCCReference Include="..\Core\OptixCore.Exceptions.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Sockets.Helper.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Packet.pas"/>
         <DCCReference Include="..\Core\Network\OptixCore.Sockets.Exceptions.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.pas"/>
         <DCCReference Include="..\Core\OptixCore.Interfaces.pas"/>
         <DCCReference Include="..\Core\OptixCore.Thread.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Client.Handler.pas"/>
+        <DCCReference Include="..\Core\OptixCore.Types.pas"/>
+        <DCCReference Include="..\Core\OptixCore.Helper.pas"/>
+        <DCCReference Include="..\Core\OptixCore.WinApiEx.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.LogNotifier.pas"/>
+        <DCCReference Include="..\Core\OptixCore.Classes.pas"/>
+        <DCCReference Include="..\Core\OptixCore.ClassesRegistry.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.Helper.pas"/>
         <DCCReference Include="..\Core\System\OptixCore.System.InformationGathering.pas"/>
         <DCCReference Include="..\Core\System\OptixCore.System.Process.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.FileSystem.pas"/>
+        <DCCReference Include="..\Core\System\OptixCore.System.Registry.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Packet.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Client.Handler.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Preflight.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Exceptions.pas"/>
+        <DCCReference Include="..\Core\Network\OptixCore.Protocol.FileTransfer.pas"/>
         <DCCReference Include="..\Core\Commands\OptixCore.SessionInformation.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Base.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.FileSystem.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Process.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Shell.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Registry.pas"/>
+        <DCCReference Include="..\Core\Commands\OptixCore.Commands.ContentReader.pas"/>
+        <DCCReference Include="..\Core\Tasks\OptixCore.Task.ProcessDump.pas"/>
         <DCCReference Include="..\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.SessionHandler.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Client.pas"/>
-        <DCCReference Include="..\Core\OptixCore.WinApiEx.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.Helper.pas"/>
-        <DCCReference Include="..\Core\OptixCore.Types.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.LogNotifier.pas"/>
-        <DCCReference Include="..\Core\OptixCore.Classes.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.FileSystem.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Preflight.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.Exceptions.pas"/>
         <DCCReference Include="Units\Threads\Optix.Protocol.Worker.FileTransfer.pas"/>
-        <DCCReference Include="..\Core\Network\OptixCore.Protocol.FileTransfer.pas"/>
-        <DCCReference Include="..\Core\Tasks\OptixCore.Task.ProcessDump.pas"/>
         <DCCReference Include="Units\Actions\Optix.Actions.ProcessHandler.pas"/>
         <DCCReference Include="..\Server\Units\Optix.Helper.pas"/>
         <DCCReference Include="..\Server\Units\Optix.Constants.pas"/>
@@ -196,15 +205,6 @@
         <DCCReference Include="..\Server\Units\Forms\uFormDebugThreads.pas">
             <Form>FormDebugThreads</Form>
         </DCCReference>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Base.pas"/>
-        <DCCReference Include="..\Core\OptixCore.ClassesRegistry.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.FileSystem.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Process.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Shell.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.Registry.pas"/>
-        <DCCReference Include="..\Core\System\OptixCore.System.Registry.pas"/>
-        <DCCReference Include="..\Core\Commands\OptixCore.Commands.ContentReader.pas"/>
-        <DCCReference Include="..\Core\OptixCore.Helper.pas"/>
         <DCCReference Include="Units\Forms\uFormWarning.pas">
             <Form>FormWarning</Form>
         </DCCReference>

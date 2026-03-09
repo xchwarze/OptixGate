@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Actions.ProcessHandler;
 
 interface
@@ -63,54 +61,54 @@ uses
 type
   TProcessHandler = class
   private
-    FInstanceId         : TGUID;
-    FGroupId            : TGUID;
+    FInstanceId: TGUID;
+    FGroupId: TGUID;
 
-    FJobObject          : THandle;
+    FJobObject: THandle;
     
-    FPipeOutRead        : THandle;
-    FPipeOutWrite       : THandle;
-    FPipeInRead         : THandle;
-    FPipeInWrite        : THandle;
+    FPipeOutRead: THandle;
+    FPipeOutWrite: THandle;
+    FPipeInRead: THandle;
+    FPipeInWrite: THandle;
     
-    FStartupInformation : TStartupInfo;
-    FProcessInformation : TProcessInformation;
+    FStartupInformation: TStartupInfo;
+    FProcessInformation: TProcessInformation;
 
-    FCommandLine  : String;
-    FShowWindow   : Boolean;
+    FCommandLine: string;
+    FShowWindow: Boolean;
 
     {@M}
-    procedure Cleanup();
-    function IsActive() : Boolean;
-    function GetAvailableOutputBytes() : DWORD;
+    procedure Cleanup;
+    function IsActive: Boolean;
+    function GetAvailableOutputBytes: DWORD;
   public
     {@C}
-    constructor Create(const ACommandLine : String); overload;
-    constructor Create(const ACommandLine : String; const AGroupId : TGUID); overload;
-    destructor Destroy(); override;
+    constructor Create(const ACommandLine: String); overload;
+    constructor Create(const ACommandLine: string; const AGroupId: TGUID); overload;
+    destructor Destroy; override;
 
     {@M}
-    procedure Start(const AControlIO : Boolean = False);
-    procedure TryClose();
-    procedure Close();
+    procedure Start(const AControlIO: Boolean = False);
+    procedure TryClose;
+    procedure Close;
 
-    procedure CtrlC();
-    procedure TryCtrlC();
+    procedure CtrlC;
+    procedure TryCtrlC;
 
-    function ReadAvailableOutput(var pBuffer : PVOID; var ABytesRead : Cardinal; const AOemToChar : Boolean) : Boolean; overload;
-    function ReadAvailableOutput() : String; overload;
+    function ReadAvailableOutput(var pBuffer: PVOID; var ABytesRead: Cardinal; const AOemToChar: Boolean): Boolean; overload;
+    function ReadAvailableOutput: string; overload;
 
-    procedure Write(const pData : PVOID; const ADataSize : Cardinal);
-    procedure WriteLn(AStr : AnsiString = '');
+    procedure Write(const pData: PVOID; const ADataSize: Cardinal);
+    procedure WriteLn(AStr: AnsiString = '');
 
     {@G/S - Options}
-    property ShowWindow : Boolean read FShowWindow write FShowWindow;
+    property ShowWindow: Boolean read FShowWindow write FShowWindow;
 
     {@G}
-    property InstanceId  : TGUID   read FInstanceId;
-    property GroupId     : TGUID   read FGroupId;
-    property CommandLine : String  read FCommandLine;
-    property Active      : Boolean read IsActive;
+    property InstanceId: TGUID read FInstanceId;
+    property GroupId: TGUID read FGroupId;
+    property CommandLine: String read FCommandLine;
+    property Active: Boolean read IsActive;
   end;
 
 implementation
@@ -122,22 +120,22 @@ uses
   OptixCore.WinApiEx, OptixCore.Exceptions;
 // ---------------------------------------------------------------------------------------------------------------------
 
-constructor TProcessHandler.Create(const ACommandLine : String);
+constructor TProcessHandler.Create(const ACommandLine: String);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FShowWindow := True;
 
-  FInstanceId := TGUID.NewGuid();
+  FInstanceId := TGUID.NewGuid;
   FGroupId := TGUID.Empty;
   
-  Cleanup();
+  Cleanup;
 
   FCommandLine := ACommandLine;
 end;
 
-constructor TProcessHandler.Create(const ACommandLine : String; const AGroupId : TGUID);
+constructor TProcessHandler.Create(const ACommandLine: string; const AGroupId: TGUID);
 begin
   Create(ACommandLine);
   ///
@@ -145,25 +143,25 @@ begin
   FGroupId := AGroupId;
 end;
 
-destructor TProcessHandler.Destroy();
+destructor TProcessHandler.Destroy;
 begin
-  Close();
+  Close;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TProcessHandler.Start(const AControlIO : Boolean = False);
+procedure TProcessHandler.Start(const AControlIO: Boolean = False);
 begin
-  Close(); // Terminate + clean previous process instance informations, if any.
+  Close; // Terminate + clean previous process instance informations, if any.
   try
-    var AJobObjectExtendedLimitInformation : TJobObjectExtendedLimitInformation;
+    var AJobObjectExtendedLimitInformation: TJobObjectExtendedLimitInformation;
     ZeroMemory(@AJobObjectExtendedLimitInformation, SizeOf(TJobObjectExtendedLimitInformation));
   
     var ACreateProcessFlags := CREATE_NEW_CONSOLE;
     
     if AControlIO (* or ??? *) then begin
-      FJobObject := CreateJobObjectW(nil, PWideChar(TGUID.NewGuid.ToString()));
+      FJobObject := CreateJobObjectW(nil, PWideChar(TGUID.NewGuid.ToString));
       if (FJobObject = 0) then
         raise EWindowsException.Create('CreateJobObjectW');
       ///
@@ -180,11 +178,11 @@ begin
       ACreateProcessFlags := ACreateProcessFlags or CREATE_BREAKAWAY_FROM_JOB;
     end;
 
-    var ASecurityAttributes : TSecurityAttributes;
+    var ASecurityAttributes: TSecurityAttributes;
 
-    ASecurityAttributes.nLength              := SizeOf(TSecurityAttributes);
+    ASecurityAttributes.nLength := SizeOf(TSecurityAttributes);
     ASecurityAttributes.lpSecurityDescriptor := nil;
-    ASecurityAttributes.bInheritHandle       := AControlIO (* or ??? *);
+    ASecurityAttributes.bInheritHandle := AControlIO (* or ??? *);
 
     FStartupInformation.dwFlags := STARTF_USESHOWWINDOW;
     
@@ -198,8 +196,8 @@ begin
       FStartupInformation.dwFlags := FStartupInformation.dwFlags or STARTF_USESTDHANDLES;
       
       FStartupInformation.hStdOutput := FPipeInWrite;
-      FStartupInformation.hStdInput  := FPipeOutRead;
-      FStartupInformation.hStdError  := FPipeInWrite;
+      FStartupInformation.hStdInput := FPipeOutRead;
+      FStartupInformation.hStdError := FPipeInWrite;
     end;
     
     if FShowWindow then
@@ -227,32 +225,32 @@ begin
       if not AssignProcessToJobObject(FJobObject, FProcessInformation.hProcess) then
         raise EWindowsException.Create('AssignProcessToJobObject');
   except
-    TryClose();
+    TryClose;
 
     raise;
   end;
 end;
 
-function TProcessHandler.GetAvailableOutputBytes() : DWORD;
+function TProcessHandler.GetAvailableOutputBytes: DWORD;
 begin
-  if not PeekNamedPipe(FPipeInRead, nil, 0, nil, @result, nil) then
+  if not PeekNamedPipe(FPipeInRead, nil, 0, nil, @Result, nil) then
     raise EWindowsException.Create('PeekNamedPipe');
 end;
 
-function TProcessHandler.ReadAvailableOutput(var pBuffer : PVOID; var ABytesRead : Cardinal; const AOemToChar : Boolean) : Boolean;
+function TProcessHandler.ReadAvailableOutput(var pBuffer: PVOID; var ABytesRead: Cardinal; const AOemToChar: Boolean): Boolean;
 begin  
-  result := False;
+  Result := False;
   ///
 
   ABytesRead := 0;
   pBuffer := nil;
   
   if FPipeInRead = 0 then
-    Exit();
+    Exit;
 
-  var ABytesAvailable := GetAvailableOutputBytes();
+  var ABytesAvailable := GetAvailableOutputBytes;
   if ABytesAvailable = 0 then
-    Exit();
+    Exit;
   ///
 
   GetMem(pBuffer, ABytesAvailable);
@@ -266,9 +264,9 @@ begin
         raise EWindowsException.Create('OemToCharBuffA');
 
     ///
-    result := (ABytesRead > 0);
+    Result := (ABytesRead > 0);
   except
-    on E : Exception do begin
+    on E: Exception do begin
       FreeMem(pBuffer, ABytesAvailable);
 
       raise;
@@ -276,9 +274,9 @@ begin
   end;
 end;
 
-function TProcessHandler.ReadAvailableOutput() : String;
+function TProcessHandler.ReadAvailableOutput: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   var pBuffer := PVOID(nil);
@@ -288,34 +286,34 @@ begin
     ReadAvailableOutput(pBuffer, ABufferSize, True);
     ///
 
-    SetString(result, PAnsiChar(pBuffer), ABufferSize);
+    SetString(Result, PAnsiChar(pBuffer), ABufferSize);
   finally
     if (ABufferSize > 0) and Assigned(pBuffer) then    
       FreeMem(pBuffer, ABufferSize);
   end;
 end;
 
-procedure TProcessHandler.Write(const pData : PVOID; const ADataSize : Cardinal);
+procedure TProcessHandler.Write(const pData: PVOID; const ADataSize: Cardinal);
 begin
-  if not IsActive() or (FPipeOutWrite = 0) or (ADataSize = 0) or not Assigned(pData) then
-    Exit();
+  if not IsActive or (FPipeOutWrite = 0) or (ADataSize = 0) or not Assigned(pData) then
+    Exit;
   ///
 
-  var ABytesWritten : DWORD;
+  var ABytesWritten: DWORD;
   
   if NOT WriteFile(FPipeOutWrite, PByte(pData)^, ADataSize, ABytesWritten, nil) then
     raise EWindowsException.Create('WriteFile');
 end;
 
-procedure TProcessHandler.WriteLn(AStr : AnsiString = '');
+procedure TProcessHandler.WriteLn(AStr: AnsiString = '');
 begin
   Write(@AStr[1], Length(AStr));
 end;
 
-procedure TProcessHandler.CtrlC();
+procedure TProcessHandler.CtrlC;
 begin
-  if not IsActive() then
-    Exit();
+  if not IsActive then
+    Exit;
   ///
 
   if not AttachConsole(FProcessInformation.dwProcessId) then
@@ -331,39 +329,39 @@ begin
         raise EWindowsException.Create('SetConsoleCtrlHandler');
     end;
   finally
-    if not FreeConsole() then
+    if not FreeConsole then
       raise EWindowsException.Create('FreeConsole');
   end;
 end;
 
-procedure TProcessHandler.TryCtrlC();
+procedure TProcessHandler.TryCtrlC;
 begin
   try
-    CtrlC();
+    CtrlC
   except
 
   end;
 end;
 
-function TProcessHandler.IsActive() : Boolean;
+function TProcessHandler.IsActive: Boolean;
 begin
-  result := False;
+  Result := False;
   
   if FProcessInformation.hProcess = 0 then
-    Exit();
+    Exit;
   ///
 
   case WaitForSingleObject(FProcessInformation.hProcess, 0) of
-    WAIT_OBJECT_0 : ;
+    WAIT_OBJECT_0: ;
 
     else
-      result := True;
+      Result := True;
   end;
 end;
 
-procedure TProcessHandler.Close();
+procedure TProcessHandler.Close;
 begin
-  var AExitCode : LongWord := 0;
+  var AExitCode: LongWord := 0;
 
   if FJobObject > 0 then begin
     if not TerminateJobObject(FJobObject, AExitCode) then
@@ -379,19 +377,19 @@ begin
   end;
 
   ///
-  Cleanup();
+  Cleanup;
 end;
 
-procedure TProcessHandler.TryClose();
+procedure TProcessHandler.TryClose;
 begin
   try
-    Close();
+    Close
   except
 
   end;
 end;
 
-procedure TProcessHandler.Cleanup();
+procedure TProcessHandler.Cleanup;
 begin
   FJobObject := 0;
 
@@ -407,10 +405,10 @@ begin
   if FPipeInWrite > 0 then
     CloseHandle(FPipeInWrite);
   
-  FPipeOutRead  := 0;
+  FPipeOutRead := 0;
   FPipeOutWrite := 0;
-  FPipeInRead   := 0;
-  FPipeInWrite  := 0;
+  FPipeInRead := 0;
+  FPipeInWrite := 0;
 
   ZeroMemory(@FStartupInformation, SizeOf(TStartupInfo));
   ZeroMemory(@FProcessInformation, Sizeof(TProcessInformation));

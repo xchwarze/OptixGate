@@ -51,8 +51,6 @@ program OptixGate;
 
 uses
   Vcl.Forms,
-  Vcl.Themes,
-  Vcl.Styles,
   OptixCore.Exceptions in '..\Core\OptixCore.Exceptions.pas',
   OptixCore.Sockets.Helper in '..\Core\Network\OptixCore.Sockets.Helper.pas',
   OptixCore.Sockets.Exceptions in '..\Core\Network\OptixCore.Sockets.Exceptions.pas',
@@ -74,11 +72,6 @@ uses
   OptixCore.Protocol.Preflight in '..\Core\Network\OptixCore.Protocol.Preflight.pas',
   OptixCore.Protocol.Exceptions in '..\Core\Network\OptixCore.Protocol.Exceptions.pas',
   OptixCore.Protocol.FileTransfer in '..\Core\Network\OptixCore.Protocol.FileTransfer.pas',
-  OptixCore.OpenSSL.Headers in '..\Core\Network\OpenSSL\OptixCore.OpenSSL.Headers.pas',
-  OptixCore.OpenSSL.Helper in '..\Core\Network\OpenSSL\OptixCore.OpenSSL.Helper.pas',
-  OptixCore.OpenSSL.Exceptions in '..\Core\Network\OpenSSL\OptixCore.OpenSSL.Exceptions.pas',
-  OptixCore.OpenSSL.Context in '..\Core\Network\OpenSSL\OptixCore.OpenSSL.Context.pas',
-  OptixCore.OpenSSL.Handler in '..\Core\Network\OpenSSL\OptixCore.OpenSSL.Handler.pas',
   OptixCore.SessionInformation in '..\Core\Commands\OptixCore.SessionInformation.pas',
   OptixCore.Commands in '..\Core\Commands\OptixCore.Commands.pas',
   OptixCore.Commands.Base in '..\Core\Commands\OptixCore.Commands.Base.pas',

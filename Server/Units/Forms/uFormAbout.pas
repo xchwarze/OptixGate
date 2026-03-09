@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uFormAbout;
 
 interface
@@ -78,10 +76,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ImageBannerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
-    FFirstShow : Boolean;
+    FFirstShow: Boolean;
 
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     { Public declarations }
   end;
@@ -100,21 +98,21 @@ uses
 
 {$R *.dfm}
 
-procedure TFormAbout.DoResize();
+procedure TFormAbout.DoResize;
 begin
-  ImageBanner.Top   := 0;
-  ImageBanner.Left  := 0;
+  ImageBanner.Top := 0;
+  ImageBanner.Left := 0;
 
-  ShapeBanner.Top   := ImageBanner.Top + ImageBanner.Height;
-  ShapeBanner.Left  := 0;
+  ShapeBanner.Top := ImageBanner.Top + ImageBanner.Height;
+  ShapeBanner.Left := 0;
   ShapeBanner.Width := ClientWidth;
 
-  PanelDisclaimer.Top   := ShapeBanner.Top + ShapeBanner.Height + ScaleValue(4);
-  PanelDisclaimer.Left  := ScaleValue(4);
+  PanelDisclaimer.Top := ShapeBanner.Top + ShapeBanner.Height + ScaleValue(4);
+  PanelDisclaimer.Left := ScaleValue(4);
   PanelDisclaimer.Width := ClientWidth - (ScaleValue(4) * 2);
 
   ClientHeight := PanelDisclaimer.Top + PanelDisclaimer.Height + ScaleValue(4);
-  ClientWidth  := ImageBanner.Width;
+  ClientWidth := ImageBanner.Width;
 end;
 
 procedure TFormAbout.FormCreate(Sender: TObject);
@@ -122,14 +120,14 @@ begin
   FFirstShow := True;
 
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
   {$ENDIF}
 end;
 
 procedure TFormAbout.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormAbout.FormShow(Sender: TObject);
@@ -141,12 +139,12 @@ begin
     FFirstShow := False;
   end;
 
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormAbout.ImageBannerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  ReleaseCapture();
+  ReleaseCapture;
   SendMessage(Handle, WM_SYSCOMMAND, $F012, 0);
 end;
 

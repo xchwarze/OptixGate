@@ -57,31 +57,31 @@ uses
 type
   TStatusPanel = class(TCollectionItem)
   private
-    FText      : String;
-    FWidth     : Integer;
-    FHint      : String;
-    FAlignment : TAlignment;
-    FRect      : TRect;
+    FText: string;
+    FWidth: Integer;
+    FHint: string;
+    FAlignment: TAlignment;
+    FRect: TRect;
 
     {@M}
     procedure Invalidate;
 
-    procedure SetText(const AValue : String);
-    procedure SetWidth(const AValue : Integer);
-    procedure SetAlignment(const AValue : TAlignment);
+    procedure SetText(const AValue: String);
+    procedure SetWidth(const AValue: Integer);
+    procedure SetAlignment(const AValue: TAlignment);
   public
     {@C}
-    constructor Create(ACollection : TCollection); override;
-    destructor Destroy(); override;
+    constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
 
     {@G/S}
-    property Rect : TRect read FRect write FRect;
+    property Rect: TRect read FRect write FRect;
   published
     {@G/S}
-    property Text      : String     read FText      write SetText;
-    property Width     : Integer    read FWidth     write SetWidth;
-    property Hint      : String     read FHint      write FHint;
-    property Alignment : TAlignment read FAlignment write SetAlignment;
+    property Text: String read FText write SetText;
+    property Width: Integer read FWidth write SetWidth;
+    property Hint: String read FHint write FHint;
+    property Alignment: TAlignment read FAlignment write SetAlignment;
   end;
 
   TStatusPanels = class(TOwnedCollection)
@@ -105,25 +105,25 @@ type
 
   TFlatStatusBar = class(TCustomControl)
   private
-    FPanels : TStatusPanels;
+    FPanels: TStatusPanels;
 
     {@M}
     procedure CMHintShow(var AMessage: TCMHintShow); message CM_HINTSHOW;
 
-    procedure RefreshPanelsRect();
-    function GetPanelByPoint(APoint : TPoint) : TStatusPanel;
+    procedure RefreshPanelsRect;
+    function GetPanelByPoint(APoint: TPoint): TStatusPanel;
   protected
     {@M}
     procedure Paint; override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     property Font;
 
     {@G/S}
-    property Panels : TStatusPanels read FPanels write FPanels;
+    property Panels: TStatusPanels read FPanels write FPanels;
   end;
 
 implementation
@@ -135,9 +135,9 @@ uses
 
 (* TFlatStatusBar *)
 
-function TFlatStatusBar.GetPanelByPoint(APoint : TPoint) : TStatusPanel;
+function TFlatStatusBar.GetPanelByPoint(APoint: TPoint): TStatusPanel;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var I := 0 to Panels.Count -1 do begin
@@ -149,17 +149,17 @@ begin
   end;
 end;
 
-procedure TFlatStatusBar.RefreshPanelsRect();
+procedure TFlatStatusBar.RefreshPanelsRect;
 begin
-  var ARect    := TRect.Empty;
-  ARect.Top    := 1;
+  var ARect := TRect.Empty;
+  ARect.Top := 1;
   ARect.Height := (ClientHeight - 2);
 
   for var I := 0 to Panels.Count -1 do begin
     var APanelItem := Panels.Items[i];
     ///
 
-    ARect.Left  := (ARect.Left + ARect.Width + 1);
+    ARect.Left := (ARect.Left + ARect.Width + 1);
 
     if I = (Panels.Count -1) then
       ARect.Width := (ClientWidth - ARect.Left - 1)
@@ -180,8 +180,8 @@ begin
 
   FPanels := TStatusPanels.Create(self);
 
-  Font.Name   := FONT_1;
-  Font.Color  := clBlack;
+  Font.Name := FONT_1;
+  Font.Color := clBlack;
   Font.Height := -11;
 
   ShowHint := True;
@@ -189,26 +189,26 @@ begin
   Height := 19;
 end;
 
-destructor TFlatStatusBar.Destroy();
+destructor TFlatStatusBar.Destroy;
 begin
   if Assigned(FPanels) then
     FreeAndNil(FPanels);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFlatStatusBar.Paint;
 begin
-  Canvas.Lock();
+  Canvas.Lock;
   try
     Canvas.Brush.Style := bsSolid;
     Canvas.Font.Assign(Font);
     ///
 
     // Draw Background
-    var ARect    := TRect.Empty;
-    ARect.Width  := ClientWidth;
+    var ARect := TRect.Empty;
+    ARect.Width := ClientWidth;
     ARect.Height := ClientHeight;
 
     Canvas.Brush.Color := clBlack;
@@ -218,7 +218,7 @@ begin
     // Draw Panels
     Canvas.Brush.Color := MAIN_GRAY;
 
-    RefreshPanelsRect();
+    RefreshPanelsRect;
 
     for var I := 0 to (Panels.Count -1) do begin
       ARect := Panels.Items[i].Rect;
@@ -230,25 +230,25 @@ begin
       // Draw Panel Caption
       var ACaption := Panels[I].Text;
 
-      var ATextRect    := TRect.Empty;
-      ATextRect.Top    := ARect.Top;
+      var ATextRect := TRect.Empty;
+      ATextRect.Top := ARect.Top;
       ATextRect.Height := ARect.Height;
-      ATextRect.Left   := (ARect.Left + 2);
-      ATextRect.Width  := (ARect.Width - 4);
+      ATextRect.Left := (ARect.Left + 2);
+      ATextRect.Width := (ARect.Width - 4);
 
-      var ATextFormat : TTextFormat := [tfEndEllipsis, tfSingleLine, tfVerticalCenter];
+      var ATextFormat: TTextFormat := [tfEndEllipsis, tfSingleLine, tfVerticalCenter];
 
       case Panels[I].Alignment of
-        taLeftJustify  : ATextFormat := ATextFormat + [tfLeft];
-        taRightJustify : ATextFormat := ATextFormat + [tfRight];
-        taCenter       : ATextFormat := ATextFormat + [tfCenter];
+        taLeftJustify: ATextFormat := ATextFormat + [tfLeft];
+        taRightJustify: ATextFormat := ATextFormat + [tfRight];
+        taCenter: ATextFormat := ATextFormat + [tfCenter];
       end;
 
       ///
       Canvas.TextRect(ATextRect, ACaption, ATextFormat);
     end;
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 
@@ -267,24 +267,24 @@ end;
 
 (* TStatusPanel *)
 
-constructor TStatusPanel.Create(ACollection : TCollection);
+constructor TStatusPanel.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
   ///
 
-  FText      := '';
-  FWidth     := 50;
-  FHint      := '';
+  FText := '';
+  FWidth := 50;
+  FHint := '';
   FAlignment := taLeftJustify;
-  FRect      := TRect.Empty;
+  FRect := TRect.Empty;
 
   ///
   Invalidate;
 end;
 
-destructor TStatusPanel.Destroy();
+destructor TStatusPanel.Destroy;
 begin
-  inherited Destroy();
+  inherited Destroy;
   ///
 
   Invalidate;
@@ -293,14 +293,14 @@ end;
 procedure TStatusPanel.Invalidate;
 begin
   if not Assigned(GetOwner()) then
-    Exit();
+    Exit;
   ///
 
-  if Assigned(TStatusPanels(GetOwner())) then
-    TFlatStatusBar(TStatusPanels(GetOwner()).GetOwner).Invalidate;
+  if Assigned(TStatusPanels(GetOwner)) then
+    TFlatStatusBar(TStatusPanels(GetOwner).GetOwner).Invalidate;
 end;
 
-procedure TStatusPanel.SetText(const AValue : String);
+procedure TStatusPanel.SetText(const AValue: String);
 begin
   if (FText = AValue) then
     Exit;
@@ -312,7 +312,7 @@ begin
   Invalidate;
 end;
 
-procedure TStatusPanel.SetWidth(const AValue : Integer);
+procedure TStatusPanel.SetWidth(const AValue: Integer);
 begin
   if (FWidth = AValue) then
     Exit;
@@ -324,7 +324,7 @@ begin
   Invalidate;
 end;
 
-procedure TStatusPanel.SetAlignment(const AValue : TAlignment);
+procedure TStatusPanel.SetAlignment(const AValue: TAlignment);
 begin
   if (AValue = FAlignment) then
     Exit;
@@ -343,7 +343,7 @@ begin
   Result := TStatusPanel(inherited Add);
 end;
 
-constructor TStatusPanels.create(AOwner : TPersistent);
+constructor TStatusPanels.create(AOwner: TPersistent);
 begin
   inherited Create(AOwner, TStatusPanel);
   ///
@@ -366,7 +366,7 @@ end;
 procedure TStatusPanels.Invalidate;
 begin
   if Assigned(GetOwner()) then
-    TFlatStatusBar(GetOwner()).Invalidate;
+    TFlatStatusBar(GetOwner).Invalidate;
 end;
 
 end.

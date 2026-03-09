@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Protocol.Preflight;
 
 interface
@@ -62,13 +60,13 @@ type
   );
 
   TOptixPreflightRequest = record
-    ProtocolVersion : String[50];
-    ClientKind      : TClientKind;
-    HandlerId       : TGUID;
+    ProtocolVersion: String[50];
+    ClientKind: TClientKind;
+    HandlerId: TGUID;
 
     {$IFDEF CLIENT}
     {@O}
-    class operator Initialize(out ADestRecord : TOptixPreflightRequest);
+    class operator Initialize(out ADestRecord: TOptixPreflightRequest);
     {$ENDIF}
   end;
 
@@ -77,10 +75,10 @@ implementation
 {$IFDEF CLIENT}
 uses OptixCore.Protocol.Packet;
 
-class operator TOptixPreflightRequest.Initialize(out ADestRecord : TOptixPreflightRequest);
+class operator TOptixPreflightRequest.Initialize(out ADestRecord: TOptixPreflightRequest);
 begin
   ADestRecord.ProtocolVersion := OPTIX_PROTOCOL_VERSION;
-  ADestRecord.HandlerId       := TGUID.Empty;
+  ADestRecord.HandlerId := TGUID.Empty;
 end;
 {$ENDIF}
 

@@ -135,8 +135,8 @@ object FormWarning: TFormWarning
       AlignWithMargins = True
       Left = 69
       Top = 8
-      Width = 463
-      Height = 73
+      Width = 461
+      Height = 45
       Margins.Left = 8
       Margins.Top = 8
       Margins.Right = 8
@@ -159,8 +159,6 @@ object FormWarning: TFormWarning
       Transparent = True
       WordWrap = True
       StyleElements = [seClient, seBorder]
-      ExplicitWidth = 461
-      ExplicitHeight = 45
     end
   end
   object PanelBody: TFlatPanel

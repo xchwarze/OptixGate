@@ -57,56 +57,56 @@ uses
 type
   TFlatMetrics = class
   private
-    FControl : TControl;
+    FControl: TControl;
 
     {@M}
-    function GetMetric(const AIndex : Integer) : Integer;
-    function GetScaleFactor() : Single;
+    function GetMetric(const AIndex: Integer): Integer;
+    function GetScaleFactor: Single;
   public
     {@C}
-    constructor Create(const AControl : TControl);
+    constructor Create(const AControl: TControl);
 
     {@M}
-    function ScaleValue(const AValue : Integer) : Integer;
+    function ScaleValue(const AValue: Integer): Integer;
 
     {@G}
-    property _1  : Integer index 1  read GetMetric;
-    property _2  : Integer index 2  read GetMetric;
-    property _3  : Integer index 3  read GetMetric;
-    property _4  : Integer index 4  read GetMetric;
-    property _5  : Integer index 5  read GetMetric;
-    property _6  : Integer index 6  read GetMetric;
-    property _7  : Integer index 7  read GetMetric;
-    property _8  : Integer index 8  read GetMetric;
-    property _9  : Integer index 9  read GetMetric;
-    property _10 : Integer index 10 read GetMetric;
-    property _11 : Integer index 11 read GetMetric;
-    property _12 : Integer index 12 read GetMetric;
-    property _13 : Integer index 13 read GetMetric;
-    property _14 : Integer index 14 read GetMetric;
-    property _15 : Integer index 15 read GetMetric;
-    property _16 : Integer index 16 read GetMetric;
-    property _17 : Integer index 17 read GetMetric;
-    property _18 : Integer index 18 read GetMetric;
-    property _19 : Integer index 19 read GetMetric;
-    property _20 : Integer index 20 read GetMetric;
+    property _1: Integer index 1 read GetMetric;
+    property _2: Integer index 2 read GetMetric;
+    property _3: Integer index 3 read GetMetric;
+    property _4: Integer index 4 read GetMetric;
+    property _5: Integer index 5 read GetMetric;
+    property _6: Integer index 6 read GetMetric;
+    property _7: Integer index 7 read GetMetric;
+    property _8: Integer index 8 read GetMetric;
+    property _9: Integer index 9 read GetMetric;
+    property _10: Integer index 10 read GetMetric;
+    property _11: Integer index 11 read GetMetric;
+    property _12: Integer index 12 read GetMetric;
+    property _13: Integer index 13 read GetMetric;
+    property _14: Integer index 14 read GetMetric;
+    property _15: Integer index 15 read GetMetric;
+    property _16: Integer index 16 read GetMetric;
+    property _17: Integer index 17 read GetMetric;
+    property _18: Integer index 18 read GetMetric;
+    property _19: Integer index 19 read GetMetric;
+    property _20: Integer index 20 read GetMetric;
 
-    property ScaleFactor : Single read GetScaleFactor;
+    property ScaleFactor: Single read GetScaleFactor;
   end;
 
-procedure FadeBitmap32Opacity(var ABitmap : TBitmap; const AOpacity : Word = 200);
-procedure InitializeBitmap32(var ABmp : TBitmap; AWidth, AHeight : Integer);
-function GetParentChain(ABase : TComponent) : String;
-procedure DrawGlyph(const ACanvas : TCanvas; const AImageList : TCustomImageList; const AImageIndex : Integer;
-  const X, Y : Integer; const AEnabled : Boolean);
-procedure ScaleMatrixGlyph(const AGlyph: TMatrixGlyph; var AScaledGlyph : TMatrixGlyph; const AScaleFactor : Integer);
-function RotateMatrixGlyph(const AGlyph: TByteArrayArray; AClockwise : Boolean = true) : TMatrixGlyph;
-procedure DrawMatrixGlyph(const ACanvas : TCanvas; const AGlyphMatrix : TMatrixGlyph; const X, Y : Integer;
-  const AGlyphColor : TColor); overload;
-procedure DrawMatrixGlyph(const ACanvas : TCanvas; const AGlyphMatrix : TMatrixGlyph; const APoint : TPoint;
-  const AGlyphColor : TColor); overload;
-function IsValidMatrixGlyph(const AGlyph : TMatrixGlyph) : Boolean;
-function DebugRect(const ARect : TRect; const AName : String) : String;
+procedure FadeBitmap32Opacity(var ABitmap: TBitmap; const AOpacity: Word = 200);
+procedure InitializeBitmap32(var ABmp: TBitmap; AWidth, AHeight: Integer);
+function GetParentChain(ABase: TComponent): string;
+procedure DrawGlyph(const ACanvas: TCanvas; const AImageList: TCustomImageList; const AImageIndex: Integer;
+  const X, Y: Integer; const AEnabled: Boolean);
+procedure ScaleMatrixGlyph(const AGlyph: TMatrixGlyph; var AScaledGlyph: TMatrixGlyph; const AScaleFactor: Integer);
+function RotateMatrixGlyph(const AGlyph: TByteArrayArray; AClockwise: Boolean = true): TMatrixGlyph;
+procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGlyph; const X, Y: Integer;
+  const AGlyphColor: TColor); overload;
+procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGlyph; const APoint: TPoint;
+  const AGlyphColor: TColor); overload;
+function IsValidMatrixGlyph(const AGlyph: TMatrixGlyph): Boolean;
+function DebugRect(const ARect: TRect; const AName: String): string;
 
 implementation
 
@@ -117,18 +117,18 @@ uses
 
 (* Local *)
 
-function DebugRect(const ARect : TRect; const AName : String) : String;
+function DebugRect(const ARect: TRect; const AName: String): string;
 begin
-  result := Format('[%s] X:%d, Y:%d, W:%d, H:%d', [AName, ARect.Left, ARect.Top, ARect.Width, ARect.Height]);
+  Result := Format('[%s] X:%d, Y:%d, W:%d, H:%d', [AName, ARect.Left, ARect.Top, ARect.Width, ARect.Height]);
 end;
 
-function IsValidMatrixGlyph(const AGlyph : TMatrixGlyph) : Boolean;
+function IsValidMatrixGlyph(const AGlyph: TMatrixGlyph): Boolean;
 begin
-  result := (Length(AGlyph) > 0) and (Length(AGlyph[0]) > 0);
+  Result := (Length(AGlyph) > 0) and (Length(AGlyph[0]) > 0);
 end;
 
-procedure DrawMatrixGlyph(const ACanvas : TCanvas; const AGlyphMatrix : TMatrixGlyph; const X, Y : Integer;
-  const AGlyphColor : TColor);
+procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGlyph; const X, Y: Integer;
+  const AGlyphColor: TColor);
 begin
   if not Assigned(ACanvas) or not IsValidMatrixGlyph(AGlyphMatrix) then
     Exit;
@@ -140,13 +140,13 @@ begin
         ACanvas.Pixels[(X + I), (Y + N)] := AGlyphColor;
 end;
 
-procedure DrawMatrixGlyph(const ACanvas : TCanvas; const AGlyphMatrix : TMatrixGlyph; const APoint : TPoint;
-  const AGlyphColor : TColor);
+procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGlyph; const APoint: TPoint;
+  const AGlyphColor: TColor);
 begin
   DrawMatrixGlyph(ACanvas, AGlyphMatrix, APoint.X, APoint.Y, AGlyphColor);
 end;
 
-procedure ScaleMatrixGlyph(const AGlyph: TMatrixGlyph; var AScaledGlyph : TMatrixGlyph; const AScaleFactor : Integer);
+procedure ScaleMatrixGlyph(const AGlyph: TMatrixGlyph; var AScaledGlyph: TMatrixGlyph; const AScaleFactor: Integer);
 begin
   if not IsValidMatrixGlyph(AGlyph) then begin
     SetLength(AScaledGlyph, 0);
@@ -169,9 +169,9 @@ begin
           AScaledGlyph[i * AScaleFactor + k][j * AScaleFactor + l] := AGlyph[i][j];
 end;
 
-function RotateMatrixGlyph(const AGlyph: TByteArrayArray; AClockwise : Boolean = true) : TMatrixGlyph;
+function RotateMatrixGlyph(const AGlyph: TByteArrayArray; AClockwise: Boolean = true): TMatrixGlyph;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   var ARowLength := Length(AGlyph);
@@ -180,25 +180,25 @@ begin
 
   var AColumnLength := Length(AGlyph[0]);
 
-  SetLength(result, AColumnLength, ARowLength);
+  SetLength(Result, AColumnLength, ARowLength);
 
   for var X := 0 to ARowLength - 1 do begin
     for var Y := 0 to AColumnLength - 1 do begin
       if AClockwise then
-        result[Y][(ARowLength - 1) - X] := AGlyph[X][Y]
+        Result[Y][(ARowLength - 1) - X] := AGlyph[X][Y]
       else
-        result[(AColumnLength - 1) - Y][X] := AGlyph[X][Y];
+        Result[(AColumnLength - 1) - Y][X] := AGlyph[X][Y];
     end;
   end;
 end;
 
-procedure DrawGlyph(const ACanvas : TCanvas; const AImageList : TCustomImageList; const AImageIndex : Integer;
-  const X, Y : Integer; const AEnabled : Boolean);
+procedure DrawGlyph(const ACanvas: TCanvas; const AImageList: TCustomImageList; const AImageIndex: Integer;
+  const X, Y: Integer; const AEnabled: Boolean);
 begin
   if not Assigned(AImageList) or (AImageIndex <= -1) then
     Exit;
 
-  var AGlyph := TBitmap.Create();
+  var AGlyph := TBitmap.Create;
   try
     InitializeBitmap32(AGlyph, AImageList.Width, AImageList.Height);
 
@@ -210,20 +210,19 @@ begin
     ///
     ACanvas.Draw(X, Y, AGlyph);
   finally
-    if Assigned(AGlyph) then
-      FreeAndNil(AGlyph);
+    AGlyph.Free;     
   end;
 end;
 
-function GetParentChain(ABase : TComponent) : String;
+function GetParentChain(ABase: TComponent): string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if not Assigned(ABase) then
     Exit;
 
-  var AList := TStringList.Create();
+  var AList := TStringList.Create;
   try
     AList.Add(ABase.Name);
 
@@ -239,9 +238,9 @@ begin
 
     for var I := AList.Count -1 downto 0 do begin
       if I <> AList.Count -1 then
-        result := result + '.';
+        Result := Result + '.';
 
-      result := result + AList.Strings[I];
+      Result := Result + AList.Strings[I];
     end;
   finally
     if Assigned(AList) then
@@ -249,29 +248,29 @@ begin
   end;
 end;
 
-procedure InitializeBitmap32(var ABmp : TBitmap; AWidth, AHeight : Integer);
+procedure InitializeBitmap32(var ABmp: TBitmap; AWidth, AHeight: Integer);
 begin
   if NOT Assigned(ABmp) then
     Exit;
   ///
 
-  ABmp.PixelFormat   := pf32Bit;
-  ABmp.Width         := AWidth;
-  ABmp.Height        := AHeight;
-  ABmp.HandleType    := bmDIB;
+  ABmp.PixelFormat := pf32Bit;
+  ABmp.Width := AWidth;
+  ABmp.Height := AHeight;
+  ABmp.HandleType := bmDIB;
   ABmp.ignorepalette := true;
-  ABmp.alphaformat   := afPremultiplied;
+  ABmp.alphaformat := afPremultiplied;
 
   var p := ABmp.ScanLine[AHeight - 1];
   ZeroMemory(p, AWidth * AHeight * 4);
 end;
 
-function ValidGraphic(ABitmap : TBitmap) : Boolean;
+function ValidGraphic(ABitmap: TBitmap): Boolean;
 begin
-  result := Assigned(ABitmap) and (ABitmap.Width > 0) and (ABitmap.Height > 0);
+  Result := Assigned(ABitmap) and (ABitmap.Width > 0) and (ABitmap.Height > 0);
 end;
 
-procedure FadeBitmap32Opacity(var ABitmap : TBitmap; const AOpacity : Word = 200);
+procedure FadeBitmap32Opacity(var ABitmap: TBitmap; const AOpacity: Word = 200);
 begin
   if not ValidGraphic(ABitmap) then
     Exit;
@@ -283,11 +282,11 @@ begin
       try
         if pPixels^.rgbReserved = 0 then continue;
 
-        var APixelOpacity : Word := (pPixels^.rgbReserved * AOpacity) div high(byte);
+        var APixelOpacity: Word := (pPixels^.rgbReserved * AOpacity) div high(byte);
 
-        pPixels^.rgbRed   := (pPixels^.rgbRed   * APixelOpacity) div $FF;
+        pPixels^.rgbRed := (pPixels^.rgbRed   * APixelOpacity) div $FF;
         pPixels^.rgbGreen := (pPixels^.rgbGreen * APixelOpacity) div $FF;
-        pPixels^.rgbBlue  := (pPixels^.rgbBlue  * APixelOpacity) div $FF;
+        pPixels^.rgbBlue := (pPixels^.rgbBlue  * APixelOpacity) div $FF;
 
         pPixels^.rgbReserved := APixelOpacity;
       finally
@@ -299,36 +298,36 @@ end;
 
 (* TFlatMetrics *)
 
-function TFlatMetrics.GetMetric(const AIndex : Integer) : Integer;
+function TFlatMetrics.GetMetric(const AIndex: Integer): Integer;
 begin
   if not Assigned(FControl) then
-    result := AIndex
+    Result := AIndex
   else
-    result := FControl.ScaleValue(AIndex);
+    Result := FControl.ScaleValue(AIndex);
 end;
 
-constructor TFlatMetrics.Create(const AControl : TControl);
+constructor TFlatMetrics.Create(const AControl: TControl);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FControl := AControl;
 end;
 
-function TFlatMetrics.GetScaleFactor() : Single;
+function TFlatMetrics.GetScaleFactor: Single;
 begin
   if not Assigned(FControl) then
-    result := 1
+    Result := 1
   else
-    result := FControl.ScaleFactor;
+    Result := FControl.ScaleFactor;
 end;
 
-function TFlatMetrics.ScaleValue(const AValue : Integer) : Integer;
+function TFlatMetrics.ScaleValue(const AValue: Integer): Integer;
 begin
   if not Assigned(FControl) then
-    result := AValue
+    Result := AValue
   else
-    result := FControl.ScaleValue(AValue);
+    Result := FControl.ScaleValue(AValue);
 end;
 
 end.

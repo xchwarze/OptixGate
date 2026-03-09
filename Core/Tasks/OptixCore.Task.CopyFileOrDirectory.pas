@@ -60,38 +60,38 @@ type
   TOptixCopyFileOrDirectoryTask = class(TOptixTask)
   protected
     {@M}
-    function TaskCode() : TOptixTaskResult; override;
+    function TaskCode: TOptixTaskResult; override;
   end;
 
   TOptixTaskGetCopyFileOrDirectoryResult = class(TOptixTaskResult)
   private
     [OptixSerializableAttribute]
-    FFileInformation : TFileInformation;
+    FFileInformation: TFileInformation;
 
     [OptixSerializableAttribute]
-    FSource : String;
+    FSource: string;
 
     [OptixSerializableAttribute]
-    FDestination : String;
+    FDestination: string;
 
     [OptixSerializableAttribute]
-    FMoved : Boolean;
+    FMoved: Boolean;
   protected
     {@M}
-    function GetExtendedDescription() : String; override;
+    function GetExtendedDescription: string; override;
   public
     {@C}
-    constructor Create(const ASource, ADestination : string; const AMoved : Boolean); overload;
-    destructor Destroy(); override;
+    constructor Create(const ASource, ADestination: string; const AMoved: Boolean); overload;
+    destructor Destroy; override;
 
     {@M}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@G}
-    property FileInformation : TFileInformation read FFileInformation;
-    property Source          : String           read FSource;
-    property Destination     : String           read FDestination;
-    property Moved           : Boolean          read FMoved;
+    property FileInformation: TFileInformation read FFileInformation;
+    property Source: String read FSource;
+    property Destination: String read FDestination;
+    property Moved: Boolean read FMoved;
   end;
 
 implementation
@@ -105,7 +105,7 @@ uses
 
 (* TOptixCopyFileOrDirectoryTask *)
 
-function TOptixCopyFileOrDirectoryTask.TaskCode() : TOptixTaskResult;
+function TOptixCopyFileOrDirectoryTask.TaskCode: TOptixTaskResult;
 begin
   if not Assigned(FCommand) or not (FCommand is TOptixCommandCopyFileOrDirectory) then
     Exit(nil);
@@ -120,7 +120,7 @@ begin
   );
 
   ///
-  result := TOptixTaskGetCopyFileOrDirectoryResult.Create(
+  Result := TOptixTaskGetCopyFileOrDirectoryResult.Create(
     ACastedCommand.Source,
     ACopiedOrMovedFileDestination,
     ACastedCommand.CopyMode = vccmCut
@@ -129,38 +129,38 @@ end;
 
 (* TOptixTaskGetCopyFileOrDirectoryResult *)
 
-constructor TOptixTaskGetCopyFileOrDirectoryResult.Create(const ASource, ADestination : string; const AMoved : Boolean);
+constructor TOptixTaskGetCopyFileOrDirectoryResult.Create(const ASource, ADestination: string; const AMoved: Boolean);
 begin
-  FSource      := ASource;
+  FSource := ASource;
   FDestination := ADestination;
-  FMoved       := AMoved;
+  FMoved := AMoved;
   ///
 
   FFileInformation := TFileInformation.Create(FDestination, DirectoryExists(FDestination));
 
   ///
-  inherited Create();
+  inherited Create;
 end;
 
-destructor TOptixTaskGetCopyFileOrDirectoryResult.Destroy();
+destructor TOptixTaskGetCopyFileOrDirectoryResult.Destroy;
 begin
   if Assigned(FFileInformation) then
     FFileInformation.Free;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixTaskGetCopyFileOrDirectoryResult.AfterCreate();
+procedure TOptixTaskGetCopyFileOrDirectoryResult.AfterCreate;
 begin
   inherited;
   ///
 
   if not Assigned(FFileInformation) then
-    FFileInformation := TFileInformation.Create();
+    FFileInformation := TFileInformation.Create;
 end;
 
-function TOptixTaskGetCopyFileOrDirectoryResult.GetExtendedDescription() : String;
+function TOptixTaskGetCopyFileOrDirectoryResult.GetExtendedDescription: string;
 begin
   // TODO: Ternary (Delphi CE 13+)
   var AMode := '';
@@ -170,7 +170,7 @@ begin
     AMode := 'pasted';
   // END TODO
 
-  result := Format('"%s" was successfully %s to "%s"', [FSource, AMode, FDestination]);
+  Result := Format('"%s" was successfully %s to "%s"', [FSource, AMode, FDestination]);
 end;
 
 end.

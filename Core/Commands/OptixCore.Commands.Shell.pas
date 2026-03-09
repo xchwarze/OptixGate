@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.Shell;
 
 interface
@@ -68,13 +66,13 @@ type
   TOptixCommandShellInstance = class(TOptixCommandShellBase)
   private
     [OptixSerializableAttribute]
-    FInstanceId : TGUID;
+    FInstanceId: TGUID;
   public
     {@C}
-    constructor Create(const AInstanceId : TGUID);
+    constructor Create(const AInstanceId: TGUID);
 
     {@G}
-    property InstanceId : TGUID read FInstanceId;
+    property InstanceId: TGUID read FInstanceId;
   end;
 
   TOptixCommandDeleteShellInstance = class(TOptixCommandShellInstance);
@@ -83,42 +81,42 @@ type
   TOptixCommandWriteShellInstance = class(TOptixCommandShellInstance)
   private
     [OptixSerializableAttribute]
-    FCommandLine : String;
+    FCommandLine: string;
   public
 
     {@C}
-    constructor Create(const AInstanceId : TGUID; const ACommandLine : String); overload;
+    constructor Create(const AInstanceId: TGUID; const ACommandLine: String); overload;
 
     {@G}
-    property CommandLine : String read FCommandLine;
+    property CommandLine: String read FCommandLine;
   end;
 
   TOptixCommandReadShellInstance = class(TOptixCommandShellInstance)
   private
     [OptixSerializableAttribute]
-    FOutput : String;
+    FOutput: string;
   public
     {@C}
-    constructor Create(const AGroupId : TGUID; const AOutput : String; const AInstanceId : TGUID);
+    constructor Create(const AGroupId: TGUID; const AOutput: string; const AInstanceId: TGUID);
 
     {@G}
-    property Output : String read FOutput;
+    property Output: String read FOutput;
   end;
 
 implementation
 
 (* TOptiCommandxShellInstance *)
 
-constructor TOptixCommandShellInstance.Create(const AInstanceId : TGUID);
+constructor TOptixCommandShellInstance.Create(const AInstanceId: TGUID);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FInstanceId := AInstanceId;
 end;
 
 (* TOptixCommandWriteShellInstance *)
-constructor TOptixCommandWriteShellInstance.Create(const AInstanceId : TGUID; const ACommandLine : String);
+constructor TOptixCommandWriteShellInstance.Create(const AInstanceId: TGUID; const ACommandLine: String);
 begin
   inherited Create(AInstanceId);
   ///
@@ -127,12 +125,12 @@ begin
 end;
 
 (* TOptixCommandReadShellInstance *)
-constructor TOptixCommandReadShellInstance.Create(const AGroupId : TGUID; const AOutput : String; const AInstanceId : TGUID);
+constructor TOptixCommandReadShellInstance.Create(const AGroupId: TGUID; const AOutput: string; const AInstanceId: TGUID);
 begin
   inherited Create(AInstanceId);
   ///
 
-  FOutput     := AOutput;
+  FOutput := AOutput;
   FWindowGUID := AGroupId;
 end;
 

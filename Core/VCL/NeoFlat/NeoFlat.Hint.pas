@@ -63,36 +63,36 @@ type
   );
 
   THintInfo = record
-    HintShow       : Boolean;
-    HintShortPause : Integer;
-    HintPause      : Integer;
-    HintHidePause  : Integer;
+    HintShow: Boolean;
+    HintShortPause: Integer;
+    HintPause: Integer;
+    HintHidePause: Integer;
   end;
 
   TFlatHint = class(TComponent)
   private
-    FActive             : Boolean;
+    FActive: Boolean;
 
-    FOldHintWindowClass : THintWindowClass;
-    FOldHintInfo        : THintInfo;
-    FApplicationEvents  : TApplicationEvents;
+    FOldHintWindowClass: THintWindowClass;
+    FOldHintInfo: THintInfo;
+    FApplicationEvents: TApplicationEvents;
 
     {@M}
     procedure OnGlobalShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: Vcl.Controls.THintInfo);
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     {@G/S}
-    property Active : Boolean read FActive write FActive;
+    property Active: Boolean read FActive write FActive;
   end;
 
   TFlatHintWindow = class(THintWindow)
   private
-    FMetrics  : TFlatMetrics;
-    FArrowPos : TArrowPos;
-    FCaption  : String;
+    FMetrics: TFlatMetrics;
+    FArrowPos: TArrowPos;
+    FCaption: string;
   protected
     {@M}
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -103,12 +103,12 @@ type
     procedure ActivateHint(AHintRect: TRect; const AHint: String); override;
 
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   end;
 
   const
-    ARROW_TOP_RIGHT_GLYPH : TMatrixGlyph = [
+    ARROW_TOP_RIGHT_GLYPH: TMatrixGlyph = [
                                               [$0, $1, $1, $1, $1, $1, $1, $1],
                                               [$0, $1, $1, $1, $1, $1, $1, $1],
                                               [$0, $0, $0, $1, $1, $1, $1, $1],
@@ -134,7 +134,7 @@ uses
 
 (* TFlatHint *)
 
-constructor TFlatHint.Create(AOwner : TComponent);
+constructor TFlatHint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
@@ -149,7 +149,7 @@ begin
   FApplicationEvents.OnShowHint := OnGlobalShowHint;
 end;
 
-destructor TFlatHint.Destroy();
+destructor TFlatHint.Destroy;
 begin
   if Assigned(FApplicationEvents) then
     FreeAndNil(FApplicationEvents);
@@ -165,12 +165,12 @@ end;
 
 (* TFlatHintWindow *)
 
-constructor TFlatHintWindow.Create(AOwner : TComponent);
+constructor TFlatHintWindow.Create(AOwner: TComponent);
 begin
   inherited;
   ///
 
-  var ACursorPos : TPoint;
+  var ACursorPos: TPoint;
   GetCursorPos(ACursorPos);
   var AWinControl := FindVCLWindow(ACursorPos);
   if not Assigned(AWinControl) then
@@ -182,7 +182,7 @@ begin
   FMetrics := TFlatMetrics.Create(AWinControl);
 end;
 
-destructor TFlatHintWindow.Destroy();
+destructor TFlatHintWindow.Destroy;
 begin
   if Assigned(FMetrics) then
     FreeAndNil(FMetrics);
@@ -209,7 +209,7 @@ begin
 
   Caption := AHint;
 
-  Canvas.Font.Size  := 9;
+  Canvas.Font.Size := 9;
   Canvas.Font.Color := MAIN_ACCENT;
 
   FCaption := Caption;
@@ -227,11 +227,11 @@ begin
   Inc(AHintRect.Right, FMetrics.ScaleValue(22));
   Inc(AHintRect.Bottom, FMetrics._6);
 
-  var ATopLeftRect    := Rect(0, 0, Screen.Width div 2, Screen.Height div 2);
-  var ATopRightRect   := Rect(Screen.Width div 2, 0, Screen.Width, Screen.Height div 2);
+  var ATopLeftRect := Rect(0, 0, Screen.Width div 2, Screen.Height div 2);
+  var ATopRightRect := Rect(Screen.Width div 2, 0, Screen.Width, Screen.Height div 2);
   var ABottomLeftRect := Rect(0, Screen.Height div 2, Screen.Width div 2, Screen.Height);
 
-  var APoint : TPoint;
+  var APoint: TPoint;
   GetCursorPos(APoint);
 
   if ptinrect(ATopLeftRect, APoint) then
@@ -243,38 +243,38 @@ begin
   else
     FArrowPos := apBottomRight;
 
-  var ACurWidth : Integer;
+  var ACurWidth: Integer;
   if FArrowPos = apTopLeft then
     ACurWidth := FMetrics._12
   else
     ACurWidth := FMetrics._5;
 
   var AHintHeight := AHintRect.Bottom - AHintRect.Top;
-  var AHintWidth  := AHintRect.Right - AHintRect.Left;
+  var AHintWidth := AHintRect.Right - AHintRect.Left;
 
   case FArrowPos of
-    apTopLeft : AHintRect := Rect(
+    apTopLeft: AHintRect := Rect(
       APoint.x + ACurWidth,
       APoint.y + ACurWidth,
       APoint.x + AHintWidth + ACurWidth,
       APoint.y + AHintHeight + ACurWidth
     );
 
-    apTopRight : AHintRect := Rect(
+    apTopRight: AHintRect := Rect(
       APoint.x - AHintWidth - ACurWidth,
       APoint.y + ACurWidth,
       APoint.x - ACurWidth,
       APoint.y + AHintHeight + ACurWidth
     );
 
-    apBottomLeft  : AHintRect := Rect(
+    apBottomLeft: AHintRect := Rect(
       APoint.x + ACurWidth,
       APoint.y - AHintHeight - ACurWidth,
       APoint.x + AHintWidth + ACurWidth,
       APoint.y - ACurWidth
     );
 
-    apBottomRight : AHintRect := Rect(
+    apBottomRight: AHintRect := Rect(
       APoint.x - AHintWidth - ACurWidth,
       APoint.y - AHintHeight - ACurWidth,
       APoint.x - ACurWidth,
@@ -293,7 +293,7 @@ end;
 procedure TFlatHintWindow.Paint;
 begin
   var AArrowAreaRect := TRect.Empty;
-  var ATextRect      := TRect.Empty;
+  var ATextRect := TRect.Empty;
 
   case FArrowPos of
     apTopLeft, apBottomLeft: begin
@@ -329,7 +329,7 @@ begin
     end;
   end;
 
-  Canvas.Lock();
+  Canvas.Lock;
   try
     Canvas.Brush.Style := bsSolid;
 
@@ -346,15 +346,15 @@ begin
     Canvas.FillRect(AArrowAreaRect);
 
     // Draw Glyph (Arrow)
-    var AGlyph : TMatrixGlyph;
+    var AGlyph: TMatrixGlyph;
     ScaleMatrixGlyph(ARROW_TOP_RIGHT_GLYPH, AGlyph, round(FMetrics.ScaleFactor));
     if not IsValidMatrixGlyph(AGlyph) then
       Exit;
 
-    var AArrowPos : TPoint;
+    var AArrowPos: TPoint;
 
     case FArrowPos of
-      apTopLeft : begin
+      apTopLeft: begin
         AArrowPos := Point(
           AArrowAreaRect.Left + FMetrics._2, // X
           AArrowAreaRect.Top + FMetrics._2   // Y
@@ -363,13 +363,13 @@ begin
         AGlyph := RotateMatrixGlyph(AGlyph, False);
       end;
 
-      apTopRight :
+      apTopRight: 
         AArrowPos := Point(
           AArrowAreaRect.Right - FMetrics._3 - Length(AGlyph[0]), // X
           AArrowAreaRect.Top + FMetrics._2                        // Y
         );
 
-      apBottomLeft : begin
+      apBottomLeft: begin
         AArrowPos := Point(
           AArrowAreaRect.Left + FMetrics._2,                   // X
           AArrowAreaRect.Bottom - FMetrics._3 - Length(AGlyph) // Y
@@ -379,7 +379,7 @@ begin
         AGlyph := RotateMatrixGlyph(AGlyph, True);
       end;
 
-      apBottomRight : begin
+      apBottomRight: begin
         AArrowPos := Point(
           AArrowAreaRect.Right - FMetrics._3 - Length(AGlyph[0]), // X
           AArrowAreaRect.Bottom - FMetrics._3 - Length(AGlyph)    // Y
@@ -399,7 +399,7 @@ begin
     ///
     DrawText(Canvas.Handle, PWideChar(FCaption), Length(FCaption), ATextRect, (DT_WORDBREAK or DT_NOPREFIX));
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 

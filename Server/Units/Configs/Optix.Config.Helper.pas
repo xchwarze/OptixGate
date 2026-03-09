@@ -63,40 +63,40 @@ uses
 type
   TOptixConfigEnumBase = class
   protected
-    FItems : TJsonArray;
+    FItems: TJsonArray;
   public
     {@M}
-    procedure Clear();
-    function ToString() : String; override;
-    function GetCount() : Integer;
+    procedure Clear;
+    function ToString: string; override;
+    function GetCount: Integer;
 
     {@C}
-    constructor Create(const AJsonString : String = '');
-    destructor Destroy(); override;
+    constructor Create(const AJsonString: String = '');
+    destructor Destroy; override;
 
     {@G}
-    property Count : Integer read GetCount;
+    property Count: Integer read GetCount;
   end;
 
   TOptixConfigHelper = class
   private
-    FRegistry : TRegistry;
-    FKeyName  : String;
+    FRegistry: TRegistry;
+    FKeyName: string;
 
     {@M}
-    procedure Open();
+    procedure Open;
   public
     {@C}
-    constructor Create(const AKeyName : String; const AHive : HKEY);
-    destructor Destroy(); override;
+    constructor Create(const AKeyName: string; const AHive: HKEY);
+    destructor Destroy; override;
 
     {@}
-    procedure Write(const AName : String; const AConfig : TOptixConfigEnumBase);
-    function Read(const AName : String) : TOptixConfigEnumBase;
+    procedure Write(const AName: string; const AConfig: TOptixConfigEnumBase);
+    function Read(const AName: String): TOptixConfigEnumBase;
   end;
 
   {$IF defined(SERVER) or defined(CLIENT_GUI)}
-  var CONFIG_HELPER : TOptixConfigHelper;
+  var CONFIG_HELPER: TOptixConfigHelper;
   {$ENDIF}
 
 implementation
@@ -108,9 +108,9 @@ uses
 
 (* TOptixConfigEnumBase *)
 
-constructor TOptixConfigEnumBase.Create(const AJsonString : String);
+constructor TOptixConfigEnumBase.Create(const AJsonString: String);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   try
@@ -121,52 +121,52 @@ begin
       AJsonValue.Free;
 
       ///
-      FItems := TJsonArray.Create();
+      FItems := TJsonArray.Create;
     end;
   except
-    Clear();
+    Clear;
   end;
 end;
 
-destructor TOptixConfigEnumBase.Destroy();
+destructor TOptixConfigEnumBase.Destroy;
 begin
   if Assigned(FItems) then
     FreeAndNil(FItems);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixConfigEnumBase.Clear();
+procedure TOptixConfigEnumBase.Clear;
 begin
   if Assigned(FItems) then
     FreeAndNil(FItems);
 
   ///
-  FItems := TJsonArray.Create();
+  FItems := TJsonArray.Create;
 end;
 
-function TOptixConfigEnumBase.ToString() : String;
+function TOptixConfigEnumBase.ToString: string;
 begin
   if Assigned(FItems) then
-    result := FItems.ToJson()
+    Result := FItems.ToJson
   else
-    result := '';
+    Result := '';
 end;
 
-function TOptixConfigEnumBase.GetCount() : Integer;
+function TOptixConfigEnumBase.GetCount: Integer;
 begin
   if Assigned(FItems) then
-    result := FItems.Count
+    Result := FItems.Count
   else
-    result := 0;
+    Result := 0;
 end;
 
 (* TOptixConfigHelper *)
 
-constructor TOptixConfigHelper.Create(const AKeyName : String; const AHive : HKEY);
+constructor TOptixConfigHelper.Create(const AKeyName: string; const AHive: HKEY);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FRegistry := TRegistry.Create(KEY_ALL_ACCESS or KEY_WOW64_64KEY);
@@ -174,19 +174,19 @@ begin
 
   FKeyName := AKeyName;
 
-  Open();
+  Open;
 end;
 
-destructor TOptixConfigHelper.Destroy();
+destructor TOptixConfigHelper.Destroy;
 begin
   if Assigned(FRegistry) then
     FreeAndNil(FRegistry);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixConfigHelper.Open();
+procedure TOptixConfigHelper.Open;
 begin
   var AKeyPath := 'Software\' + FKeyName;
   ///
@@ -195,26 +195,26 @@ begin
     FRegistry.OpenKey(AKeyPath, True);
 end;
 
-procedure TOptixConfigHelper.Write(const AName : String; const AConfig : TOptixConfigEnumBase);
+procedure TOptixConfigHelper.Write(const AName: string; const AConfig: TOptixConfigEnumBase);
 begin
   if not Assigned(AConfig) then
-    Exit();
+    Exit;
   ///
 
-  Open();
+  Open;
 
-  FRegistry.WriteString(AName, AConfig.ToString());
+  FRegistry.WriteString(AName, AConfig.ToString);
 end;
 
-function TOptixConfigHelper.Read(const AName : String) : TOptixConfigEnumBase;
+function TOptixConfigHelper.Read(const AName: String): TOptixConfigEnumBase;
 begin
-  result := nil;
+  Result := nil;
   ///
 
-  Open();
+  Open;
   try
     if FRegistry.ValueExists(AName) then
-      result := TOptixConfigEnumBase.Create(FRegistry.ReadString(AName));
+      Result := TOptixConfigEnumBase.Create(FRegistry.ReadString(AName));
   except
 
   end;
@@ -222,8 +222,8 @@ end;
 
 {$IF defined(SERVER) or defined(CLIENT_GUI)}
 initialization
-  var AKeyName : String;
-  var AHive    : HKEY;
+  var AKeyName: string;
+  var AHive: HKEY;
 
   {$IFDEF SERVER}
     AKeyName := 'OptixGate';

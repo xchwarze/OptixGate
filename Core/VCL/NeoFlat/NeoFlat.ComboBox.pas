@@ -57,17 +57,17 @@ uses
 type
   TFlatComboBox = class(TCustomComboBox)
   private
-    FArrowColor       : TColor;
-    FBorderColor      : TColor;
-    FButtonBackground : TColor;
+    FArrowColor: TColor;
+    FBorderColor: TColor;
+    FButtonBackground: TColor;
 
-    FButtonWidth      : Integer;
+    FButtonWidth: Integer;
 
-    FMetrics          : TFlatMetrics;
+    FMetrics: TFlatMetrics;
 
-    FValidators       : TValidators;
+    FValidators: TValidators;
 
-    FStatus           : TControlStatus;
+    FStatus: TControlStatus;
 
     {@M}
     procedure WMPaint(var AMessage: TWMPaint); message WM_PAINT;
@@ -78,32 +78,32 @@ type
     procedure CMSysColorChange(var AMessage: TMessage); message CM_SYSCOLORCHANGE;
     procedure CMParentColorChanged(var AMessage: TWMNoParams); message CM_PARENTCOLORCHANGED;
 
-    procedure RedrawBorders();
-    procedure PaintBorder();
+    procedure RedrawBorders;
+    procedure PaintBorder;
 
-    procedure PaintButton();
-    function GetButtonRect(): TRect;
+    procedure PaintButton;
+    function GetButtonRect: TRect;
 
-    function GetIsValid() : Boolean;
-    procedure SetStatus(const AStatus : TControlStatus);
-    procedure DoValidate();
-    procedure SetValidators(const AValue : TValidators);
+    function GetIsValid: Boolean;
+    procedure SetStatus(const AStatus: TControlStatus);
+    procedure DoValidate;
+    procedure SetValidators(const AValue: TValidators);
   protected
     {@M}
     procedure ComboWndProc(var AMessage: TMessage; ComboWnd: HWnd; ComboProc: Pointer); override;
     procedure Change; override;
 
-    procedure SetEnabled(AValue : Boolean); override;
+    procedure SetEnabled(AValue: Boolean); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     {@M}
-    function HasSelectedItem() : Boolean;
+    function HasSelectedItem: Boolean;
 
     {@G}
-    property IsValid : Boolean read GetIsValid;
+    property IsValid: Boolean read GetIsValid;
   published
     property Align;
     property Enabled;
@@ -149,8 +149,8 @@ type
     property OnStartDock;
 
     {@G/S}
-    property Status     : TControlStatus read FStatus     write SetStatus;
-    property Validators : TValidators    read FValidators write SetValidators;
+    property Status: TControlStatus read FStatus write SetStatus;
+    property Validators: TValidators read FValidators write SetValidators;
 
   end;
 
@@ -163,16 +163,16 @@ uses
   NeoFlat.Theme, NeoFlat.Validators;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TFlatComboBox.Change();
+procedure TFlatComboBox.Change;
 begin
   inherited;
   ///
 
   if (Status = cStatusError) then
-    DoValidate();
+    DoValidate;
 end;
 
-procedure TFlatComboBox.DoValidate();
+procedure TFlatComboBox.DoValidate;
 begin
   if Validate(Text, FValidators) then
     Status := cStatusNormal
@@ -180,20 +180,20 @@ begin
     Status := cStatusError;
 end;
 
-constructor TFlatComboBox.Create(AOwner : TComponent);
+constructor TFlatComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
 
   ControlStyle := ControlStyle - [csOpaque];
 
-  FArrowColor       := MAIN_ACCENT;
-  FBorderColor      := MAIN_ACCENT;
-  Color             := clWhite;
+  FArrowColor := MAIN_ACCENT;
+  FBorderColor := MAIN_ACCENT;
+  Color := clWhite;
   FButtonBackground := RGB(204, 191, 190);
 
-  Font.Color  := MAIN_ACCENT;
-  Font.Name   := FONT_1;
+  Font.Color := MAIN_ACCENT;
+  Font.Name := FONT_1;
   Font.Height := -11;
 
   FMetrics := TFlatMetrics.Create(self);
@@ -209,13 +209,13 @@ begin
   FButtonWidth := GetSystemMetrics(SM_CXVSCROLL);
 end;
 
-destructor TFlatComboBox.Destroy();
+destructor TFlatComboBox.Destroy;
 begin
   if Assigned(FMetrics) then
     FreeAndNil(FMetrics);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFlatComboBox.ComboWndProc(var AMessage: TMessage; ComboWnd: HWnd; ComboProc: Pointer);
@@ -227,20 +227,20 @@ begin
     Exit;
 end;
 
-procedure TFlatComboBox.RedrawBorders();
+procedure TFlatComboBox.RedrawBorders;
 begin
-  PaintBorder();
+  PaintBorder;
   ///
 
   if Style <> csSimple then
-    PaintButton();
+    PaintButton;
 end;
 
-procedure TFlatComboBox.PaintBorder();
+procedure TFlatComboBox.PaintBorder;
 begin
   var ADC := GetWindowDC(Handle);
   try
-    var ABorderColor : TColor;
+    var ABorderColor: TColor;
     if (Status = cStatusError) and Enabled then
       ABorderColor := MAIN_RED
     else
@@ -248,12 +248,12 @@ begin
 
     var ABrush := CreateSolidBrush(ColorToRGB(ABorderColor));
     try
-      var AClientRect : TRect;
+      var AClientRect: TRect;
       GetWindowRect(Handle, AClientRect);
 
       // Border Top
       var ARect := TRect.Empty;
-      ARect.Width  := AClientRect.Width;
+      ARect.Width := AClientRect.Width;
       ARect.Height := FMetrics._1;
 
       FillRect(ADC, ARect, ABrush);
@@ -267,8 +267,8 @@ begin
 
       // Border Bottom
       ARect := TRect.Empty;
-      ARect.Top    := AClientRect.Height - FMetrics._1;
-      ARect.Width  := AClientRect.Width;
+      ARect.Top := AClientRect.Height - FMetrics._1;
+      ARect.Width := AClientRect.Width;
       ARect.Height := FMetrics._1;
 
       FillRect(ADC, ARect, ABrush);
@@ -280,7 +280,7 @@ begin
   end;
 end;
 
-function TFlatComboBox.GetButtonRect(): TRect;
+function TFlatComboBox.GetButtonRect: TRect;
 begin
   GetWindowRect(Handle, Result);
   OffsetRect(Result, -Result.Left, -Result.Top);
@@ -289,18 +289,18 @@ begin
   OffsetRect(Result, -1, 0);
 end;
 
-procedure TFlatComboBox.PaintButton();
+procedure TFlatComboBox.PaintButton;
 begin
-  var ARect := GetButtonRect();
+  var ARect := GetButtonRect;
   InflateRect(ARect, 1, 0);
 
-  var AArrowColor  : TColor;
-  var ABorderColor : TColor;
+  var AArrowColor: TColor;
+  var ABorderColor: TColor;
   if (Status = cStatusError) and Enabled then begin
-    AArrowColor  := MAIN_RED;
+    AArrowColor := MAIN_RED;
     ABorderColor := MAIN_RED;
   end else begin
-    AArrowColor  := FArrowColor;
+    AArrowColor := FArrowColor;
     ABorderColor := FBorderColor;
   end;
 
@@ -343,7 +343,7 @@ begin
 
   var X := (ARect.Right - ARect.Left) div 2 - FMetrics._6 + ARect.Left;
 
-  var Y : Integer;
+  var Y: Integer;
   if DroppedDown then
     Y := (ARect.Bottom - ARect.Top) div 2 - FMetrics._1 + ARect.Top
   else
@@ -351,7 +351,7 @@ begin
 
   if Enabled then begin
     canvas.Brush.Color := AArrowColor;
-    canvas.Pen.Color   := AArrowColor;
+    canvas.Pen.Color := AArrowColor;
 
     if DroppedDown then
       canvas.Polygon([
@@ -367,7 +367,7 @@ begin
       ]);
   end else begin
     canvas.Brush.Color := clWhite;
-    canvas.Pen.Color   := clWhite;
+    canvas.Pen.Color := clWhite;
 
     Inc(x);
     Inc(y);
@@ -389,7 +389,7 @@ begin
     Dec(y);
 
     canvas.Brush.Color := clGray;
-    canvas.Pen.Color   := clGray;
+    canvas.Pen.Color := clGray;
 
     if DroppedDown then
       canvas.Polygon([
@@ -424,7 +424,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatComboBox.CMEnabledChanged(var AMessage : TMessage);
+procedure TFlatComboBox.CMEnabledChanged(var AMessage: TMessage);
 begin
   inherited;
   ///
@@ -453,7 +453,7 @@ procedure TFlatComboBox.WMPaint(var AMessage: TWMPaint);
   end;
 
 begin
-  var APaintStruct : TPaintStruct;
+  var APaintStruct: TPaintStruct;
   var DC := BeginPaint(Handle, APaintStruct);
   try
     var ARect := APaintStruct.rcPaint;
@@ -462,7 +462,7 @@ begin
 
     FillRect(DC, ARect, Brush.Handle);
     if RectInRect(GetButtonRect, APaintStruct.rcPaint) then
-      PaintButton();
+      PaintButton;
 
     ExcludeClipRect(DC, ClientWidth - FButtonWidth, 0, ClientWidth, ClientHeight);
 
@@ -471,7 +471,7 @@ begin
   finally
     EndPaint(Handle, APaintStruct);
   end;
-  RedrawBorders();
+  RedrawBorders;
 
   ///
   AMessage.Result := 0;
@@ -482,7 +482,7 @@ begin
   inherited;
   ///
 
-  RedrawBorders();
+  RedrawBorders;
 end;
 
 procedure TFlatComboBox.CMFontChanged(var AMessage: TMessage);
@@ -490,10 +490,10 @@ begin
   inherited;
   ///
 
-  RecreateWnd();
+  RecreateWnd;
 end;
 
-procedure TFlatComboBox.SetEnabled(AValue : Boolean);
+procedure TFlatComboBox.SetEnabled(AValue: Boolean);
 begin
   if AValue = Enabled then
     Exit;
@@ -507,7 +507,7 @@ begin
     Font.Color := clGray;
 end;
 
-procedure TFlatComboBox.SetStatus(const AStatus : TControlStatus);
+procedure TFlatComboBox.SetStatus(const AStatus: TControlStatus);
 begin
   if AStatus = FStatus then
     Exit;
@@ -519,7 +519,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatComboBox.SetValidators(const AValue : TValidators);
+procedure TFlatComboBox.SetValidators(const AValue: TValidators);
 begin
   if AValue = FValidators then
     Exit;
@@ -531,17 +531,17 @@ begin
   Invalidate;
 end;
 
-function TFlatComboBox.HasSelectedItem() : Boolean;
+function TFlatComboBox.HasSelectedItem: Boolean;
 begin
-  result := (ItemIndex >= 0) and (ItemIndex <= Items.count -1);
+  Result := (ItemIndex >= 0) and (ItemIndex <= Items.count -1);
 end;
 
-function TFlatComboBox.GetIsValid() : Boolean;
+function TFlatComboBox.GetIsValid: Boolean;
 begin
-  DoValidate();
+  DoValidate;
   ///
 
-  result := (Status = cStatusNormal);
+  Result := (Status = cStatusNormal);
 end;
 
 end.

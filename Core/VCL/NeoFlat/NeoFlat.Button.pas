@@ -55,50 +55,50 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOnValueChanged = procedure(Sender : TObject; const ANewValue : Integer) of object;
+  TOnValueChanged = procedure(Sender: TObject; const ANewValue: Integer) of object;
 
   TFlatButton = class(TGraphicControl)
   private
-    FMetrics         : TFlatMetrics;
+    FMetrics: TFlatMetrics;
 
-    FOldWindowProc   : TWndMethod;
+    FOldWindowProc: TWndMethod;
 
-    FButtonState     : TFlatControlStateEx;
-    FMouseHover      : Boolean;
-    FOldEnabledValue : Boolean;
-    FBusy            : Boolean;
+    FButtonState: TFlatControlStateEx;
+    FMouseHover: Boolean;
+    FOldEnabledValue: Boolean;
+    FBusy: Boolean;
 
-    FValue           : Integer;
+    FValue: Integer;
 
-    FBackground      : TFlatStateColors;
-    FOuterBorder     : TFlatStateColors;
+    FBackground: TFlatStateColors;
+    FOuterBorder: TFlatStateColors;
 
-    FImageList       : TCustomImageList;
-    FImageIndex      : Integer;
+    FImageList: TCustomImageList;
+    FImageIndex: Integer;
 
-    FOnClick         : TNotifyEvent;
-    FOnValueChanged  : TOnValueChanged;
+    FOnClick: TNotifyEvent;
+    FOnValueChanged: TOnValueChanged;
 
     {@M}
-    procedure OnCustomWindowProc(var AMessage : TMessage);
+    procedure OnCustomWindowProc(var AMessage: TMessage);
 
-    procedure SetButtonState(const AState : TFlatControlStateEx);
-    procedure SetValue(const AValue : Integer);
-    procedure SetBusy(const AValue : Boolean);
-    procedure SetImageIndex(const Avalue : Integer);
+    procedure SetButtonState(const AState: TFlatControlStateEx);
+    procedure SetValue(const AValue: Integer);
+    procedure SetBusy(const AValue: Boolean);
+    procedure SetImageIndex(const Avalue: Integer);
 
-    procedure DrawText();
-    procedure DrawBorders();
-    procedure DrawImage();
-    procedure DrawBackground();
+    procedure DrawText;
+    procedure DrawBorders;
+    procedure DrawImage;
+    procedure DrawBackground;
   protected
     {@M}
     procedure Paint; override;
-    procedure SetEnabled(AValue : Boolean); override;
+    procedure SetEnabled(AValue: Boolean); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     {@G/S}
     property Caption;
@@ -108,12 +108,12 @@ type
     property Align;
     property ShowHint;
 
-    property Images         : TCustomImageList read FImageList      write FImageList;
-    property ImageIndex     : Integer          read FImageIndex     write SetImageIndex;
-    property Value          : Integer          read FValue          write SetValue;
-    property OnClick        : TNotifyEvent     read FOnClick        write FOnClick;
-    property OnValueChanged : TOnValueChanged  read FOnValueChanged write FOnValueChanged;
-    property Busy           : Boolean          read FBusy           write SetBusy;
+    property Images: TCustomImageList read FImageList write FImageList;
+    property ImageIndex: Integer read FImageIndex write SetImageIndex;
+    property Value: Integer read FValue write SetValue;
+    property OnClick: TNotifyEvent read FOnClick write FOnClick;
+    property OnValueChanged: TOnValueChanged read FOnValueChanged write FOnValueChanged;
+    property Busy: Boolean read FBusy write SetBusy;
   end;
 
 implementation
@@ -125,55 +125,55 @@ uses
 
 (* TFlatButton *)
 
-constructor TFlatButton.Create(AOwner : TComponent);
+constructor TFlatButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
 
   ShowHint := True;
 
-  FOldWindowProc := self.WindowProc;
-  self.WindowProc := OnCustomWindowProc;
+  FOldWindowProc := WindowProc;
+  WindowProc := OnCustomWindowProc;
 
   ControlStyle := ControlStyle;
 
   FButtonState := csExNormal;
-  FMouseHover  := False;
+  FMouseHover := False;
 
   FOnClick := nil;
 
   FValue := 0;
   FOnValueChanged := nil;
 
-  FBackground  := TFlatStateColors.Create(self);
+  FBackground := TFlatStateColors.Create(self);
   FOuterBorder := TFlatStateColors.Create(self);
 
-  FBackground.Normal   := MAIN_GRAY;
-  FBackground.Hover    := MAIN_GRAY;
-  FBackground.Focus    := MAIN_GRAY;
-  FBackground.Active   := DARKER_GRAY;
+  FBackground.Normal := MAIN_GRAY;
+  FBackground.Hover := MAIN_GRAY;
+  FBackground.Focus := MAIN_GRAY;
+  FBackground.Active := DARKER_GRAY;
   FBackground.Disabled := clNone;
 
-  FOuterBorder.Normal   := MAIN_ACCENT;
-  FOuterBorder.Hover    := MAIN_ACCENT;
-  FOuterBorder.Focus    := MAIN_ACCENT;
-  FOuterBorder.Active   := MAIN_ACCENT;
+  FOuterBorder.Normal := MAIN_ACCENT;
+  FOuterBorder.Hover := MAIN_ACCENT;
+  FOuterBorder.Focus := MAIN_ACCENT;
+  FOuterBorder.Active := MAIN_ACCENT;
   FOuterBorder.Disabled := clGray;
 
-  self.Font.Height      := -11;
-  self.Font.Name        := FONT_1;
-  self.Font.Color       := MAIN_ACCENT;
+  Font.Height := -11;
+  Font.Name := FONT_1;
+  Font.Color := MAIN_ACCENT;
 
-  FOldEnabledValue      := inherited Enabled;
-  FBusy                 := False;
+  FOldEnabledValue := inherited Enabled;
+  FBusy := False;
 
   FImageIndex := -1;
-  FImageList  := nil;
+  FImageList := nil;
 
   FMetrics := TFlatMetrics.Create(self);
 end;
 
-destructor TFlatButton.Destroy();
+destructor TFlatButton.Destroy;
 begin
   if Assigned(FMetrics) then
     FreeAndNil(FMetrics);
@@ -185,13 +185,13 @@ begin
     FreeAndNil(FOuterBorder);
 
   if Assigned(FOldWindowProc) then
-    self.WindowProc := FOldWindowProc;
+    WindowProc := FOldWindowProc;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TFlatButton.DrawText();
+procedure TFlatButton.DrawText;
 begin
   var ATextDownDelta := 0;
   if (FButtonState = csExActive) then
@@ -212,18 +212,18 @@ begin
 
   var ARect := TRect.Empty;
 
-  ARect.Left   := ALeftMargin;
-  ARect.Top    := ATextDownDelta;
-  ARect.Width  := ClientWidth - ALeftMargin - FMetrics._4;
+  ARect.Left := ALeftMargin;
+  ARect.Top := ATextDownDelta;
+  ARect.Width := ClientWidth - ALeftMargin - FMetrics._4;
   ARect.Height := ClientHeight;
 
   Canvas.Brush.Style := bsClear;
 
-  var ACaption : String := Caption;
+  var ACaption: String := Caption;
   Canvas.TextRect(ARect, ACaption, [tfEndEllipsis, tfVerticalCenter, tfSingleLine, tfCenter]);
 end;
 
-procedure TFlatButton.DrawImage();
+procedure TFlatButton.DrawImage;
 begin
   if not Assigned(FImageList) or (FImageIndex <= -1) then
     Exit;
@@ -232,13 +232,13 @@ begin
   DrawGlyph(Canvas, FImageList, FImageIndex, ScaleValue(4), (ClientHeight div 2) - (FImageList.Height div 2), Enabled);
 end;
 
-procedure TFlatButton.DrawBorders();
+procedure TFlatButton.DrawBorders;
 begin
   var AColor := FOuterBorder.GetStateColor(FButtonState);
   if AColor = clNone then
     Exit;
 
-  var ABorderWidth := self.ScaleValue(1);
+  var ABorderWidth := ScaleValue(1);
   ///
 
   var AOldBrushStyle := Canvas.Brush.Style;
@@ -249,7 +249,7 @@ begin
     var ARect := TRect.Empty;
 
     // Border Top
-    ARect.Width  := ClientWidth;
+    ARect.Width := ClientWidth;
     ARect.Height := ABorderWidth;
 
     Canvas.FillRect(ARect);
@@ -263,16 +263,16 @@ begin
     ARect := TRect.Empty;
 
     // Border Right
-    ARect.Left   := ClientWidth - ABorderWidth;
+    ARect.Left := ClientWidth - ABorderWidth;
     ARect.Height := ClientHeight;
-    ARect.Width  := ABorderWidth;
+    ARect.Width := ABorderWidth;
 
     Canvas.FillRect(ARect);
     ARect := TRect.Empty;
 
     // Border Bottom
-    ARect.Top    := ClientHeight - ABorderWidth;
-    ARect.Width  := ClientWidth;
+    ARect.Top := ClientHeight - ABorderWidth;
+    ARect.Width := ClientWidth;
     ARect.Height := ABorderWidth;
 
     Canvas.FillRect(ARect);
@@ -281,7 +281,7 @@ begin
   end;
 end;
 
-procedure TFlatButton.DrawBackground();
+procedure TFlatButton.DrawBackground;
 begin
   var AColor := FBackground.GetStateColor(FButtonState);
   if AColor = clNone then
@@ -306,27 +306,27 @@ begin
   inherited;
   ///
 
-  Canvas.Lock();
+  Canvas.Lock;
   try
-    DrawBackground();
+    DrawBackground;
 
-    DrawBorders();
+    DrawBorders;
 
-    DrawText();
+    DrawText;
 
-    DrawImage();
+    DrawImage;
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 
-procedure TFlatButton.OnCustomWindowProc(var AMessage : TMessage);
+procedure TFlatButton.OnCustomWindowProc(var AMessage: TMessage);
 begin
   FOldWindowProc(AMessage);
   ///
 
   case AMessage.Msg of
-    CM_TEXTCHANGED :
+    CM_TEXTCHANGED: 
       Invalidate;
   end;
 
@@ -336,14 +336,14 @@ begin
   ///
 
   case AMessage.Msg of
-    WM_LBUTTONDOWN, WM_LBUTTONDBLCLK : begin
+    WM_LBUTTONDOWN, WM_LBUTTONDBLCLK: begin
       SetButtonState(csExActive);
       ///
 
     end;
 
-    WM_LBUTTONUP : begin
-      FMouseHover := ptinrect(self.ClientRect, Point(
+    WM_LBUTTONUP: begin
+      FMouseHover := ptinrect(ClientRect, Point(
         TWMLButtonUp(AMessage).XPos,
         TWMLButtonUp(AMessage).YPos
       ));
@@ -358,7 +358,7 @@ begin
         FOnClick(self);
     end;
 
-    WM_MOUSEMOVE : begin
+    WM_MOUSEMOVE: begin
       FMouseHover := True;
       ///
 
@@ -368,7 +368,7 @@ begin
       SetButtonState(csExHover);
     end;
 
-    WM_MOUSELEAVE, {VCL ->} CM_MOUSELEAVE : begin
+    WM_MOUSELEAVE, {VCL ->} CM_MOUSELEAVE: begin
       FMouseHover := False;
       ///
 
@@ -378,7 +378,7 @@ begin
   end;
 end;
 
-procedure TFlatButton.SetButtonState(const AState : TFlatControlStateEx);
+procedure TFlatButton.SetButtonState(const AState: TFlatControlStateEx);
 begin
   if (AState = FButtonState) then
     Exit;
@@ -398,7 +398,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatButton.SetValue(const AValue : Integer);
+procedure TFlatButton.SetValue(const AValue: Integer);
 begin
   if FValue = AValue then
     Exit;
@@ -410,10 +410,10 @@ begin
     FOnValueChanged(self, AValue);
 end;
 
-procedure TFlatButton.SetEnabled(AValue : Boolean);
+procedure TFlatButton.SetEnabled(AValue: Boolean);
 begin
   if AValue = Enabled then
-    Exit();
+    Exit;
   ///
 
   inherited SetEnabled(AValue);
@@ -431,7 +431,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatButton.SetBusy(const AValue : Boolean);
+procedure TFlatButton.SetBusy(const AValue: Boolean);
 begin
   if AValue = FBusy then
     Exit;
@@ -442,17 +442,17 @@ begin
     FOldEnabledValue := inherited Enabled;
 
     inherited Enabled := False;
-    FButtonState      := csExDisabled
+    FButtonState := csExDisabled
   end else begin
     inherited Enabled := FOldEnabledValue;
-    FButtonState      := csExNormal;
+    FButtonState := csExNormal;
   end;
 
   ///
   Invalidate;
 end;
 
-procedure TFlatButton.SetImageIndex(const AValue : Integer);
+procedure TFlatButton.SetImageIndex(const AValue: Integer);
 begin
   if AValue = FImageIndex then
     Exit;
