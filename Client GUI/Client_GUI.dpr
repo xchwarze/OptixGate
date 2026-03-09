@@ -101,45 +101,21 @@ uses
 {$R ..\Server\data.res}
 
 begin
-  IsMultiThread := True;
-  ///
+  {$I ..\Core\Includes\EntryPoint.inc}
 
-  {$IFNDEF CLIENT}
-  'The CLIENT compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT.'
-  {$ENDIF}
+  {$I Includes\ClientDirectiveCheck.inc}
 
-  {$IFNDEF CLIENT_GUI}
-  'The CLIENT_GUI compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT_GUI.'
-  {$ENDIF}
-  
-  var AUserUID := TOptixInformationGathering.GetUserUID();
-  var AMutex := CreateMutexW(nil, True, PWideChar(AUserUID.ToString));
-  if AMutex = 0 then
-    raise EWindowsException.Create('CreateMutexW');
-  try
-    if GetLastError() = ERROR_ALREADY_EXISTS then
-      Exit();
-    ///
+  {$I Includes\ClientGUIDirectiveCheck.inc}
 
-    // Enable certain useful privileges (if possible)
-    TSystemHelper.TryNTSetPrivilege('SeDebugPrivilege', True);
-    TSystemHelper.TryNTSetPrivilege('SeTakeOwnershipPrivilege', True);
+  {$I Includes\EnableWinPrivilegesOnStartup.inc}
 
-    ///
+  Application.Initialize;
 
-    Application.Initialize;
-    Application.MainFormOnTaskbar := True;
-    Application.ShowHint := True;
-    Application.HintPause := 200;
+  {$I ..\Core\Includes\ApplicationConfiguration.inc}
 
-    Application.CreateForm(TFormMain, FormMain);
-    Application.CreateForm(TFormAbout, FormAbout);
-    Application.CreateForm(TFormDebugThreads, FormDebugThreads);
-  // Application.CreateForm(TFormConnectToServer, FormConnectToServer);
-    Application.Run;
-  finally
-    CloseHandle(AMutex);
-  end;
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormAbout, FormAbout);
+  Application.CreateForm(TFormDebugThreads, FormDebugThreads);
+
+  Application.Run;
 end.

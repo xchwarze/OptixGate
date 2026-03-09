@@ -115,56 +115,25 @@ uses
 {$R ..\Server\data.res}
 
 begin
-  IsMultiThread := True;
-  ///
+  {$I ..\Core\Includes\EntryPoint.inc}
 
-  {$IFDEF DEBUG}
-  ReportMemoryLeaksOnShutdown := True;
-  {$ENDIF}
+  {$I Includes\ClientDirectiveCheck.inc}
 
-  {$IFNDEF CLIENT}
-  'The CLIENT compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT.'
-  {$ENDIF}
+  {$I Includes\ClientGUIDirectiveCheck.inc}
 
-  {$IFNDEF CLIENT_GUI}
-  'The CLIENT_GUI compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT_GUI.'
-  {$ENDIF}
+  {$I ..\Core\Includes\UseTLSDirectiveCheck.inc}
 
-  {$IFNDEF USETLS}
-  'The USETLS compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding USETLS.'
-  {$ENDIF}
+  {$I Includes\EnableWinPrivilegesOnStartup.inc}
 
-  var AUserUID := TOptixInformationGathering.GetUserUID('+OpenSSL');
-  var AMutex := CreateMutexW(nil, True, PWideChar(AUserUID.ToString));
-  if AMutex = 0 then
-    raise EWindowsException.Create('CreateMutexW');
-  try
-    if GetLastError() = ERROR_ALREADY_EXISTS then
-      Exit();
-    ///
+  Application.Initialize;
 
-    // Enable certain useful privileges (if possible)
-    TSystemHelper.TryNTSetPrivilege('SeDebugPrivilege', True);
-    TSystemHelper.TryNTSetPrivilege('SeTakeOwnershipPrivilege', True);
+  {$I ..\Core\Includes\ApplicationConfiguration.inc}
 
-    ///
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormAbout, FormAbout);
+  Application.CreateForm(TFormDebugThreads, FormDebugThreads);
+  Application.CreateForm(TFormCertificatesStore, FormCertificatesStore);
+  Application.CreateForm(TFormTrustedCertificates, FormTrustedCertificates);
 
-    Application.Initialize;
-    Application.MainFormOnTaskbar := True;
-    Application.ShowHint := True;
-    Application.HintPause := 200;
-
-    Application.CreateForm(TFormMain, FormMain);
-    Application.CreateForm(TFormAbout, FormAbout);
-    Application.CreateForm(TFormDebugThreads, FormDebugThreads);
-    Application.CreateForm(TFormCertificatesStore, FormCertificatesStore);
-    Application.CreateForm(TFormTrustedCertificates, FormTrustedCertificates);
-
-    Application.Run;
-  finally
-    CloseHandle(AMutex);
-  end;
+  Application.Run;
 end.

@@ -116,18 +116,13 @@ uses
 {$R data.res}
 
 begin
-  IsMultiThread := True;
-  ///
+  {$I ..\Core\Includes\EntryPoint.inc}
 
-  {$IFNDEF SERVER}
-  'The SERVER compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding SERVER.'
-  {$ENDIF}
+  {$I Includes\ServerDirectiveCheck.inc}
 
   Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.ShowHint := True;
-  Application.HintPause := 200;
+
+  {$I ..\Core\Includes\ApplicationConfiguration.inc}
 
   Application.CreateForm(TFormMain, FormMain);
   Application.CreateForm(TFormAbout, FormAbout);

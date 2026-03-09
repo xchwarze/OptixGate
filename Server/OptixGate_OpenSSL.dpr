@@ -129,27 +129,15 @@ uses
 {$R data.res}
 
 begin
-  IsMultiThread := True;
-  ///
+  {$I ..\Core\Includes\EntryPoint.inc}
 
-  {$IFDEF DEBUG}
-  ReportMemoryLeaksOnShutdown := True;
-  {$ENDIF}
+  {$I Includes\ServerDirectiveCheck.inc}
 
-  {$IFNDEF SERVER}
-  'The SERVER compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding SERVER.'
-  {$ENDIF}
-
-  {$IFNDEF USETLS}
-  'The USETLS compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding USETLS.'
-  {$ENDIF}
+  {$I ..\Core\Includes\UseTLSDirectiveCheck.inc}
 
   Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.ShowHint := True;
-  Application.HintPause := 200;
+
+  {$I ..\Core\Includes\ApplicationConfiguration.inc}
 
   // (!) The order of creation is VERY important (!) //
   Application.CreateForm(TFormMain, FormMain);
