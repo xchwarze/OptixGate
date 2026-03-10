@@ -99,8 +99,15 @@ type
   PFileTreeData = ^TFileTreeData;
 
   TFolderTreeData = record
+  private
+    {@M}
+    function GetIsRoot: Boolean;
+  public
     Information: TSimpleFolderInformation;
     ImageIndex: Integer;
+
+    {@G}
+    property IsRoot: Boolean read GetIsRoot;
   end;
   PFolderTreeData = ^TFolderTreeData;
 
@@ -154,6 +161,7 @@ type
     ClearClipboard1: TMenuItem;
     N4: TMenuItem;
     Delete1: TMenuItem;
+    Rename1: TMenuItem;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -204,6 +212,7 @@ type
     procedure PasteToSelectedFolder1Click(Sender: TObject);
     procedure ClearClipboard1Click(Sender: TObject);
     procedure Delete1Click(Sender: TObject);
+    procedure Rename1Click(Sender: TObject);
   private
     FHistoryCursor: Integer;
     FPathHistory: TList<string>;
@@ -212,6 +221,9 @@ type
     {@M}
     procedure InsertPathToHistory(APath: string);
     procedure BrowseFromCurrentHistoryLocation;
+    function GetFolderFromTreeByFolderPath(AFolderPath: string) : PVirtualNode;
+    procedure DeleteFolderFromTree(const AFolderPath: string);
+    procedure RegisterNewFolderOnTree(const AFolderInformation: TFileInformation);
     function CanNodeFileBeRead(var pData: PFileTreeData): Boolean;
     function CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
     procedure RegisterFoldersInTree(const AParentFolders: TObjectList<TSimpleFolderInformation>;
@@ -239,7 +251,7 @@ type
     {@M}
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
     procedure RegisterNewFile(const APath: string; const AFileInformation: TFileInformation);
-    procedure DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
+    procedure DeleteFile(const AFilePath: string; const AIsDirectory: Boolean);
   end;
 
 var
@@ -249,6 +261,8 @@ implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
+  Winapi.ShLwApi,
+
   System.Types, System.DateUtils, System.Math, System.IOUtils, System.StrUtils,
 
   uFormMain,
@@ -257,6 +271,16 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 {$R *.dfm}
+
+(* TFolderTreeData *)
+
+function TFolderTreeData.GetIsRoot: Boolean;
+begin
+  if Assigned(Information) then
+    result := PathIsRootW(PWideChar(Information.Path))
+  else
+    result := True;
+end;
 
 (* TFileTreeData *)
 
@@ -341,18 +365,21 @@ begin
       pData^.ImageIndex := TOptixHelper.SystemFolderIcon
     else
       pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.Name, True);
+
+    ///
+    if AFileInformation.IsDirectory then
+      RegisterNewFolderOnTree(pData^.FileInformation);
   finally
     VSTFiles.EndUpdate;
-  end;
-
-  ///
-  if AFileInformation.IsDirectory then begin
-    // TODO: Update Parent > Child Folder Tree
   end;
 end;
 
 procedure TControlFormFileManager.Delete1Click(Sender: TObject);
 begin
+  if VSTFiles.FocusedNode = nil then
+    Exit;
+  ///
+
   var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
   if not Assigned(pData) or not (faWrite in pData^.Access) or not Assigned(pData^.FileInformation) then
     Exit;
@@ -376,10 +403,10 @@ begin
  SendCommand(TOptixCommandDeleteFileOrDirectory.Create(pData^.Path));
 end;
 
-procedure TControlFormFileManager.DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
+procedure TControlFormFileManager.DeleteFile(const AFilePath: string; const AIsDirectory: Boolean);
 begin
   if string.Compare(
-    IncludeTrailingPathDelimiter(ExtractFilePath(ANewFilePath)),
+    IncludeTrailingPathDelimiter(ExtractFilePath(AFilePath)),
     IncludeTrailingPathDelimiter(EditPath.Text),
     True
   ) <> 0 then
@@ -388,7 +415,7 @@ begin
 
   VSTFiles.BeginUpdate;
   try
-    var pNode := GetNodeByFileName(ExtractFileName(ANewFilePath));
+    var pNode := GetNodeByFileName(ExtractFileName(AFilePath));
     if Assigned(pNode) then
       VSTFiles.DeleteNode(pNode);
   finally
@@ -396,9 +423,8 @@ begin
   end;
 
   ///
-  if AIsDirectory then begin
-    // TODO: Update Parent > Child Folder Tree
-  end;
+  if AIsDirectory then
+    DeleteFolderFromTree(AFilePath);
 end;
 
 function TControlFormFileManager.GetFolderImageIndex(const AFolderAccess: TFileAccessAttributes): Integer;
@@ -460,13 +486,81 @@ begin
 
         pData^.Information.Assign(AItem);
 
-        if AItem.IsRoot then
+        if pData^.IsRoot then
           pData^.ImageIndex := TOptixHelper.SystemFileIcon(AItem.Path)
         else
-          pData^.ImageIndex := TOptixHelper.SystemFolderIcon
+          pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
       end
     )
   );
+end;
+
+function TControlFormFileManager.GetFolderFromTreeByFolderPath(AFolderPath: string) : PVirtualNode;
+begin
+  result := nil;
+  ///
+
+  AFolderPath := IncludeTrailingPathDelimiter(AFolderPath);
+  ///
+
+  for var pNode in VSTFolders.Nodes do begin
+    var pData := PFolderTreeData(pNode.GetData);
+    if not Assigned(pData) then
+      Exit;
+    ///
+
+    if string.Compare(pData^.Information.Path, AFolderPath, True) = 0 then begin
+      result := pNode;
+
+      Break;
+    end;
+  end;
+end;
+
+procedure TControlFormFileManager.DeleteFolderFromTree(const AFolderPath: string);
+begin
+  var pNodeToDelete := GetFolderFromTreeByFolderPath(AFolderPath);
+  if Assigned(pNodeToDelete) then
+    VSTFolders.DeleteNode(pNodeToDelete);
+end;
+
+procedure TControlFormFileManager.RegisterNewFolderOnTree(const AFolderInformation: TFileInformation);
+begin
+  if not Assigned(AFolderInformation) then
+    Exit;
+  ///
+
+  var pParentNode := GetFolderFromTreeByFolderPath(ExtractFilePath(AFolderInformation.Path));
+  if not Assigned(pParentNode) then
+    Exit;
+  ///
+
+  VSTFolders.BeginUpdate;
+  try
+    var pNode := VSTFolders.AddChild(pParentNode);
+    var pData := PFolderTreeData(pNode.GetData);
+    if not Assigned(pData) then
+      Exit;
+    ///
+
+    pData^.Information := TSimpleFolderInformation.Create(AFolderInformation);
+    pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
+  finally
+    if Assigned(pParentNode) then
+      VSTFolders.Expanded[pParentNode] := True;
+
+    VSTFolders.SortTree(0, TSortDirection.sdAscending);
+
+    VSTFolders.EndUpdate;
+  end;
+end;
+
+procedure TControlFormFileManager.Rename1Click(Sender: TObject);
+begin
+  if VSTFiles.FocusedNode = nil then
+    Exit;
+  ///
+
 end;
 
 procedure TControlFormFileManager.BrowseFromCurrentHistoryLocation;
@@ -792,6 +886,7 @@ begin
       Copy1.Visible := True;
       Cut1.Visible := True;
       Delete1.Visible := True;
+      Rename1.Visible := True;
 
       if Assigned(pData^.FileInformation) then begin
         if pData^.FileInformation.IsDirectory then begin
@@ -810,6 +905,7 @@ begin
         Copy1.Enabled := faRead in pData^.Access;
         Cut1.Enabled := (faRead in pData^.Access) and (faWrite in pData^.Access);
         Delete1.Enabled := (faWrite in pData^.Access);
+        Rename1.Enabled := pData^.Access <> [];
       end;
     end;
 
@@ -1244,7 +1340,7 @@ begin
       pData^.ImageIndex := TOptixHelper.SystemFileIcon(IncludeTrailingPathDelimiter(ADrive.Letter));
 
       ///
-      AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, ADrive.Letter, [], True));
+      AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, ADrive.Letter, []));
     end;
   finally
     RegisterFoldersInTree(nil, AFolders);
@@ -1291,8 +1387,7 @@ begin
             TSimpleFolderInformation.Create(
               pData^.FileInformation.Name,
               pData^.FileInformation.Path,
-              pData^.FileInformation.Access,
-              False
+              pData^.FileInformation.Access
             )
           );
       end else

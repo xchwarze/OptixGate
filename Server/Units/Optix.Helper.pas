@@ -95,8 +95,8 @@ type
     class function TryReadResourceString(const AResourceName: string): string; static;
     class procedure InitializeSystemIcons(var AImages: TImageList; var AFileInfo: TSHFileInfo;
       const ALargeIcon: Boolean = False); static;
-    class function SystemFileIcon(const AFileName: string; AExtensionMode: Boolean = False): Integer; static;
-    class function SystemFolderIcon(APath: string = ''): Integer; static;
+    class function SystemFileIcon(const AFilePath: string; AUseRealFile: Boolean = False): Integer; static;
+    class function SystemFolderIcon(): Integer; static;
     class function GetWindowsDirectory: string; static;
     class procedure Open(const ACommand: string); static;
 
@@ -479,37 +479,41 @@ begin
   );
 end;
 
-class function TOptixHelper.SystemFileIcon(const AFileName: string; AExtensionMode: Boolean = False): Integer;
-var AFileInfo: TSHFileInfo;
+class function TOptixHelper.SystemFileIcon(const AFilePath: string; AUseRealFile: Boolean = False): Integer;
 begin
+  var AFileInfo: TSHFileInfo;
   ZeroMemory(@AFileInfo, sizeof(AFileInfo));
   ///
 
-  if not AExtensionMode then
-    AExtensionMode := not FileExists(AFileName);
-
-  var AFlags := SHGFI_SMALLICON or SHGFI_SYSICONINDEX;
-  if AExtensionMode then
-    AFlags := AFlags or SHGFI_USEFILEATTRIBUTES;
-
-  SHGetFileInfo(PWideChar(AFileName), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
-
-  Result := AFileInfo.iIcon;
-end;
-
-class function TOptixHelper.SystemFolderIcon(APath: string = ''): Integer;
-var AFileInfo: TSHFileInfo;
-begin
-  ZeroMemory(@AFileInfo, sizeof(AFileInfo));
-  ///
-
-  if APath = '' then
-    APath := GetWindowsDirectory;
+  if AUseRealFile then
+    AUseRealFile := FileExists(AFilePath) and not DirectoryExists(AFilePath);
 
   var AFlags := SHGFI_SYSICONINDEX;
 
-  SHGetFileInfo(PChar(APath), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
+  var AAtributes := 0;
+  if not AUseRealFile then begin
+    AFlags := AFlags or SHGFI_USEFILEATTRIBUTES;
 
+    AAtributes := FILE_ATTRIBUTE_NORMAL;
+  end;
+
+  SHGetFileInfo(PWideChar(AFilePath), AAtributes, AFileInfo, SizeOf(TSHFileInfo), AFlags);
+
+  ///
+  Result := AFileInfo.iIcon;
+end;
+
+class function TOptixHelper.SystemFolderIcon(): Integer;
+begin
+  var AFileInfo: TSHFileInfo;
+  ZeroMemory(@AFileInfo, sizeof(AFileInfo));
+  ///
+
+  var AFlags := SHGFI_SYSICONINDEX;
+
+  SHGetFileInfo(PWideChar(GetWindowsDirectory), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
+
+  ///
   Result := AFileInfo.iIcon;
 end;
 

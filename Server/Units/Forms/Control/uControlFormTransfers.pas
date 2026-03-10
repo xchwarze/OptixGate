@@ -360,7 +360,7 @@ begin
     pData^.DestinationFilePath := TFileSystemHelper.UniqueFileName(ADestinationFilePath.Trim);
     pData^.Direction := ADirection;
     pData^.Context := AContext;
-    pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.SourceFilePath, (ADirection = otdClientIsUploading));
+    pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.SourceFilePath, (ADirection = otdClientIsDownloading));
 
     ///
     Result := pData^.Id;

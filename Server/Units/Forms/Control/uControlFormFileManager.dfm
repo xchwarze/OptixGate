@@ -692,6 +692,10 @@ object ControlFormFileManager: TControlFormFileManager
     object N4: TMenuItem
       Caption = '-'
     end
+    object Rename1: TMenuItem
+      Caption = 'Rename'
+      OnClick = Rename1Click
+    end
     object Delete1: TMenuItem
       Caption = 'Delete'
       OnClick = Delete1Click

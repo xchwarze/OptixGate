@@ -326,7 +326,7 @@ begin
           AFileAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
 
         ///
-        FParentFolders.Add(TSimpleFolderInformation.Create(ADirectoryName, AAbsolutePath, AFileAccess, AIsRoot));
+        FParentFolders.Add(TSimpleFolderInformation.Create(ADirectoryName, AAbsolutePath, AFileAccess));
       end
     )
   );

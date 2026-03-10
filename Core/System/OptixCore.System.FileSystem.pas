@@ -227,6 +227,8 @@ type
     property PageSize: UInt64 read FPageSize write SetPageSize;
   end;
 
+  TFileInformation = class;
+
   // Folder Information (Simplified) -----------------------------------------------------------------------------------
   TSimpleFolderInformation = class(TOptixSerializableObject)
   private
@@ -238,13 +240,10 @@ type
 
     [OptixSerializableAttribute]
     FAccess: TFileAccessAttributes;
-
-    [OptixSerializableAttribute]
-    FIsRoot: Boolean;
   public
     {@C}
-    constructor Create(const AName, APath: string; const AAccess: TFileAccessAttributes;
-      const AIsRoot: Boolean); overload;
+    constructor Create(const AFileInformation : TFileInformation); overload;
+    constructor Create(const AName, APath: string; const AAccess: TFileAccessAttributes); overload;
 
     {@M}
     procedure Assign(ASource: TPersistent); override;
@@ -253,7 +252,6 @@ type
     property Name: string read FName;
     property Path: string read FPath;
     property Access: TFileAccessAttributes read FAccess;
-    property IsRoot: Boolean read FIsRoot;
   end;
 
   // Drives ------------------------------------------------------------------------------------------------------------
@@ -1075,8 +1073,7 @@ end;
 
 (* TSimpleFolderInformation *)
 
-constructor TSimpleFolderInformation.Create(const AName, APath: string; const AAccess: TFileAccessAttributes;
-  const AIsRoot: Boolean);
+constructor TSimpleFolderInformation.Create(const AName, APath: string; const AAccess: TFileAccessAttributes);
 begin
   inherited Create;
   ///
@@ -1084,7 +1081,19 @@ begin
   FName := AName;
   FPath := IncludeTrailingPathDelimiter(APath);
   FAccess := AAccess;
-  FIsRoot := AIsRoot;
+end;
+
+constructor TSimpleFolderInformation.Create(const AFileInformation : TFileInformation);
+begin
+  inherited Create;
+  ///
+
+  if not Assigned(AFileInformation) then
+    raise EOptixSystemException.Create('{73267E78-D356-460A-BCCE-3704E312335C}');
+
+  FName := AFileInformation.Name;
+  FPath := AFileInformation.Path;
+  FAccess := AFileInformation.Access;
 end;
 
 procedure TSimpleFolderInformation.Assign(ASource: TPersistent);
@@ -1093,7 +1102,6 @@ begin
     FName := TSimpleFolderInformation(ASource).FName;
     FPath := TSimpleFolderInformation(ASource).FPath;
     FAccess := TSimpleFolderInformation(ASource).FAccess;
-    FIsRoot := TSimpleFolderInformation(ASource).FIsRoot;
   end else
     inherited;
 end;
