@@ -188,7 +188,7 @@ begin
           var APreflight: TOptixPreflightRequest;
           AClient.Recv(APreflight, SizeOf(TOptixPreflightRequest));
 
-          if APreflight.ProtocolVersion <> OPTIX_PROTOCOL_VERSION then
+          if string(APreflight.ProtocolVersion) <> OPTIX_PROTOCOL_VERSION then
             raise EOptixPreflightException.Create(Format('Client:[%s] / Server:[%s] version mismatch.', [
               APreflight.ProtocolVersion,
               OPTIX_PROTOCOL_VERSION

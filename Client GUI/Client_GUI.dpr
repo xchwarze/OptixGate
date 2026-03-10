@@ -98,7 +98,8 @@ uses
   uFormWarning in 'Units\Forms\uFormWarning.pas' {FormWarning};
 
 {$R *.res}
-{$R ..\Server\data.res}
+
+{$I Includes\ExtraResourceFiles.inc}
 
 begin
   {$I ..\Core\Includes\EntryPoint.inc}

@@ -112,7 +112,8 @@ uses
   uFormSelectCertificate in '..\Server\Units\Forms\uFormSelectCertificate.pas' {FormSelectCertificate};
 
 {$R *.res}
-{$R ..\Server\data.res}
+
+{$I Includes\ExtraResourceFiles.inc}
 
 begin
   {$I ..\Core\Includes\EntryPoint.inc}

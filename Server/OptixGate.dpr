@@ -113,7 +113,8 @@ uses
   uControlFormRegistryEditor in 'Units\Forms\Control\uControlFormRegistryEditor.pas' {ControlFormRegistryEditor};
 
 {$R *.res}
-{$R data.res}
+
+{$I Includes\ExtraResourceFiles.inc}
 
 begin
   {$I ..\Core\Includes\EntryPoint.inc}

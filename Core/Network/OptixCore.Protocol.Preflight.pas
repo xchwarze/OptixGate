@@ -51,8 +51,6 @@ unit OptixCore.Protocol.Preflight;
 
 interface
 
-const OPTIX_PROTOCOL_VERSION = 'v2.0.2' {$IFDEF USETLS} + '+OpenSSL'{$ENDIF};
-
 type
   TClientKind = (
     ckHandler,
@@ -60,7 +58,7 @@ type
   );
 
   TOptixPreflightRequest = record
-    ProtocolVersion: String[50];
+    ProtocolVersion: array[0..50-1] of WideChar;
     ClientKind: TClientKind;
     HandlerId: TGUID;
 
@@ -70,16 +68,37 @@ type
     {$ENDIF}
   end;
 
+  // Treated like a constant
+  var OPTIX_PROTOCOL_VERSION : string;
+
 implementation
 
-{$IFDEF CLIENT}
-uses OptixCore.Protocol.Packet;
+// ---------------------------------------------------------------------------------------------------------------------
+uses
+  System.SysUtils, System.Math,
 
+  Winapi.Windows,
+
+  OptixCore.System.FileSystem {$IFDEF CLIENT}, OptixCore.Protocol.Packet{$ENDIF};
+// ---------------------------------------------------------------------------------------------------------------------
+
+{$IFDEF CLIENT}
 class operator TOptixPreflightRequest.Initialize(out ADestRecord: TOptixPreflightRequest);
 begin
-  ADestRecord.ProtocolVersion := OPTIX_PROTOCOL_VERSION;
-  ADestRecord.HandlerId := TGUID.Empty;
+  FillChar(ADestRecord, SizeOf(TOptixPreflightRequest), #0);
+  ///
+
+  var ACopySize := Min(Length(OPTIX_PROTOCOL_VERSION), Length(ADestRecord.ProtocolVersion)) * SizeOf(WideChar);
+  if ACopySize > 0 then
+    Move(
+      OPTIX_PROTOCOL_VERSION[1],
+      ADestRecord.ProtocolVersion[0],
+      ACopySize
+    );
 end;
 {$ENDIF}
+
+initialization
+  OPTIX_PROTOCOL_VERSION := TFileSystemHelper.GetFileVersion(GetModuleName(0)) {$IFDEF USETLS} + '+OpenSSL'{$ENDIF};
 
 end.

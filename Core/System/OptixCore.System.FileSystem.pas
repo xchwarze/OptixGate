@@ -190,6 +190,9 @@ type
     class procedure CreateDirectory(const AFullPath: String); overload; static;
     class function Copy(const ASource, ADestination: string; const ADoMove: Boolean;
       const ABlockThread: Boolean = True): string; static;
+    class function GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
+      ABuild : Cardinal) : Boolean; overload; static;
+    class function GetFileVersion(const AFilePath : String) : string; overload; static;
   end;
 
   TContentReader = class
@@ -895,6 +898,57 @@ begin
   finally
     CoUninitialize;
   end;
+end;
+
+class function TFileSystemHelper.GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
+  ABuild : Cardinal) : Boolean;
+begin
+  Result := False;
+  ///
+
+  AMajor   := 0;
+  AMinor   := 0;
+  ARelease := 0;
+  ABuild   := 0;
+  ///
+
+  var ADummyHandle : DWORD;
+  var pVersionInfo : Pointer;
+  var AVersionInfoSize := GetFileVersionInfoSize(PWideChar(AFilePath), ADummyHandle);
+  GetMem(pVersionInfo, AVersionInfoSize);
+  try
+    if not GetFileVersionInfo(PWideChar(AFilePath), 0, AVersionInfoSize, pVersionInfo) then
+      Exit;
+
+    var AValueLength : UINT;
+    var pQueriedValue : Pointer;
+    if not VerQueryValue(pVersionInfo, '\', pQueriedValue, AValueLength) or (pQueriedValue = nil) then
+      Exit;
+
+    AMajor   := HiWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionMS);
+    AMinor   := LoWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionMS);
+    ARelease := HiWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionLS);
+    ABuild   := LoWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionLS);
+
+    ///
+    Result := True;
+  finally
+    FreeMem(pVersionInfo, AVersionInfoSize);
+  end;
+end;
+
+class function TFileSystemHelper.GetFileVersion(const AFilePath : String) : string;
+begin
+  var AMajor, AMinor, ARelease, ABuild : Cardinal;
+  if not GetFileVersion(AFilePath, AMajor, AMinor, ARelease, ABuild) then
+    Exit;
+  ///
+
+  Result := Format('%d.%d.%d', [
+    AMajor,
+    AMinor,
+    ARelease
+  ]);
 end;
 
 (* TContentReader *)
