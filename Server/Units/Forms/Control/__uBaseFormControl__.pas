@@ -154,6 +154,7 @@ type
     procedure PurgeRequest; virtual;
     procedure RegisterNewFileOnFileManagers(const ABasePath: string; const ANewFileInformation: TFileInformation);
     procedure DeleteFileFromFileManagers(const ADeletedFilePath: string; const AIsDirectory: Boolean);
+    procedure RenameFileOrDirectoryOnFileManagers(const AOldFilePath, ANewFilePath: string);
     procedure __WARNING__OverrideWindowGUID(const ANewGUID: TGUID); (* Warning | TODO: Safer method *)
 
     {@C}
@@ -500,6 +501,19 @@ begin
   try
     for var AForm in AForms do
       TControlFormFileManager(AForm).RegisterNewFile(ABasePath, ANewFileInformation);
+  finally
+    AForms.Free;
+  end;
+end;
+
+procedure TBaseFormControl.RenameFileOrDirectoryOnFileManagers(const AOldFilePath, ANewFilePath: string);
+begin
+  var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
+  if not Assigned(AForms) then
+    Exit;
+  try
+    for var AForm in AForms do
+      TControlFormFileManager(AForm).RenameFileOrDirectory(AOldFilePath, ANewFilePath);
   finally
     AForms.Free;
   end;

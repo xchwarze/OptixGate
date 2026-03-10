@@ -212,7 +212,7 @@ type
   TOptixCommandDeleteFileOrDirectory = class(TOptixCommandTask)
   private
     [OptixSerializableAttribute]
-    FFilePath : string;
+    FFilePath: string;
   public
     {@C}
     constructor Create(const AFilePath : string); overload;
@@ -226,11 +226,34 @@ type
     property FilePath : string read FFilePath;
   end;
 
+  TOptixCommandRenameFileOrDirectory = class(TOptixCommandActionResponse)
+  private
+    [OptixSerializableAttribute]
+    FFilePath: string;
+
+    [OptixSerializableAttribute]
+    FNewFilePath: string;
+  public
+    {@M}
+    {$IFNDEF SERVER}
+    procedure DoAction; override;
+    {$ENDIF}
+
+    {@C}
+    constructor Create(const AFilePath, ANewName: string); overload;
+
+    {@G}
+    property FilePath: string read FFilePath;
+    property NewFilePath: string read FNewFilePath;
+  end;
+
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.IOUtils, OptixCore.Task.FileOperations;
+  System.IOUtils,
+
+  OptixCore.Task.FileOperations, OptixCore.Exceptions;
 // ---------------------------------------------------------------------------------------------------------------------
 
 (* TOptixCommandFileInformation *)
@@ -326,7 +349,7 @@ begin
           AFileAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
 
         ///
-        FParentFolders.Add(TSimpleFolderInformation.Create(ADirectoryName, AAbsolutePath, AFileAccess));
+        FParentFolders.Add(TSimpleFolderInformation.Create(AAbsolutePath, AFileAccess));
       end
     )
   );
@@ -437,6 +460,30 @@ begin
     Result := TOptixDeleteFileOrDirectoryTask.Create(ACommand)
   else
     Result := nil;
+end;
+{$ENDIF}
+
+(* TOptixCommandRenameFileOrDirectory *)
+
+constructor TOptixCommandRenameFileOrDirectory.Create(const AFilePath, ANewName: string);
+begin
+  inherited Create;
+  ///
+
+  FFilePath := AFilePath;
+  FNewFilePath := TFileSystemHelper.ExtractFilePath(FFilePath, True) + ANewName;
+end;
+
+{$IFNDEF SERVER}
+procedure TOptixCommandRenameFileOrDirectory.DoAction;
+begin
+  inherited;
+  ///
+
+  var ASourcePath := ExcludeTrailingPathDelimiter(FFilePath);
+
+  if not Winapi.Windows.MoveFile(PWideChar(ASourcePath), PWideChar(FNewFilePath)) then
+    raise EWindowsException.Create('MoveFile(@Rename)');
 end;
 {$ENDIF}
 

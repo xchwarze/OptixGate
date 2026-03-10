@@ -193,7 +193,10 @@ type
     class procedure Delete(const AFilePath: string; const ABlockThread: Boolean = True); static;
     class function GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
       ABuild : Cardinal) : Boolean; overload; static;
-    class function GetFileVersion(const AFilePath : string) : string; overload; static;
+    class function GetFileVersion(const AFilePath: string): string; overload; static;
+    class function ExtractFilePath(const AFilePath: string;
+      const AIncludeTrailingPathDelimiter: Boolean = False): string; static;
+    class function ExtractFileName(const AFilePath: string): string; static;
   end;
 
   TContentReader = class
@@ -243,10 +246,11 @@ type
   public
     {@C}
     constructor Create(const AFileInformation : TFileInformation); overload;
-    constructor Create(const AName, APath: string; const AAccess: TFileAccessAttributes); overload;
+    constructor Create(const APath: string; const AAccess: TFileAccessAttributes); overload;
 
     {@M}
     procedure Assign(ASource: TPersistent); override;
+    procedure UpdatePath(APath: string);
 
     {@G}
     property Name: string read FName;
@@ -343,6 +347,7 @@ type
     {@M}
     function GetFileTypeDescription: string;
     procedure Assign(ASource: TPersistent); override;
+    procedure UpdatePath(const APath: string);
 
     {@G}
     property Path: string read FPath;
@@ -375,7 +380,7 @@ implementation
 uses
   System.IOUtils, System.StrUtils, System.Math,
 
-  Winapi.AccCtrl, Winapi.AclAPI, Winapi.ShellAPI, Winapi.ActiveX,
+  Winapi.AccCtrl, Winapi.AclAPI, Winapi.ShellAPI, Winapi.ActiveX, Winapi.ShLwApi,
 
   OptixCore.Exceptions, OptixCore.WinApiEx, OptixCore.System.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -730,7 +735,7 @@ begin
   var I := 1;
   repeat
     Result := Format('%s%s(%d)%s', [
-      IncludeTrailingPathDelimiter(ExtractFilePath(AFilePath)),
+      TFileSystemHelper.ExtractFilePath(AFilePath, True),
       TPath.GetFileNameWithoutExtension(AFilePath),
       I,
       TPath.GetExtension(AFilePath)
@@ -980,6 +985,19 @@ begin
   ]);
 end;
 
+class function TFileSystemHelper.ExtractFilePath(const AFilePath: string;
+  const AIncludeTrailingPathDelimiter: Boolean = False): string;
+begin
+  Result := System.SysUtils.ExtractFilePath(ExcludeTrailingPathDelimiter(AFilePath));
+  if AIncludeTrailingPathDelimiter then
+    Result := IncludeTrailingPathDelimiter(Result);
+end;
+
+class function TFileSystemHelper.ExtractFileName(const AFilePath: string): string;
+begin
+  Result := System.SysUtils.ExtractFileName(ExcludeTrailingPathDelimiter(AFilePath));
+end;
+
 (* TContentReader *)
 
 constructor TContentReader.Create(const AFilePath: string; const APageSize: UInt64);
@@ -1073,14 +1091,24 @@ end;
 
 (* TSimpleFolderInformation *)
 
-constructor TSimpleFolderInformation.Create(const AName, APath: string; const AAccess: TFileAccessAttributes);
+constructor TSimpleFolderInformation.Create(const APath: string; const AAccess: TFileAccessAttributes);
 begin
   inherited Create;
   ///
 
-  FName := AName;
-  FPath := IncludeTrailingPathDelimiter(APath);
+  UpdatePath(APath);
   FAccess := AAccess;
+end;
+
+procedure TSimpleFolderInformation.UpdatePath(APath: string);
+begin
+  FPath := IncludeTrailingPathDelimiter(APath);
+
+  APath := ExcludeTrailingPathDelimiter(APath);
+  if PathIsRootW(PWideCHar(FPath)) then
+    FName := APath
+  else
+    FName := ExtractFileName(APath);
 end;
 
 constructor TSimpleFolderInformation.Create(const AFileInformation : TFileInformation);
@@ -1091,8 +1119,7 @@ begin
   if not Assigned(AFileInformation) then
     raise EOptixSystemException.Create('{73267E78-D356-460A-BCCE-3704E312335C}');
 
-  FName := AFileInformation.Name;
-  FPath := AFileInformation.Path;
+  UpdatePath(AFileInformation.Path);
   FAccess := AFileInformation.Access;
 end;
 
@@ -1214,10 +1241,15 @@ begin
     inherited;
 end;
 
-constructor TFileInformation.Create(const APath: string; const AIsDirectory: Boolean);
+procedure TFileInformation.UpdatePath(const APath: string);
 begin
   FPath := APath;
   FName := ExtractFileName(APath);
+end;
+
+constructor TFileInformation.Create(const APath: string; const AIsDirectory: Boolean);
+begin
+  UpdatePath(APath);
   FIsDirectory := AIsDirectory;
   FACL_SSDL := TFileSystemHelper.TryGetFileACLString(APath);
   FAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);

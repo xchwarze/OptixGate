@@ -223,6 +223,7 @@ type
     procedure BrowseFromCurrentHistoryLocation;
     function GetFolderFromTreeByFolderPath(AFolderPath: string) : PVirtualNode;
     procedure DeleteFolderFromTree(const AFolderPath: string);
+    procedure RenameFolderFromTree(const AFolderPath, ANewFolderPath: string);
     procedure RegisterNewFolderOnTree(const AFolderInformation: TFileInformation);
     function CanNodeFileBeRead(var pData: PFileTreeData): Boolean;
     function CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
@@ -252,6 +253,7 @@ type
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
     procedure RegisterNewFile(const APath: string; const AFileInformation: TFileInformation);
     procedure DeleteFile(const AFilePath: string; const AIsDirectory: Boolean);
+    procedure RenameFileOrDirectory(const AOldFilePath, ANewFilePath: string);
   end;
 
 var
@@ -427,6 +429,37 @@ begin
     DeleteFolderFromTree(AFilePath);
 end;
 
+procedure TControlFormFileManager.RenameFileOrDirectory(const AOldFilePath, ANewFilePath: string);
+begin
+  if string.Compare(
+    TFileSystemHelper.ExtractFilePath(AOldFilePath, True),
+    IncludeTrailingPathDelimiter(EditPath.Text),
+    True
+  ) <> 0 then
+    Exit;
+  ///
+
+  VSTFiles.BeginUpdate;
+  try
+    var pNode := GetNodeByFileName(TFileSystemHelper.ExtractFileName(AOldFilePath));
+    if not Assigned(pNode) then
+      Exit;
+    ///
+
+    var pData := PFileTreeData(pNode.GetData);
+    if Assigned(pData) and Assigned(pData^.FileInformation) then begin
+      pData^.FileInformation.UpdatePath(ANewFilePath);
+
+      ///
+      if pData^.FileInformation.IsDirectory then
+        RenameFolderFromTree(AOldFilePath, ANewFilePath);
+    end;
+
+  finally
+    VSTFiles.EndUpdate;
+  end;
+end;
+
 function TControlFormFileManager.GetFolderImageIndex(const AFolderAccess: TFileAccessAttributes): Integer;
 begin
   Result := -1;
@@ -524,6 +557,26 @@ begin
     VSTFolders.DeleteNode(pNodeToDelete);
 end;
 
+procedure TControlFormFileManager.RenameFolderFromTree(const AFolderPath, ANewFolderPath: string);
+begin
+  var pNode := GetFolderFromTreeByFolderPath(AFolderPath);
+  if not Assigned(pNode) then
+    Exit;
+  ///
+
+  var pData := PFolderTreeData(pNode.GetData);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  VSTFolders.BeginUpdate;
+  try
+    pData^.Information.UpdatePath(ANewFolderPath);
+  finally
+    VSTFolders.EndUpdate;
+  end;
+end;
+
 procedure TControlFormFileManager.RegisterNewFolderOnTree(const AFolderInformation: TFileInformation);
 begin
   if not Assigned(AFolderInformation) then
@@ -561,6 +614,21 @@ begin
     Exit;
   ///
 
+  var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  var ANewName := pData^.Name;
+  if not InputQuery('Rename File or Directory', 'New Name:', ANewName) then
+    Exit;
+
+  ANewName := TFileSystemHelper.CleanFileName(ANewName);
+  if string.IsNullOrWhiteSpace(ANewName) then
+    Exit;
+
+  ///
+  SendCommand(TOptixCommandRenameFileOrDirectory.Create(pData.Path(True), ANewName));
 end;
 
 procedure TControlFormFileManager.BrowseFromCurrentHistoryLocation;
@@ -1310,6 +1378,13 @@ begin
 
     // Propagate signal to other File Manager Windows
     RegisterNewFileOnFileManagers(ExtractFilePath(ACastedPacket.FileName), ACastedPacket.FileInformation);
+  end
+  // -------------------------------------------------------------------------------------------------------------------
+  else if AOptixPacket is TOptixCommandRenameFileOrDirectory then begin
+    var ACastedPacket := TOptixCommandRenameFileOrDirectory(AOptixPacket);
+    ///
+
+    RenameFileOrDirectoryOnFileManagers(ACastedPacket.FilePath, ACastedPacket.NewFilePath);
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;
@@ -1340,7 +1415,7 @@ begin
       pData^.ImageIndex := TOptixHelper.SystemFileIcon(IncludeTrailingPathDelimiter(ADrive.Letter));
 
       ///
-      AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, ADrive.Letter, []));
+      AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, []));
     end;
   finally
     RegisterFoldersInTree(nil, AFolders);
@@ -1384,11 +1459,7 @@ begin
         ///
         if not MatchStr(pData^.FileInformation.Name, ['.', '..']) then
           AFolders.Add(
-            TSimpleFolderInformation.Create(
-              pData^.FileInformation.Name,
-              pData^.FileInformation.Path,
-              pData^.FileInformation.Access
-            )
+            TSimpleFolderInformation.Create(pData^.FileInformation.Path, pData^.FileInformation.Access)
           );
       end else
         pData^.ImageIndex := TOptixHelper.SystemFileIcon(AFile.Name, True);

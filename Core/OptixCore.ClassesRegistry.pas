@@ -162,6 +162,7 @@ initialization
     TOptixCommandCreateDirectory,
     TOptixCommandCopyFileOrDirectory,
     TOptixCommandDeleteFileOrDirectory,
+    TOptixCommandRenameFileOrDirectory,
 
     // System & Process Commands
     TOptixCommandTerminateProcess,
