@@ -47,32 +47,30 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Types;
 
 interface
 
 type
-  TBoolResult   = (brTrue, brFalse, brError);
+  TBoolResult = (brTrue, brFalse, brError);
   TBoolNullable = (bnTrue, bnFalse, bnNull);
 
-function CastResult(const AValue : TBoolResult) : Boolean; overload;
-function CastResult(const AValue : Boolean) : TBoolResult; overload;
+function CastResult(const AValue: TBoolResult): Boolean; overload;
+function CastResult(const AValue: Boolean): TBoolResult; overload;
 
 implementation
 
-function CastResult(const AValue : TBoolResult) : Boolean;
+function CastResult(const AValue: TBoolResult): Boolean;
 begin
-  result := AValue = brTrue;
+  Result := AValue = brTrue;
 end;
 
-function CastResult(const AValue : Boolean) : TBoolResult;
+function CastResult(const AValue: Boolean): TBoolResult;
 begin
   if AValue then
-    result := brTrue
+    Result := brTrue
   else
-    result := brFalse;
+    Result := brFalse;
 end;
 
 end.

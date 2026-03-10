@@ -20,12 +20,6 @@ object ControlFormRemoteShell: TControlFormRemoteShell
     Top = 0
     Width = 680
     Height = 294
-    BorderTop = 0
-    BorderLeft = 0
-    BorderRight = 0
-    BorderBottom = 0
-    Color = 13554645
-    BorderColor = clBlack
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -34,8 +28,13 @@ object ControlFormRemoteShell: TControlFormRemoteShell
     Font.Style = []
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 670
-    ExplicitHeight = 262
+    BorderTop = 0
+    BorderLeft = 0
+    BorderRight = 0
+    BorderBottom = 0
+    Color = 13554645
+    BorderColor = clBlack
+    ExplicitWidth = 690
     object OMultiPanel: TOMultiPanel
       AlignWithMargins = True
       Left = 4
@@ -59,8 +58,7 @@ object ControlFormRemoteShell: TControlFormRemoteShell
       SplitterHoverColor = clHighlight
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 662
-      ExplicitHeight = 225
+      ExplicitWidth = 682
       object PanelInstances: TFlatPanel
         Left = 0
         Top = 0
@@ -70,12 +68,6 @@ object ControlFormRemoteShell: TControlFormRemoteShell
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        BorderTop = 2
-        BorderLeft = 2
-        BorderRight = 2
-        BorderBottom = 2
-        Color = clWhite
-        BorderColor = clBlack
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
@@ -88,6 +80,12 @@ object ControlFormRemoteShell: TControlFormRemoteShell
         Padding.Top = 2
         Padding.Right = 2
         Padding.Bottom = 2
+        BorderTop = 2
+        BorderLeft = 2
+        BorderRight = 2
+        BorderBottom = 2
+        Color = clWhite
+        BorderColor = clBlack
       end
     end
     object PanelActions: TFlatPanel
@@ -100,12 +98,6 @@ object ControlFormRemoteShell: TControlFormRemoteShell
       Margins.Top = 4
       Margins.Right = 4
       Margins.Bottom = 0
-      BorderTop = 0
-      BorderLeft = 0
-      BorderRight = 0
-      BorderBottom = 0
-      Color = clBlack
-      BorderColor = clBlack
       Align = alTop
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
@@ -118,6 +110,12 @@ object ControlFormRemoteShell: TControlFormRemoteShell
       Padding.Top = 2
       Padding.Right = 2
       Padding.Bottom = 2
+      BorderTop = 0
+      BorderLeft = 0
+      BorderRight = 0
+      BorderBottom = 0
+      Color = clBlack
+      BorderColor = clBlack
       ExplicitWidth = 662
       object ButtonUploadFileToCwd: TFlatImageButton
         AlignWithMargins = True
@@ -278,12 +276,6 @@ object ControlFormRemoteShell: TControlFormRemoteShell
         Top = 2
         Width = 500
         Height = 21
-        BorderTop = 0
-        BorderLeft = 0
-        BorderRight = 0
-        BorderBottom = 0
-        Color = 13554645
-        BorderColor = clBlack
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
@@ -292,6 +284,12 @@ object ControlFormRemoteShell: TControlFormRemoteShell
         Font.Style = []
         ParentFont = False
         TabOrder = 0
+        BorderTop = 0
+        BorderLeft = 0
+        BorderRight = 0
+        BorderBottom = 0
+        Color = 13554645
+        BorderColor = clBlack
         ExplicitWidth = 490
         object ComboInstance: TFlatComboBox
           AlignWithMargins = True
@@ -318,7 +316,6 @@ object ControlFormRemoteShell: TControlFormRemoteShell
           OnChange = ComboInstanceChange
           Status = cStatusNormal
           Validators = []
-          ExplicitWidth = 486
         end
       end
     end

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uFormGenerateNewCertificate;
 
 interface
@@ -86,7 +84,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   end;
 
 var
@@ -112,61 +110,61 @@ procedure TFormGenerateNewCertificate.ButtonGenerateClick(Sender: TObject);
 begin
   var AErrorDialog := TOptixErrorDialog.Create(self);
   try
-    if String.IsNullOrWhiteSpace(EditC.Text) then
+    if string.IsNullOrWhiteSpace(EditC.Text) then
       AErrorDialog.Add('You must specify a country.');
 
-    if String.IsNullOrWhiteSpace(EditO.Text) then
+    if string.IsNullOrWhiteSpace(EditO.Text) then
       AErrorDialog.Add('You must specify an organization name.');
 
-    if String.IsNullOrWhiteSpace(EditCN.Text) then
+    if string.IsNullOrWhiteSpace(EditCN.Text) then
       AErrorDialog.Add('You must specify a common name.');
 
-    if AErrorDialog.ShowErrors() then
-      Exit();
+    if AErrorDialog.ShowErrors then
+      Exit;
   finally
-    FreeAndNil(AErrorDialog);
+    AErrorDialog.Free;
   end;
 
   ///
   ModalResult := mrOk;
 end;
 
-procedure TFormGenerateNewCertificate.DoResize();
+procedure TFormGenerateNewCertificate.DoResize;
 begin
-  ButtonGenerate.Top  := (PanelBottom.Height div 2) - (ButtonGenerate.Height div 2);
-  ButtonCancel.Top    := ButtonGenerate.Top;
+  ButtonGenerate.Top := (PanelBottom.Height div 2) - (ButtonGenerate.Height div 2);
+  ButtonCancel.Top := ButtonGenerate.Top;
 
   ButtonGenerate.Left := PanelBottom.Width - ButtonGenerate.Width - ScaleValue(8);
-  ButtonCancel.Left   := ButtonGenerate.Left - ButtonGenerate.Width - ScaleValue(8);
+  ButtonCancel.Left := ButtonGenerate.Left - ButtonGenerate.Width - ScaleValue(8);
 end;
 
 procedure TFormGenerateNewCertificate.FormCreate(Sender: TObject);
 begin
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
-  PanelClient.Color      := FlatWindow1.Background;
-  PanelLeft.Color        := FlatWindow1.Background;
-  PanelBottom.Color      := FlatWindow1.Background;
+  PanelClient.Color := FlatWindow1.Background;
+  PanelLeft.Color := FlatWindow1.Background;
+  PanelBottom.Color := FlatWindow1.Background;
   {$ENDIF}
 end;
 
 procedure TFormGenerateNewCertificate.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : ButtonGenerateClick(ButtonGenerate);
-    27 : ModalResult := mrCancel;
+    13: ButtonGenerateClick(ButtonGenerate);
+    27: ModalResult := mrCancel;
   end;
 end;
 
 procedure TFormGenerateNewCertificate.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormGenerateNewCertificate.FormShow(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 end.

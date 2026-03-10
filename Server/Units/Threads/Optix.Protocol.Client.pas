@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Protocol.Client;
 
 interface
@@ -63,34 +61,36 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOnClientDisconnect = procedure(Sender : TObject; const AClient : TClientSocket) of object;
+  TOnClientDisconnect = procedure(Sender: TObject; const AClient: TClientSocket) of object;
 
   TOptixClientThread = class(TOptixThread)
   private
-    FOnClientDisconnect : TOnClientDisconnect;
+    FOnClientDisconnect: TOnClientDisconnect;
   protected
-    FClient      : TClientSocket;
-    FPeerAddress : String;
+    FClient: TClientSocket;
+    FPeerAddress: string;
+    FPort: Word;
 
     {@M}
-    procedure ThreadExecute(); override;
-    procedure TerminatedSet(); override;
+    procedure ThreadExecute; override;
+    procedure TerminatedSet; override;
 
-    procedure Initialize(); virtual;
-    procedure Finalize(); virtual;
+    procedure Initialize; virtual;
+    procedure Finalize; virtual;
 
-    procedure ClientExecute(); virtual; abstract;
-    procedure ClientTerminate(); virtual;
+    procedure ClientExecute; virtual; abstract;
+    procedure ClientTerminate; virtual;
   public
     {@C}
-    constructor Create(const AClient : TClientSocket);
-    destructor Destroy(); override;
+    constructor Create(const AClient: TClientSocket);
+    destructor Destroy; override;
 
     {@G/S}
-    property OnClientDisconnect : TOnClientDisconnect read FOnClientDisconnect write FOnClientDisconnect;
+    property OnClientDisconnect: TOnClientDisconnect read FOnClientDisconnect write FOnClientDisconnect;
 
     {@G}
-    property PeerAddress : String read FPeerAddress;
+    property PeerAddress: string read FPeerAddress;
+    property Port: Word read FPort;
   end;
 
 implementation
@@ -104,43 +104,44 @@ uses
   OptixCore.Sockets.Exceptions;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixClientThread.Initialize();
+procedure TOptixClientThread.Initialize;
 begin
   ///
 end;
 
-procedure TOptixClientThread.Finalize();
+procedure TOptixClientThread.Finalize;
 begin
   ///
 end;
 
-constructor TOptixClientThread.Create(const AClient : TClientSocket);
+constructor TOptixClientThread.Create(const AClient: TClientSocket);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FClient := AClient;
   FPeerAddress := FClient.RemoteAddress;
+  FPort := FClient.RemotePort;
 
   FOnClientDisconnect := nil;
 
   ///
-  Initialize();
+  Initialize;
 end;
 
-destructor TOptixClientThread.Destroy();
+destructor TOptixClientThread.Destroy;
 begin
   if Assigned(FClient) then
     FreeAndNil(FClient);
 
   ///
-  Finalize();
+  Finalize;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixClientThread.ClientTerminate();
+procedure TOptixClientThread.ClientTerminate;
 begin
   if Assigned(FOnClientDisconnect) then
     Synchronize(procedure begin
@@ -148,14 +149,14 @@ begin
     end);
 end;
 
-procedure TOptixClientThread.ThreadExecute();
+procedure TOptixClientThread.ThreadExecute;
 begin
   if not Assigned(FClient) then
-    Exit();
+    Exit;
   try
-    self.ClientExecute();
+    ClientExecute;
   finally
-    ClientTerminate();
+    ClientTerminate;
     ///
 
     if Assigned(FClient) then
@@ -163,13 +164,13 @@ begin
   end;
 end;
 
-procedure TOptixClientThread.TerminatedSet();
+procedure TOptixClientThread.TerminatedSet;
 begin
-  inherited TerminatedSet();
+  inherited TerminatedSet;
   ///
 
   if Assigned(FClient) then
-    FClient.Close();
+    FClient.Close;
 end;
 
 end.

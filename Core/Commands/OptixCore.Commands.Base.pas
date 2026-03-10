@@ -66,7 +66,7 @@ type
   TOptixCommandAction = class(TOptixCommand)
   public
     {$IFNDEF SERVER}
-    procedure DoAction(); virtual; abstract;
+    procedure DoAction; virtual; abstract;
     {$ENDIF}
   end;
 
@@ -85,109 +85,113 @@ type
   TOptixTaskResult = class(TOptixPacket)
   private
     [OptixSerializableAttribute]
-    FSuccess : Boolean;
+    FSuccess: Boolean;
 
     [OptixSerializableAttribute]
-    FExceptionMessage : String;
+    FExceptionMessage: string;
 
     [OptixSerializableAttribute]
-    FTaskDuration : UInt64;
+    FTaskDuration: UInt64;
 
     {@M}
-    function GetDescription() : String;
+    function GetDescription: string;
   protected
     {@M}
-    function GetExtendedDescription() : String; virtual;
+    function GetExtendedDescription: string; virtual;
   public
     {@M}
-    procedure SetTaskDuration(const AValue : UInt64);
-    procedure TaskFailed(const AExceptionMessage : String);
-    procedure TaskSucceed();
+    procedure SetTaskDuration(const AValue: UInt64);
+    procedure TaskFailed(const AExceptionMessage: string);
+    procedure TaskSucceed;
 
     {@C}
-    constructor Create(); override;
-    constructor Create(const ASerializedObject : TJsonObject); override;
-    destructor Destroy(); override;
+    constructor Create; override;
+    constructor Create(const ASerializedObject: TJsonObject); override;
+    destructor Destroy; override;
 
     {@G}
-    property Success          : Boolean read FSuccess;
-    property ExceptionMessage : String  read FExceptionMessage;
-    property TaskDuration     : UInt64  read FTaskDuration;
-    property Description      : String  read GetDescription;
+    property Success: Boolean read FSuccess;
+    property ExceptionMessage: string read FExceptionMessage;
+    property TaskDuration: UInt64 read FTaskDuration;
+    property Description: string read GetDescription;
   end;
 
   TOptixTaskCallback = class(TOptixPacket)
   private
     [OptixSerializableAttribute]
-    FId : TGUID;
+    FId: TGUID;
 
     [OptixSerializableAttribute]
-    FTaskClassName : String;
+    FTaskClassName: string;
 
     [OptixSerializableAttribute]
-    FState : TOptixTaskState;
+    FState: TOptixTaskState;
 
-    FResult  : TOptixTaskResult;
+    FResult: TOptixTaskResult;
+
+    {@M}
+    function GetHasEnded: Boolean;
   protected
     {@M}
-    procedure DeSerialize(const ASerializedObject : TJsonObject); override;
+    procedure DeSerialize(const ASerializedObject: TJsonObject); override;
   public
     {@C}
-    constructor Create(const ATask : TOptixTask); overload;
-    destructor Destroy(); override;
+    constructor Create(const ATask: TOptixTask); overload;
+    destructor Destroy; override;
 
     {@M}
-    function Serialize() : TJsonObject; override;
+    function Serialize: TJsonObject; override;
 
     {@G}
-    property Id            : TGUID            read FId;
-    property TaskClassName : String           read FTaskClassName;
-    property State         : TOptixTaskState  read FState;
-    property Result        : TOptixTaskResult read FResult;
+    property Id: TGUID read FId;
+    property TaskClassName: string read FTaskClassName;
+    property State: TOptixTaskState read FState;
+    property HasEnded: Boolean read GetHasEnded;
+    property Result: TOptixTaskResult read FResult;
   end;
 
   TOptixTask = class
   private
-    FId             : TGUID;
-    FTask           : IFuture<TOptixTaskResult>;
-    FSuccess        : Boolean;
-    FRunningAware   : Boolean;
-    FResultIsPulled : Boolean;
+    FId: TGUID;
+    FTask: IFuture<TOptixTaskResult>;
+    FSuccess: Boolean;
+    FRunningAware: Boolean;
+    FResultIsPulled: Boolean;
 
     {@M}
-    function Execute() : TOptixTaskResult;
-    function IsCompleted() : Boolean;
-    function IsRunning() : Boolean;
-    function GetResult(const APullResult : Boolean = false) : TOptixTaskResult;
+    function Execute: TOptixTaskResult;
+    function IsCompleted: Boolean;
+    function IsRunning: Boolean;
+    function GetResult(const APullResult: Boolean = false): TOptixTaskResult;
   protected
-    FCommand : TOptixCommand;
+    FCommand: TOptixCommand;
 
     {@M}
-    function TaskCode() : TOptixTaskResult; virtual; abstract;
+    function TaskCode: TOptixTaskResult; virtual; abstract;
   public
     {@C}
-    constructor Create(const ACommand : TOptixCommand);
-    destructor Destroy(); override;
+    constructor Create(const ACommand: TOptixCommand);
+    destructor Destroy; override;
 
     {@M}
-    procedure Start();
-    procedure SetTaskId(const ATaskId : TGUID);
-    function PullResult() : TOptixTaskResult;
+    procedure Start;
+    procedure SetTaskId(const ATaskId: TGUID);
+    function PullResult: TOptixTaskResult;
 
     {@G}
-    property Id        : TGUID   read FId;
-    property Completed : Boolean read IsCompleted;
-    property Running   : Boolean read IsRunning;
-    property Success   : Boolean read FSuccess;
+    property Id: TGUID read FId;
+    property Completed: Boolean read IsCompleted;
+    property Running: Boolean read IsRunning;
+    property Success: Boolean read FSuccess;
 
     {@G/S}
-    property RunningAware : Boolean read FRunningAware write FRunningAware;
+    property RunningAware: Boolean read FRunningAware write FRunningAware;
   end;
 
   TOptixCommandTask = class(TOptixCommand)
   public
     {$IFNDEF SERVER}
-    function CreateTask(const ACommand : TOptixCommand) : TOptixTask; virtual; abstract;
+    function CreateTask(const ACommand: TOptixCommand): TOptixTask; virtual; abstract;
     {$ENDIF}
   end;
 
@@ -204,16 +208,16 @@ uses
 
 (* TOptixTaskCallback *)
 
-constructor TOptixTaskCallback.Create(const ATask : TOptixTask);
+constructor TOptixTaskCallback.Create(const ATask: TOptixTask);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FId            := ATask.Id;
+  FId := ATask.Id;
   FTaskClassName := ATask.ClassName;
 
   if ATask.Completed then begin
-    FResult := ATask.PullResult();
+    FResult := ATask.PullResult;
     ///
 
     if ATask.Success then
@@ -231,27 +235,27 @@ begin
   end;
 end;
 
-destructor TOptixTaskCallback.Destroy();
+destructor TOptixTaskCallback.Destroy;
 begin
   if Assigned(FResult) then
     FreeAndNil(FResult);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixTaskCallback.DeSerialize(const ASerializedObject : TJsonObject);
+procedure TOptixTaskCallback.DeSerialize(const ASerializedObject: TJsonObject);
 begin
   inherited;
   ///
 
-  var AResult : TJsonObject;
+  var AResult: TJsonObject;
   if not ASerializedObject.TryGetValue<TJSONObject>('Result', AResult) then
     Exit;
   ///
 
-  var AResultClass : String;
-  if not AResult.TryGetValue<String>('META_CLASSNAME', AResultClass) then
+  var AResultClass: string;
+  if not AResult.TryGetValue<string>('META_CLASSNAME', AResultClass) then
     Exit;
 
   if Assigned(FResult) then
@@ -260,84 +264,89 @@ begin
   FResult := TOptixTaskResult(TClassesRegistry.CreateInstance(AResultClass, [TValue.From<TJsonObject>(AResult)]));
 end;
 
-function TOptixTaskCallback.Serialize() : TJsonObject;
+function TOptixTaskCallback.Serialize: TJsonObject;
 begin
-  result := inherited;
-  if not Assigned(result) then
+  Result := inherited;
+  if not Assigned(Result) then
     Exit;
   ///
 
   if Assigned(FResult) then
-    result.AddPair('Result', FResult.Serialize())
+    Result.AddPair('Result', FResult.Serialize)
   else
-    result.AddPair('Result', TJsonObject.Create());
+    Result.AddPair('Result', TJsonObject.Create);
+end;
+
+function TOptixTaskCallback.GetHasEnded: Boolean;
+begin
+  Result := (FState = otsFailed) or (FState = otsSuccess);
 end;
 
 (* TOptixTask *)
 
-function TOptixTask.Execute() : TOptixTaskResult;
+function TOptixTask.Execute: TOptixTaskResult;
 begin
-  result := nil;
+  Result := nil;
   try
-    var AStartTick := GetTickCount64();
+    var AStartTick := GetTickCount64;
     ///
 
-    result := TaskCode();
-    if Assigned(result) then begin
-      result.SetTaskDuration(GetTickCount64() - AStartTick);
+    Result := TaskCode;
+    if Assigned(Result) then begin
+      Result.SetTaskDuration(GetTickCount64 - AStartTick);
 
-      result.TaskSucceed();
+      Result.TaskSucceed;
     end;
   except
-    on E : Exception do begin
-      if not Assigned(result) then
-        result := TOptixTaskResult.Create();
+    on E: Exception do begin
+      if not Assigned(Result) then
+        Result := TOptixTaskResult.Create;
 
       ///
-      result.TaskFailed(E.Message);
+      Result.TaskFailed(E.Message);
     end;
   end;
 end;
 
-function TOptixTask.IsCompleted() : Boolean;
+function TOptixTask.IsCompleted: Boolean;
 begin
-  result := Assigned(FTask) and (FTask.Status in [TTaskStatus.Completed, TTaskStatus.Exception]);
+  Result := Assigned(FTask) and (FTask.Status in [TTaskStatus.Completed, TTaskStatus.Exception]);
 end;
 
-function TOptixTask.IsRunning() : Boolean;
+function TOptixTask.IsRunning: Boolean;
 begin
-  result := Assigned(FTask) and (FTask.Status in [TTaskStatus.Running]);
+  Result := Assigned(FTask) and (FTask.Status in [TTaskStatus.Running]);
 end;
 
-procedure TOptixTask.Start();
+procedure TOptixTask.Start;
 begin
   if FTask = nil then
     FTask := TTask.Future<TOptixTaskResult>(
-      function : TOptixTaskResult begin
-        result := Execute();
+      function: TOptixTaskResult begin
+        Result := Execute
       end
     );
 end;
 
-procedure TOptixTask.SetTaskId(const ATaskId : TGUID);
+procedure TOptixTask.SetTaskId(const ATaskId: TGUID);
 begin
   FId := ATaskId;
 end;
 
-function TOptixTask.GetResult(const APullResult : Boolean = false) : TOptixTaskResult;
+function TOptixTask.GetResult(const APullResult: Boolean = false): TOptixTaskResult;
 begin
-  result := nil;
+  Result := nil;
   ///
 
-  if IsCompleted() and not FResultIsPulled then begin
+  if IsCompleted and not FResultIsPulled then begin
     try
-      result := FTask.Value;
+      Result := FTask.Value;
     except
 
     end;
 
-    if Assigned(result) then begin
-      FSuccess := result.Success;
+    if Assigned(Result) then begin
+      FSuccess := Result.Success;
 
       ///
       if APullResult then
@@ -346,108 +355,109 @@ begin
   end;
 end;
 
-function TOptixTask.PullResult() : TOptixTaskResult;
+function TOptixTask.PullResult: TOptixTaskResult;
 begin
-  result := GetResult(True);
+  Result := GetResult(True);
 end;
 
-constructor TOptixTask.Create(const ACommand : TOptixCommand);
+constructor TOptixTask.Create(const ACommand: TOptixCommand);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FId             := TGUID.Empty;
-  FTask           := nil;
-  FCommand        := ACommand;
-  FRunningAware   := False;
-  FSuccess        := False;
+  FId := TGUID.Empty;
+  FTask := nil;
+  FCommand := ACommand;
+  FRunningAware := False;
+  FSuccess := False;
   FResultIsPulled := False;
 end;
-destructor TOptixTask.Destroy();
+
+destructor TOptixTask.Destroy;
 begin
   if Assigned(FCommand) then
     FreeAndNil(FCommand);
 
-  var AResult := GetResult();
+  var AResult := GetResult;
   if Assigned(AResult) then
     FreeAndNil(AResult);
 
   FTask := nil;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 (* TOptixTaskResult *)
 
-constructor TOptixTaskResult.Create();
+constructor TOptixTaskResult.Create;
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FSuccess          := False;
+  FSuccess := False;
   FExceptionMessage := '';
-  FTaskDuration     := 0;
+  FTaskDuration := 0;
 end;
 
-constructor TOptixTaskResult.Create(const ASerializedObject : TJsonObject);
+constructor TOptixTaskResult.Create(const ASerializedObject: TJsonObject);
 begin
-  Create();
+  Create;
   ///
 
   if Assigned(ASerializedObject) then
     DeSerialize(ASerializedObject);
 end;
 
-destructor TOptixTaskResult.Destroy();
+destructor TOptixTaskResult.Destroy;
 begin
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixTaskResult.SetTaskDuration(const AValue : UInt64);
+procedure TOptixTaskResult.SetTaskDuration(const AValue: UInt64);
 begin
   FTaskDuration := AValue;
 end;
 
-function TOptixTaskResult.GetExtendedDescription() : String;
+function TOptixTaskResult.GetExtendedDescription: string;
 begin
-  result := '';
+  Result := '';
 end;
 
-function TOptixTaskResult.GetDescription() : String;
+function TOptixTaskResult.GetDescription: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if FSuccess then begin
-    var AExtendedDescription := GetExtendedDescription();
+    var AExtendedDescription := GetExtendedDescription;
     var ATimingInformation := '';
     if FTaskDuration > 1000 then
-      ATimingInformation := Format('Task completed in %d seconds.', [FTaskDuration div 1000]);
+      ATimingInformation := Format(' (Task completed in %d seconds.)', [FTaskDuration div 1000]);
     ///
 
-    if not String.IsNullOrWhiteSpace(AExtendedDescription) then
-      result := Format('%s (%s)', [
+    if not string.IsNullOrWhiteSpace(AExtendedDescription) then
+      Result := Format('%s%s', [
         AExtendedDescription,
         ATimingInformation
       ])
     else
-      result := ATimingInformation;
+      Result := ATimingInformation;
   end else
-    result := Format('Task Failed: %s', [FExceptionMessage]);
+    Result := Format('Task Failed: %s', [FExceptionMessage]);
 end;
 
-procedure TOptixTaskResult.TaskFailed(const AExceptionMessage : String);
+procedure TOptixTaskResult.TaskFailed(const AExceptionMessage: string);
 begin
-  FSuccess          := False;
+  FSuccess := False;
   FExceptionMessage := AExceptionMessage;
 end;
 
-procedure TOptixTaskResult.TaskSucceed();
+procedure TOptixTaskResult.TaskSucceed;
 begin
-  FSuccess          := True;
+  FSuccess := True;
   FExceptionMessage := '';
 end;
 

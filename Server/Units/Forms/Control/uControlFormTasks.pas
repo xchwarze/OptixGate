@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormTasks;
 
 interface
@@ -70,10 +68,10 @@ uses
 
 type
   TTreeData = record
-    TaskCallBack : TOptixTaskCallback;
-    Created      : TDateTime;
-    Ended        : TDateTime;
-    HasEnded     : Boolean;
+    TaskCallBack: TOptixTaskCallback;
+    Created: TDateTime;
+    Ended: TDateTime;
+    HasEnded: Boolean;
   end;
   PTreeData = ^TTreeData;
 
@@ -91,19 +89,18 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormDestroy(Sender: TObject);
-    procedure VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Action1Click(Sender: TObject);
     procedure VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    { Private declarations }
+    procedure TaskSuccessDirectCallback(const AResult: TOptixTaskResult);
   private
     {@M}
-    function GetNodeByTaskId(const ATaskId : TGUID) : PVirtualNode;
-    function GetSelectedTaskCallBack(const AFilterState : TOptixTaskStates = []) : TOptixTaskCallBack;
-    function GetSelectedSucceededTaskCallBack() : TOptixTaskCallBack;
+    function GetNodeByTaskId(const ATaskId: TGUID): PVirtualNode;
+    function GetSelectedTaskCallBack(const AFilterState: TOptixTaskStates = []): TOptixTaskCallBack;
+    function GetSelectedSucceededTaskCallBack: TOptixTaskCallBack;
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
   end;
 
 var
@@ -119,58 +116,87 @@ uses
 
   uFormMain,
 
-  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump;
+  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump, OptixCore.Task.FileOperations,
+  OptixCore.System.FileSystem,
+
+  uControlFormFileManager;
 // ---------------------------------------------------------------------------------------------------------------------
 
 {$R *.dfm}
 
-procedure TControlFormTasks.FormDestroy(Sender: TObject);
+procedure TControlFormTasks.TaskSuccessDirectCallback(const AResult: TOptixTaskResult);
 begin
-  VST.Clear();
+  if not Assigned(AResult) then
+    Exit;
+  ///
+
+  if AResult is TOptixTaskGetCopyFileOrDirectoryResult then begin
+      var ACastedResult := TOptixTaskGetCopyFileOrDirectoryResult(AResult);
+      ///
+
+      if Assigned(ACastedResult) and Assigned(ACastedResult.FileInformation) then begin
+        // Register moved or pasted file or directory if related to cwd
+        RegisterNewFileOnFileManagers(ExtractFilePath(ACastedResult.Destination), ACastedResult.FileInformation);
+
+        // If a file or directory was cut, remove the corresponding entry if related to cwd
+        if ACastedResult.Moved then
+          DeleteFileFromFileManagers(ACastedResult.Source, ACastedResult.FileInformation.IsDirectory);
+      end;
+  end else if AResult is TOptixTaskGetDeleteFileOrDirectoryResult then begin
+    var ACastedResult := TOptixTaskGetDeleteFileOrDirectoryResult(AResult);
+    ///
+
+    DeleteFileFromFileManagers(ACastedResult.FilePath, ACastedResult.IsDirectory);
+  end;
 end;
 
-function TControlFormTasks.GetNodeByTaskId(const ATaskId : TGUID) : PVirtualNode;
+procedure TControlFormTasks.FormDestroy(Sender: TObject);
 begin
-  result := nil;
+  VST.Clear;
+end;
+
+function TControlFormTasks.GetNodeByTaskId(const ATaskId: TGUID): PVirtualNode;
+begin
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
     if Assigned(pData^.TaskCallBack) and (pData^.TaskCallBack.Id = ATaskId) then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-function TControlFormTasks.GetSelectedTaskCallBack(const AFilterState : TOptixTaskStates = []) : TOptixTaskCallBack;
+function TControlFormTasks.GetSelectedTaskCallBack(const AFilterState: TOptixTaskStates = []): TOptixTaskCallBack;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
   var pData := PTreeData(VST.FocusedNode.GetData);
   if not Assigned(pData^.TaskCallBack) then
-    Exit();
+    Exit;
 
   if (pData^.TaskCallBack.State in AFilterState) or (AFilterState = []) then
-    result := pData^.TaskCallBack;
+    Result := pData^.TaskCallBack;
 end;
 
-function TControlFormTasks.GetSelectedSucceededTaskCallBack() : TOptixTaskCallBack;
+function TControlFormTasks.GetSelectedSucceededTaskCallBack: TOptixTaskCallBack;
 begin
-  result := GetSelectedTaskCallBack([otsSuccess]);
+  Result := GetSelectedTaskCallBack([otsSuccess]);
 end;
 
 procedure TControlFormTasks.Action1Click(Sender: TObject);
 begin
-  var ACallBack := GetSelectedSucceededTaskCallBack();
+  var ACallBack := GetSelectedSucceededTaskCallBack;
   if not Assigned(ACallBack) or not Assigned(ACallBack.Result) then
-    Exit();
+    Exit;
   ///
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -178,7 +204,7 @@ begin
     var ADirectory := '';
 
     if not SelectDirectory('Select destination', '', ADirectory) then
-      Exit();
+      Exit;
 
     RequestFileDownload(
       TOptixTaskGetProcessDumpResult(ACallBack.Result).OutputFilePath,
@@ -194,15 +220,15 @@ begin
   Action1.Visible := False;
   ///
 
-  var ACallBack := GetSelectedSucceededTaskCallBack();
+  var ACallBack := GetSelectedSucceededTaskCallBack;
   if not Assigned(ACallBack) or not Assigned(ACallBack.Result) then
-    Exit();
+    Exit;
 
   case ACallBack.State of
-    otsPending :;
-    otsRunning :;
-    otsFailed  :;
-    otsSuccess : begin
+    otsPending: ;
+    otsRunning: ;
+    otsFailed: ;
+    otsSuccess: begin
       Action1.Visible := True;
       // ---------------------------------------------------------------------------------------------------------------
       if ACallBack.Result is TOptixTaskGetProcessDumpResult then
@@ -215,20 +241,20 @@ begin
   end;
 end;
 
-procedure TControlFormTasks.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormTasks.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
 
   if not (AOptixPacket is TOptixTaskCallback) then
-    Exit();
+    Exit;
   ///
 
   var ATaskResult := TOptixTaskCallback(AOptixPacket);
   var pNode := GetNodeByTaskId(ATaskResult.Id);
-  var pData : PTreeData;
+  var pData: PTreeData;
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     if not Assigned(pNode) then begin
       pNode := VST.AddChild(nil);
@@ -249,12 +275,17 @@ begin
 
     AHandleMemory := True;
 
-    if (pData^.TaskCallBack.State = otsFailed) or (pData^.TaskCallBack.State = otsSuccess) then begin
+    if pData^.TaskCallBack.HasEnded then begin
       pData^.Ended := Now;
       pData^.HasEnded := True;
+      ///
+
+      // Success Direct Callback
+      if pData^.TaskCallBack.State = otsSuccess then
+        TaskSuccessDirectCallback(pData^.TaskCallBack.Result);
     end;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -263,15 +294,15 @@ procedure TControlFormTasks.VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetC
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
 
   case pData^.TaskCallBack.State of
-    otsRunning : AColor := COLOR_LIST_BLUE;
-    otsFailed  : AColor := COLOR_LIST_RED;
-    otsSuccess : AColor := COLOR_LIST_GREEN;
+    otsRunning: AColor := COLOR_LIST_BLUE;
+    otsFailed: AColor := COLOR_LIST_RED;
+    otsSuccess: AColor := COLOR_LIST_GREEN;
   end;
 
   if AColor <> clNone then begin
@@ -287,13 +318,13 @@ procedure TControlFormTasks.VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Nod
   function GetStateOrder(const AState: TOptixTaskState): Integer;
   begin
     case AState of
-      otsRunning : result := 0;
-      otsSuccess : result := 1;
-      otsPending : result := 2;
-      otsFailed  : result := 3;
+      otsRunning: Result := 0;
+      otsSuccess: Result := 1;
+      otsPending: Result := 2;
+      otsFailed: Result := 3;
 
       else
-        result := 4;
+        Result := 4;
     end;
   end;
 
@@ -307,10 +338,10 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.TaskCallBack.Id.ToString, pData2^.TaskCallBack.Id.ToString);
-      1 : Result := CompareText(pData1^.TaskCallBack.TaskClassName, pData2^.TaskCallBack.TaskClassName);
+      0: Result := CompareText(pData1^.TaskCallBack.Id.ToString, pData2^.TaskCallBack.Id.ToString);
+      1: Result := CompareText(pData1^.TaskCallBack.TaskClassName, pData2^.TaskCallBack.TaskClassName);
 
-      2 : begin
+      2: begin
         var AOrder1 := GetStateOrder(pData1^.TaskCallBack.State);
         var AOrder2 := GetStateOrder(pData2^.TaskCallBack.State);
         ///
@@ -318,10 +349,10 @@ begin
         Result := AOrder1 - AOrder2;
       end;
 
-      3 : Result := CompareDateTime(pData1^.Created, pData2^.Created);
-      4 : Result := TOptixHelper.CompareDateTimeEx(pData1^.Ended, pData1^.HasEnded, pData2^.Ended, pData2^.HasEnded);
+      3: Result := CompareDateTime(pData1^.Created, pData2^.Created);
+      4: Result := TOptixHelper.CompareDateTimeEx(pData1^.Ended, pData1^.HasEnded, pData2^.Ended, pData2^.HasEnded);
 
-      5 : begin
+      5: begin
         if not Assigned(pData1^.TaskCallBack.Result) or not Assigned(pData2^.TaskCallBack.Result) then
           Result := TOptixHelper.CompareObjectAssignement(pData1^.TaskCallBack.Result, pData2^.TaskCallBack.Result)
         else
@@ -334,8 +365,14 @@ end;
 procedure TControlFormTasks.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
   var pData := PTreeData(Node.GetData);
-  if Assigned(pData) and Assigned(pData^.TaskCallBack) then
+  if not Assigned(pData) then
+    Exit;
+
+  if Assigned(pData^.TaskCallBack) then
     FreeAndNil(pData^.TaskCallBack);
+
+  // Uncomment if "PTreeData" finalization is required.
+  // Finalize(pData^);
 end;
 
 procedure TControlFormTasks.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -343,15 +380,15 @@ procedure TControlFormTasks.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVi
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or not Assigned(pData^.TaskCallBack) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   case Kind of
-    ikNormal, ikSelected : begin
+    ikNormal, ikSelected: begin
 //      case pData^.TaskCallBack.State of
-//        otsRunning : ImageIndex := IMAGE_TASK_RUNNING;
-//        otsFailed  : ImageIndex := IMAGE_TASK_FAILED;
-//        otsSuccess : ImageIndex := IMAGE_TASK_SUCCESS;
+//        otsRunning: ImageIndex := IMAGE_TASK_RUNNING;
+//        otsFailed: ImageIndex := IMAGE_TASK_FAILED;
+//        otsSuccess: ImageIndex := IMAGE_TASK_SUCCESS;
 //
 //        else
 //          ImageIndex := IMAGE_TASK_PENDING;
@@ -378,22 +415,22 @@ begin
 
   if Assigned(pData) and Assigned(pData^.TaskCallBack) then begin
     case Column of
-      0 : CellText := pData^.TaskCallBack.Id.ToString();
-      1 : CellText := pData^.TaskCallBack.TaskClassName;
-      2 : begin
+      0: CellText := pData^.TaskCallBack.Id.ToString;
+      1: CellText := pData^.TaskCallBack.TaskClassName;
+      2: begin
         case pData^.TaskCallBack.State of
-          otsPending : CellText := 'Pending';
-          otsRunning : CellText := 'Running';
-          otsFailed  : CellText := 'Failed';
-          otsSuccess : CellText := 'Success';
+          otsPending: CellText := 'Pending';
+          otsRunning: CellText := 'Running';
+          otsFailed: CellText := 'Failed';
+          otsSuccess: CellText := 'Success';
         end;
       end;
-      3 : CellText := DateTimeToStr(pData^.Created);
-      4 : begin
+      3: CellText := DateTimeToStr(pData^.Created);
+      4: begin
         if pData^.HasEnded then
           CellText := DateTimeToStr(pData^.Ended);
       end;
-      5 : begin
+      5: begin
         if Assigned(pData^.TaskCallBack.Result) then
           CellText := pData^.TaskCallBack.Result.Description;
       end;
@@ -402,11 +439,6 @@ begin
 
   ///
   CellText := TOptixHelper.DefaultIfEmpty(CellText);
-end;
-
-procedure TControlFormTasks.VSTMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
 end;
 
 end.

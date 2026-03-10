@@ -47,15 +47,15 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.FileSystem;
 
 interface
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.Classes,
+  System.Classes, System.Win.ComObj, System.SysUtils,
+
+  Winapi.Windows, Winapi.ShlObj,
 
   Generics.Collections,
 
@@ -80,292 +80,383 @@ type
   );
   TFileAccessAttributes = set of TFileAccess;
 
+  TVirtualClipboardCopyMode = (
+    vccmCopy,
+    vccmCut
+  );
+
+  TVirtualClipboard = class
+  private
+    FContent: string;
+    FCopyMode: TVirtualClipboardCopyMode;
+
+    FNotifyClipboardUpdateList: TList<TNotifyEvent>;
+
+    {@M}
+    procedure SetContent(const AValue: string);
+    procedure SetCopyMode(const AValue: TVirtualClipboardCopyMode);
+    procedure SignalClipboardUpdate;
+  public
+    {@C}
+    constructor Create;
+    destructor Destroy; override;
+
+    {@M}
+    procedure SubscribeToClipboardUpdateSignal(const ASignalFunc: TNotifyEvent);
+    procedure UnsubscribeFromClipboardUpdateSignal(const ASignalFunc: TNotifyEvent);
+    function IsEmpty: Boolean;
+    procedure Clear;
+
+    {@G/S}
+    property Content: string read FContent write SetContent;
+    property CopyMode: TVirtualClipboardCopyMode read FCopyMode write SetCopyMode;
+  end;
+
+  TFileOperationSink = class(TInterfacedObject, IFileOperationProgressSink)
+  private
+    FSourcePath: string;
+    FLastOperationFinalPath: string;
+
+    {@M}
+    function PostMoveOrCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrCopyOrMove: HResult; const psiNewlyCreated: IShellItem) : HResult;
+  public
+    {@C}
+    constructor Create(const ASourcePath: string);
+
+    {@M:Implemented}
+    function PostCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrCopy: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PostMoveItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR; hrMove: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+
+    {@M:Not Implemented}
+    function StartOperations: HResult; stdcall;
+    function FinishOperations(hrResult: HResult): HResult; stdcall;
+    function PreRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+    function PostRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR; hrRename: HResult;
+      const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PreMoveItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR): HResult; stdcall;
+    function PreCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+      pszNewName: LPCWSTR): HResult; stdcall;
+    function PreDeleteItem(dwFlags: DWORD; const psiItem: IShellItem): HResult; stdcall;
+    function PostDeleteItem(dwFlags: DWORD; const psiItem: IShellItem; hrDelete: HResult;
+      const psiNewlyCreated: IShellItem): HResult; stdcall;
+    function PreNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+    function PostNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR;
+      pszTemplateName: LPCWSTR; dwFileAttributes: DWORD; hrNew: HResult;
+      const psiNewItem: IShellItem): HResult; stdcall;
+    function UpdateProgress(iWorkTotal: UINT; iWorkSoFar: UINT): HResult; stdcall;
+    function ResetTimer: HResult; stdcall;
+    function PauseTimer: HResult; stdcall;
+    function ResumeTimer: HResult; stdcall;
+
+    {@G}
+    property LastOperationFinalPath: string read FLastOperationFinalPath;
+  end;
+
   TFileSystemHelper = class
   type
-    TTraversedDirectoryCallback = reference to procedure(const ADirectoryName : String; const AAbsolutePath : String);
+    TTraversedDirectoryCallback = reference to procedure(const ADirectoryName: string; const AAbsolutePath: string);
+  private
+
   public
-    class function GetDriveInformation(ADriveLetter : String; out AName : String; out AFormat : String;
-      var ADriveType : TDriveType) : Boolean; static;
-    class function TryGetDriveInformation(ADriveLetter : String; out AName : String; out AFormat : String;
-      var ADriveType : TDriveType) : Boolean; static;
-    class function GetFileACLString(const AFileName : String) : String; static;
-    class function TryGetFileACLString(const AFileName : String) : String; static;
-    class procedure GetCurrentUserFileAccess(const AFileName : String; out ARead, AWrite, AExecute : Boolean); overload; static;
-    class function GetCurrentUserFileAccess(const AFileName : String) : TFileAccessAttributes; overload; static;
-    class procedure TryGetCurrentUserFileAccess(const AFileName : String; out ARead, AWrite, AExecute : Boolean); overload; static;
-    class function TryGetCurrentUserFileAccess(const AFileName : String) : TFileAccessAttributes; overload; static;
-    class function GetFileSize(const AFileName : String) : Int64; static;
-    class function TryGetFileSize(const AFileName : String) : Int64; static;
-    class function GetFileTypeDescription(const AFileName: String): String; static;
-    class procedure GetFileTime(const AFileName : String; out ACreate, ALastModified, ALastAccess : TDateTime); static;
-    class function TryGetFileTime(const AFileName : String; out ACreate, ALastModified, ALastAccess : TDateTime) : Boolean; static;
-    class function UniqueFileName(const AFileName : String) : String; static;
-    class function ExpandPath(const APath : String) : String; static;
-    class procedure TraverseDirectories(const APath : String;
-      const ATraversedDirectoryFunc : TTraversedDirectoryCallback); static;
-    class function GetFullPathName(const APath : String) : String; static;
-    class procedure PathExists(const APath : String); static;
-    class function CleanFileName(const AFileName : String) : String; static;
+    class function GetDriveInformation(ADriveLetter: string; out AName: string; out AFormat: string;
+      var ADriveType: TDriveType) : Boolean; static;
+    class function TryGetDriveInformation(ADriveLetter: string; out AName: string; out AFormat: string;
+      var ADriveType: TDriveType) : Boolean; static;
+    class function GetFileACLString(const AFileName: string): string; static;
+    class function TryGetFileACLString(const AFileName: string): string; static;
+    class procedure GetCurrentUserFileAccess(const AFileName: string; out ARead, AWrite, AExecute: Boolean); overload; static;
+    class function GetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes; overload; static;
+    class procedure TryGetCurrentUserFileAccess(const AFileName: string; out ARead, AWrite, AExecute: Boolean); overload; static;
+    class function TryGetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes; overload; static;
+    class function GetFileSize(const AFileName: string): Int64; static;
+    class function TryGetFileSize(const AFileName: string): Int64; static;
+    class function GetFileTypeDescription(const AFileName: string): string; static;
+    class procedure GetFileTime(const AFileName: string; out ACreate, ALastModified, ALastAccess: TDateTime); static;
+    class function TryGetFileTime(const AFileName: string; out ACreate, ALastModified, ALastAccess: TDateTime): Boolean; static;
+    class function UniqueFileName(const AFilePath: string): string; static;
+    class function UniqueDirectoryName(const ADirectoryPath: string): string; static;
+    class function UniqueFileOrDirectoryName(const APath: string): string; static;
+    class function ExpandPath(const APath: string): string; static;
+    class procedure TraverseDirectories(const APath: string;
+      const ATraversedDirectoryFunc: TTraversedDirectoryCallback); static;
+    class function GetFullPathName(const APath: string): string; static;
+    class procedure PathExists(const APath: string); static;
+    class function CleanFileName(const AFileName: string): string; static;
+    class procedure CreateDirectory(const APath, ANewDirectoryName: string); overload; static;
+    class procedure CreateDirectory(const AFullPath: string); overload; static;
+    class function Copy(const ASource, ADestination: string; const ADoMove: Boolean;
+      const ABlockThread: Boolean = True): string; static;
+    class procedure Delete(const AFilePath: string; const ABlockThread: Boolean = True); static;
+    class function GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
+      ABuild : Cardinal) : Boolean; overload; static;
+    class function GetFileVersion(const AFilePath: string): string; overload; static;
+    class function ExtractFilePath(const AFilePath: string;
+      const AIncludeTrailingPathDelimiter: Boolean = False): string; static;
+    class function ExtractFileName(const AFilePath: string): string; static;
   end;
 
   TContentReader = class
   private
-    FPageSize     : UInt64;
-    FFileHandle   : THandle;
-    FFileSize     : UInt64;
-    FFilePath     : String;
+    FPageSize: UInt64;
+    FFileHandle: THandle;
+    FFileSize: UInt64;
+    FFilePath: string;
 
     {@M}
-    function GetPageCount() : UInt64;
-    procedure SetPageSize(AValue : UInt64);
+    function GetPageCount: UInt64;
+    procedure SetPageSize(AValue: UInt64);
   public
     const
       MIN_PAGE_SIZE = 128;
       MAX_PAGE_SIZE = 409600;
   public
     {@C}
-    constructor Create(const AFilePath : String; const APageSize : UInt64);
-    destructor Destroy(); override;
+    constructor Create(const AFilePath: string; const APageSize: UInt64);
+    destructor Destroy; override;
 
     {@M}
-    procedure ReadPage(APageNumber : UInt64; var pBuffer : Pointer; var ABufferSize : UInt64);
+    procedure ReadPage(APageNumber: UInt64; var pBuffer: Pointer; var ABufferSize: UInt64);
 
     {@G}
-    property FileSize  : UInt64  read FFileSize;
-    property PageCount : UInt64  read GetPageCount;
-    property FilePath  : String  read FFilePath;
+    property FileSize: UInt64 read FFileSize;
+    property PageCount: UInt64 read GetPageCount;
+    property FilePath: string read FFilePath;
 
     {@S}
-    property PageSize : UInt64 read FPageSize write SetPageSize;
+    property PageSize: UInt64 read FPageSize write SetPageSize;
   end;
+
+  TFileInformation = class;
 
   // Folder Information (Simplified) -----------------------------------------------------------------------------------
   TSimpleFolderInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FPath : String;
+    FPath: string;
 
     [OptixSerializableAttribute]
-    FAccess : TFileAccessAttributes;
-
-    [OptixSerializableAttribute]
-    FIsRoot : Boolean;
+    FAccess: TFileAccessAttributes;
   public
     {@C}
-    constructor Create(const AName, APath : String; const AAccess : TFileAccessAttributes;
-      const AIsRoot : Boolean); overload;
+    constructor Create(const AFileInformation : TFileInformation); overload;
+    constructor Create(const APath: string; const AAccess: TFileAccessAttributes); overload;
 
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
+    procedure UpdatePath(APath: string);
 
     {@G}
-    property Name   : String                read FName;
-    property Path   : String                read FPath;
-    property Access : TFileAccessAttributes read FAccess;
-    property IsRoot : Boolean               read FIsRoot;
+    property Name: string read FName;
+    property Path: string read FPath;
+    property Access: TFileAccessAttributes read FAccess;
   end;
 
   // Drives ------------------------------------------------------------------------------------------------------------
   TDriveInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FLetter : String;
+    FLetter: string;
 
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FFormat : String;
+    FFormat: string;
 
     [OptixSerializableAttribute]
-    FType : TDriveType;
+    FType: TDriveType;
 
     [OptixSerializableAttribute]
-    FTotalSize : Int64;
+    FTotalSize: Int64;
 
     [OptixSerializableAttribute]
-    FFreeSize : Int64;
+    FFreeSize: Int64;
 
     {@G}
-    function GetUsedPercentage() : Byte;
-    function GetUsedSize() : Int64;
+    function GetUsedPercentage: Byte;
+    function GetUsedSize: Int64;
   public
     {@C}
-    constructor Create(const ADrive : String; const AIndex : Integer); overload;
+    constructor Create(const ADrive: string; const AIndex: Integer); overload;
 
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Letter         : String     read FLetter;
-    property Name           : String     read FName;
-    property Format         : String     read FFormat;
-    property DriveType      : TDriveType read FType;
-    property TotalSize      : Int64      read FTotalSize;
-    property FreeSize       : Int64      read FFreeSize;
-    property UsedSize       : Int64      read GetUsedSize;
-    property UsedPercentage : Byte       read GetUsedPercentage;
+    property Letter: string read FLetter;
+    property Name: string read FName;
+    property Format: string read FFormat;
+    property DriveType: TDriveType read FType;
+    property TotalSize: Int64 read FTotalSize;
+    property FreeSize: Int64 read FFreeSize;
+    property UsedSize: Int64 read GetUsedSize;
+    property UsedPercentage: Byte read GetUsedPercentage;
   end;
 
   TOptixEnumDrives = class
   public
-    class procedure Enum(var AList : TObjectList<TDriveInformation>); static;
+    class procedure Enum(var AList: TObjectList<TDriveInformation>); static;
   end;
 
   // Files -------------------------------------------------------------------------------------------------------------
   TFileInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FPath : String;
+    FPath: string;
 
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FIsDirectory : Boolean;
+    FIsDirectory: Boolean;
 
     [OptixSerializableAttribute]
-    FACL_SSDL : String;
+    FACL_SSDL: string;
 
     [OptixSerializableAttribute]
-    FAccess : TFileAccessAttributes;
+    FAccess: TFileAccessAttributes;
 
     [OptixSerializableAttribute]
-    FTypeDescription : String;
+    FTypeDescription: string;
 
     [OptixSerializableAttribute]
-    FSize : Int64;
+    FSize: Int64;
 
     [OptixSerializableAttribute]
-    FDateAreValid : Boolean;
+    FDateAreValid: Boolean;
 
     [OptixSerializableAttribute]
-    FCreatedDate : TDateTime;
+    FCreatedDate: TDateTime;
 
     [OptixSerializableAttribute]
-    FLastModifiedDate : TDateTime;
+    FLastModifiedDate: TDateTime;
 
     [OptixSerializableAttribute]
-    FLastAccessDate : TDateTime;
+    FLastAccessDate: TDateTime;
   public
     {@C}
-    constructor Create(const APath : String; const AIsDirectory : Boolean); overload;
+    constructor Create(const APath: string; const AIsDirectory: Boolean); overload;
 
     {@M}
-    function GetFileTypeDescription() : String;
-    procedure Assign(ASource : TPersistent); override;
+    function GetFileTypeDescription: string;
+    procedure Assign(ASource: TPersistent); override;
+    procedure UpdatePath(const APath: string);
 
     {@G}
-    property Path             : String                read FPath;
-    property Name             : String                read FName;
-    property IsDirectory      : Boolean               read FIsDirectory;
-    property ACL_SSDL         : String                read FACL_SSDL;
-    property Access           : TFileAccessAttributes read FAccess;
-    property TypeDescription  : String                read GetFileTypeDescription;
-    property Size             : Int64                 read FSize;
-    property DateAreValid     : Boolean               read FDateAreValid;
-    property CreatedDate      : TDateTime             read FCreatedDate;
-    property LastModifiedDate : TDateTime             read FLastModifiedDate;
-    property LastAccessDate   : TDateTime             read FLastAccessDate;
+    property Path: string read FPath;
+    property Name: string read FName;
+    property IsDirectory: Boolean read FIsDirectory;
+    property ACL_SSDL: string read FACL_SSDL;
+    property Access: TFileAccessAttributes read FAccess;
+    property TypeDescription: string read GetFileTypeDescription;
+    property Size: Int64 read FSize;
+    property DateAreValid: Boolean read FDateAreValid;
+    property CreatedDate: TDateTime read FCreatedDate;
+    property LastModifiedDate: TDateTime read FLastModifiedDate;
+    property LastAccessDate: TDateTime read FLastAccessDate;
   end;
 
   TOptixEnumFiles = class
   public
-    class procedure Enum(const APath : String; var AList : TObjectList<TFileInformation>; var AIsRoot : Boolean;
-      var AAccess : TFileAccessAttributes); static;
+    class procedure Enum(const APath: string; var AList: TObjectList<TFileInformation>; var AIsRoot: Boolean;
+      var AAccess: TFileAccessAttributes); static;
   end;
 
-  function DriveTypeToString(const AValue : TDriveType) : String;
-  function AccessSetToString(const AValue : TFileAccessAttributes) : String;
-  function StringToAccessSet(const AValue : String) : TFileAccessAttributes;
-  function AccessSetToReadableString(const AValue : TFileAccessAttributes) : String;
+  function DriveTypeToString(const AValue: TDriveType): string;
+  function AccessSetToString(const AValue: TFileAccessAttributes): string;
+  function StringToAccessSet(const AValue: string): TFileAccessAttributes;
+  function AccessSetToReadableString(const AValue: TFileAccessAttributes): string;
 
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.SysUtils, System.IOUtils, System.StrUtils, System.Math,
+  System.IOUtils, System.StrUtils, System.Math,
 
-  Winapi.AccCtrl, Winapi.AclAPI, Winapi.Windows, Winapi.ShellAPI,
+  Winapi.AccCtrl, Winapi.AclAPI, Winapi.ShellAPI, Winapi.ActiveX, Winapi.ShLwApi,
 
   OptixCore.Exceptions, OptixCore.WinApiEx, OptixCore.System.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
 
 (* Local *)
 
-function DriveTypeToString(const AValue : TDriveType) : String;
+function DriveTypeToString(const AValue: TDriveType): string;
 begin
-  result := 'Unknown';
+  Result := 'Unknown';
   ///
 
   case AValue of
-    dtUnknown   : result := 'Unknown';
-    dtNoRootDir : result := 'No Root Dir';
-    dtRemovable : result := 'Removable';
-    dtFixed     : result := 'Fixed';
-    dtRemote    : result := 'Network';
-    dtCDROM     : result := 'CD-ROM';
-    dtRAMDisk   : result := 'RAM Disk';
+    dtUnknown: Result := 'Unknown';
+    dtNoRootDir: Result := 'No Root Dir';
+    dtRemovable: Result := 'Removable';
+    dtFixed: Result := 'Fixed';
+    dtRemote: Result := 'Network';
+    dtCDROM: Result := 'CD-ROM';
+    dtRAMDisk: Result := 'RAM Disk';
   end;
 end;
 
-function AccessSetToString(const AValue : TFileAccessAttributes) : String;
+function AccessSetToString(const AValue: TFileAccessAttributes): string;
 begin
-  SetLength(result, 3);
+  SetLength(Result, 3);
   ///
 
-  result[1] := IfThen(faRead in AValue, 'R', '_')[1];
-  result[2] := IfThen(faWrite in AValue, 'W', '_')[1];
-  result[3] := IfThen(faExecute in AValue, 'E', '_')[1];
+  Result[1] := IfThen(faRead in AValue, 'R', '_')[1];
+  Result[2] := IfThen(faWrite in AValue, 'W', '_')[1];
+  Result[3] := IfThen(faExecute in AValue, 'E', '_')[1];
 end;
 
-function StringToAccessSet(const AValue : String) : TFileAccessAttributes;
+function StringToAccessSet(const AValue: string): TFileAccessAttributes;
 begin
-  result := [];
+  Result := [];
   ///
 
   if Length(AValue) <> 3 then
-    Exit();
+    Exit;
 
   if Copy(AValue, 1, 1) = 'R' then
-    Include(result, faRead);
+    Include(Result, faRead);
 
   if Copy(AValue, 2, 1) = 'W' then
-    Include(result, faWrite);
+    Include(Result, faWrite);
 
   if Copy(AValue, 3, 1) = 'E' then
-    Include(result, faExecute);
+    Include(Result, faExecute);
 end;
 
-function AccessSetToReadableString(const AValue : TFileAccessAttributes) : String;
+function AccessSetToReadableString(const AValue: TFileAccessAttributes): string;
 begin
   if AValue <> [] then
-    result := AccessSetToString(AValue)
+    Result := AccessSetToString(AValue)
   else
-    result := 'No Access';
+    Result := 'No Access';
 end;
 
 (* TFileSystemHelper *)
 
-class function TFileSystemHelper.GetDriveInformation(ADriveLetter : String; out AName : String; out AFormat : String;
- var ADriveType : TDriveType) : Boolean;
+class function TFileSystemHelper.GetDriveInformation(ADriveLetter: string; out AName: string; out AFormat: string;
+ var ADriveType: TDriveType) : Boolean;
 begin
   var AOldErrorMode := SetErrorMode(SEM_FAILCRITICALERRORS);
   try
     ADriveLetter := IncludeTrailingPathDelimiter(ExtractFileDrive(ADriveLetter));
     ///
 
-    var ADummy        : DWORD;
-    var ABufferName   : array[0..MAX_PATH-1] of WideChar;
-    var ABufferFormat : array[0..MAX_PATH-1] of WideChar;
+    var ADummy: DWORD;
+    var ABufferName: array[0..MAX_PATH-1] of WideChar;
+    var ABufferFormat: array[0..MAX_PATH-1] of WideChar;
 
     FillChar(ABufferName, MAX_PATH, #0);
     FillChar(ABufferFormat, MAX_PATH, #0);
 
-    result := GetVolumeInformation(
+    Result := GetVolumeInformation(
                                     PWideChar(ADriveLetter),
                                     ABufferName,
                                     MAX_PATH,
@@ -379,19 +470,19 @@ begin
     {
       Conv to String
     }
-    AName   := String(ABufferName);
+    AName := String(ABufferName);
     AFormat := String(ABufferFormat);
 
     {
       Get Drive Type
     }
     case GetDriveType(PWideChar(ADriveLetter)) of
-      1 : ADriveType := dtNoRootDir; // DRIVE_NO_ROOT_DIR
-      2 : ADriveType := dtRemovable; // DRIVE_REMOVABLE
-      3 : ADriveType := dtFixed;     // DRIVE_FIXED
-      4 : ADriveType := dtRemote;    // DRIVE_REMOTE
-      5 : ADriveType := dtCDROM;     // DRIVE_CDROM
-      6 : ADriveType := dtRAMDisk;   // DRIVE_RAMDISK
+      1: ADriveType := dtNoRootDir; // DRIVE_NO_ROOT_DIR
+      2: ADriveType := dtRemovable; // DRIVE_REMOVABLE
+      3: ADriveType := dtFixed;     // DRIVE_FIXED
+      4: ADriveType := dtRemote;    // DRIVE_REMOTE
+      5: ADriveType := dtCDROM;     // DRIVE_CDROM
+      6: ADriveType := dtRAMDisk;   // DRIVE_RAMDISK
       else
         ADriveType := dtUnknown;
     end;
@@ -400,22 +491,22 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.TryGetDriveInformation(ADriveLetter : String; out AName : String; out AFormat : String;
- var ADriveType : TDriveType) : Boolean;
+class function TFileSystemHelper.TryGetDriveInformation(ADriveLetter: string; out AName: string; out AFormat: string;
+ var ADriveType: TDriveType) : Boolean;
 begin
   ADriveType := dtUnknown;
   ///
   try
-    result := GetDriveInformation(ADriveLetter, AName, AFormat, ADriveType);
+    Result := GetDriveInformation(ADriveLetter, AName, AFormat, ADriveType);
   except
-    result := False;
+    Result := False;
   end;
 end;
 
-class function TFileSystemHelper.GetFileACLString(const AFileName : String) : String;
+class function TFileSystemHelper.GetFileACLString(const AFileName: string): string;
 begin
-  var ptrSecurityDescriptor : PSecurityDescriptor := nil;
-  var pFileACL_SSDL : LPWSTR := nil;
+  var ptrSecurityDescriptor: PSecurityDescriptor := nil;
+  var pFileACL_SSDL: LPWSTR := nil;
   try
     var ASecurityInformation := OWNER_SECURITY_INFORMATION or
                                 GROUP_SECURITY_INFORMATION or
@@ -444,7 +535,7 @@ begin
       raise EWindowsException.Create('ConvertSecurityDescriptorToStringSecurityDescriptorW');
 
     ///
-    result := string(pFileACL_SSDL);
+    Result := string(pFileACL_SSDL);
   finally
     if Assigned(pFileACL_SSDL) then
       LocalFree(pFileACL_SSDL);
@@ -454,17 +545,17 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.TryGetFileACLString(const AFileName : String) : String;
+class function TFileSystemHelper.TryGetFileACLString(const AFileName: string): string;
 begin
   try
-    result := GetFileACLString(AFileName);
+    Result := GetFileACLString(AFileName);
   except
-    result := '';
+    Result := '';
   end;
 end;
 
-class procedure TFileSystemHelper.GetCurrentUserFileAccess(const AFileName : String;
- out ARead, AWrite, AExecute : Boolean);
+class procedure TFileSystemHelper.GetCurrentUserFileAccess(const AFileName: string;
+ out ARead, AWrite, AExecute: Boolean);
 begin
   var AImpersonated := False;
 
@@ -475,7 +566,7 @@ begin
   try
     AImpersonated := ImpersonateSelf(SecurityImpersonation);
 
-    if not OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, False, hToken) then
+    if not OpenThreadToken(GetCurrentThread, TOKEN_QUERY, False, hToken) then
       raise EWindowsException.Create('OpenProcessToken');
     ///
 
@@ -498,12 +589,12 @@ begin
 
     ///
     if TSystemHelper.AccessCheck(FILE_ALL_ACCESS, hToken, ptrSecurityDescriptor) then begin
-      ARead    := True;
-      AWrite   := True;
+      ARead := True;
+      AWrite := True;
       AExecute := True;
     end else begin
-      ARead    := TSystemHelper.AccessCheck(FILE_GENERIC_READ, hToken, ptrSecurityDescriptor);
-      AWrite   := TSystemHelper.AccessCheck(FILE_GENERIC_WRITE, hToken, ptrSecurityDescriptor);
+      ARead := TSystemHelper.AccessCheck(FILE_GENERIC_READ, hToken, ptrSecurityDescriptor);
+      AWrite := TSystemHelper.AccessCheck(FILE_GENERIC_WRITE, hToken, ptrSecurityDescriptor);
       AExecute := TSystemHelper.AccessCheck(FILE_GENERIC_EXECUTE, hToken, ptrSecurityDescriptor);
     end;
   finally
@@ -514,70 +605,70 @@ begin
       CloseHandle(hToken);
 
     if AImpersonated then
-      RevertToSelf();
+      RevertToSelf;
   end;
 end;
 
-class function TFileSystemHelper.GetCurrentUserFileAccess(const AFileName : String) : TFileAccessAttributes;
+class function TFileSystemHelper.GetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes;
 begin
-  var ARead, AWrite, AExecute : Boolean;
+  var ARead, AWrite, AExecute: Boolean;
 
-  result := [];
+  Result := [];
 
   GetCurrentUserFileAccess(AFileName, ARead, AWrite, AExecute);
 
   if ARead then
-    Include(result, faRead);
+    Include(Result, faRead);
 
   if AWrite then
-    Include(result, faWrite);
+    Include(Result, faWrite);
 
   if AExecute then
-    Include(result, faExecute);
+    Include(Result, faExecute);
 end;
 
-class procedure TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName : String;
- out ARead, AWrite, AExecute : Boolean);
+class procedure TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName: string;
+ out ARead, AWrite, AExecute: Boolean);
 begin
   try
     GetCurrentUserFileAccess(AFileName, ARead, AWrite, AExecute);
   except
-    ARead    := False;
-    AWrite   := False;
+    ARead := False;
+    AWrite := False;
     AExecute := False;
   end;
 end;
 
-class function TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName : String) : TFileAccessAttributes;
+class function TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes;
 begin
   try
-    result := GetCurrentUserFileAccess(AFileName);
+    Result := GetCurrentUserFileAccess(AFileName);
   except
-    result := [];
+    Result := [];
   end;
 end;
 
-class function TFileSystemHelper.GetFileSize(const AFileName : String) : Int64;
+class function TFileSystemHelper.GetFileSize(const AFileName: string): Int64;
 begin
-  var AFileInfo : TWin32FileAttributeData;
+  var AFileInfo: TWin32FileAttributeData;
 
   if NOT GetFileAttributesEx(PWideChar(AFileName), GetFileExInfoStandard, @AFileInfo) then
     raise EWindowsException.Create('GetFileAttributesEx');
 
   ///
-  result := Int64(AFileInfo.nFileSizeLow) or Int64(AFileInfo.nFileSizeHigh shl 32);
+  Result := Int64(AFileInfo.nFileSizeLow) or Int64(AFileInfo.nFileSizeHigh shl 32);
 end;
 
-class function TFileSystemHelper.TryGetFileSize(const AFileName : String) : Int64;
+class function TFileSystemHelper.TryGetFileSize(const AFileName: string): Int64;
 begin
   try
-    result := GetFileSize(AFileName);
+    Result := GetFileSize(AFileName);
   except
-    result := 0;
+    Result := 0;
   end;
 end;
 
-class function TFileSystemHelper.GetFileTypeDescription(const AFileName: String): String;
+class function TFileSystemHelper.GetFileTypeDescription(const AFileName: string): string;
 begin
   var AShFileInfo: TSHFileInfoW;
 
@@ -590,13 +681,13 @@ begin
     SizeOf(TSHFileInfoW),
     SHGFI_TYPENAME or SHGFI_USEFILEATTRIBUTES
   ) <> 0 then
-    result := AShFileInfo.szTypeName
+    Result := AShFileInfo.szTypeName
   else
-    result := '';
+    Result := '';
 end;
 
-class procedure TFileSystemHelper.GetFileTime(const AFileName : String;
- out ACreate, ALastModified, ALastAccess : TDateTime);
+class procedure TFileSystemHelper.GetFileTime(const AFileName: string;
+ out ACreate, ALastModified, ALastAccess: TDateTime);
 begin
   var hFile := CreateFileW(
     PWideChar(AFileName),
@@ -610,52 +701,76 @@ begin
   if hFile = INVALID_HANDLE_VALUE then
     raise EWindowsException.Create('GetFileTime');
   try
-    var AFtCreate, AFtLastAccess, AFtLastModified : TFileTime;
+    var AFtCreate, AFtLastAccess, AFtLastModified: TFileTime;
 
     if not Winapi.Windows.GetFileTime(hFile, @AFtCreate, @AFtLastAccess, @AFtLastModified) then
       raise EWindowsException.Create('GetFileTime');
 
-    ACreate       := TSystemHelper.TryFileTimeToDateTime(AFtCreate);
+    ACreate := TSystemHelper.TryFileTimeToDateTime(AFtCreate);
     ALastModified := TSystemHelper.TryFileTimeToDateTime(AFtLastModified);
-    ALastAccess   := TSystemHelper.TryFileTimeToDateTime(AFtLastAccess);
+    ALastAccess := TSystemHelper.TryFileTimeToDateTime(AFtLastAccess);
   finally
     CloseHandle(hFile);
   end;
 end;
 
-class function TFileSystemHelper.TryGetFileTime(const AFileName : String;
- out ACreate, ALastModified, ALastAccess : TDateTime) : Boolean;
+class function TFileSystemHelper.TryGetFileTime(const AFileName: string;
+ out ACreate, ALastModified, ALastAccess: TDateTime) : Boolean;
 begin
   try
     GetFileTime(AFileName, ACreate, ALastModified, ALastAccess);
 
     ///
-    result := True;
+    Result := True;
   except
-    result := False;
+    Result := False;
   end;
 end;
 
-class function TFileSystemHelper.UniqueFileName(const AFileName : String) : String;
+class function TFileSystemHelper.UniqueFileName(const AFilePath: string): string;
 begin
-  if not FileExists(AFileName) then
-    Exit(AFileName);
-
-  var i := 1;
+  if not FileExists(AFilePath) then
+    Exit(AFilePath);
+  ///
+  var I := 1;
   repeat
-    result := Format('%s%s(%d)%s', [
-      IncludeTrailingPathDelimiter(ExtractFilePath(AFileName)),
-      TPath.GetFileNameWithoutExtension(AFileName),
-      i,
-      TPath.GetExtension(AFileName)
+    Result := Format('%s%s(%d)%s', [
+      TFileSystemHelper.ExtractFilePath(AFilePath, True),
+      TPath.GetFileNameWithoutExtension(AFilePath),
+      I,
+      TPath.GetExtension(AFilePath)
     ]);
 
     ///
     Inc(i);
-  until (NOT FileExists(result));
+  until (not FileExists(Result));
 end;
 
-class function TFileSystemHelper.ExpandPath(const APath : String) : String;
+class function TFileSystemHelper.UniqueDirectoryName(const ADirectoryPath: string): string;
+begin
+  if not DirectoryExists(ADirectoryPath) then
+    Exit(ADirectoryPath);
+  ///
+  var I := 1;
+  repeat
+    Result := Format('%s(%d)', [ADirectoryPath, I]);
+
+    ///
+    Inc(I);
+  until (not DirectoryExists(Result));
+end;
+
+class function TFileSystemHelper.UniqueFileOrDirectoryName(const APath: string): string;
+begin
+  if DirectoryExists(APath) then
+    Result := UniqueDirectoryName(APath)
+  else if FileExists(APath) then
+    Result := UniqueFileName(APath)
+  else
+    Result := APath;
+end;
+
+class function TFileSystemHelper.ExpandPath(const APath: string): string;
 begin
   var APathLength := ExpandEnvironmentStrings(PWideChar(APath), nil, 0);
   if APathLength = 0 then
@@ -664,15 +779,15 @@ begin
 
   SetLength(Result, APathLength - 1);
 
-  if ExpandEnvironmentStrings(PWideChar(APath), PWideChar(result), APathLength) = 0 then
-    result := APath;
+  if ExpandEnvironmentStrings(PWideChar(APath), PWideChar(Result), APathLength) = 0 then
+    Result := APath;
 
   ///
-  result := IncludeTrailingPathDelimiter(result);
+  Result := IncludeTrailingPathDelimiter(Result);
 end;
 
-class procedure TFileSystemHelper.TraverseDirectories(const APath : String;
-  const ATraversedDirectoryFunc : TTraversedDirectoryCallback);
+class procedure TFileSystemHelper.TraverseDirectories(const APath: string;
+  const ATraversedDirectoryFunc: TTraversedDirectoryCallback);
 begin
   var ADirectories := APath.Split(['\'], TStringSplitOptions.ExcludeEmpty);
   ///
@@ -686,12 +801,12 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFullPathName(const APath : String) : String;
+class function TFileSystemHelper.GetFullPathName(const APath: string): string;
 begin
-  result := '';
+  Result := '';
   ///
 
-  var pDummy : PWideChar;
+  var pDummy: PWideChar;
 
   var ARequiredLength := Winapi.Windows.GetFullPathNameW(PWideChar(APath), 0, nil, pDummy);
   if ARequiredLength = 0 then
@@ -700,40 +815,194 @@ begin
 
   Inc(ARequiredLength);
 
-  var pBuffer : PWideChar;
+  var pBuffer: PWideChar;
   GetMem(pBuffer, ARequiredLength * SizeOf(WideChar));
   try
     if Winapi.Windows.GetFullPathNameW(PWideChar(APath), ARequiredLength, pBuffer, pDummy) = 0 then
       raise EWindowsException.Create('GetFullPathNameW(1)');
 
     ///
-    result := String(pBuffer);
+    Result := String(pBuffer);
   finally
     FreeMem(pBuffer, ARequiredLength * SizeOf(WideChar));
   end;
 end;
 
-class procedure TFileSystemHelper.PathExists(const APath : String);
+class procedure TFileSystemHelper.PathExists(const APath: string);
 begin
   if GetFileAttributesW(PWideChar(APath)) = INVALID_FILE_ATTRIBUTES then
     raise EWindowsException.Create('GetFileAttributesW');
 end;
 
-class function TFileSystemHelper.CleanFileName(const AFileName : String) : String;
+class function TFileSystemHelper.CleanFileName(const AFileName: string): string;
 begin
-  result := AFileName;
+  Result := AFileName;
   ///
 
   // Or use a Regular Expression
   for var AChar in TPath.GetInvalidFileNameChars do
-    result := result.Replace(AChar, '_');
+    Result := Result.Replace(AChar, '_');
+end;
+
+class procedure TFileSystemHelper.CreateDirectory(const AFullPath: string);
+begin
+  if not Winapi.Windows.CreateDirectoryW(PWideChar(AFullPath), nil) then
+    raise EWindowsException.Create('CreateDirectoryW');
+end;
+
+class procedure TFileSystemHelper.CreateDirectory(const APath, ANewDirectoryName: string);
+begin
+  TFileSystemHelper.CreateDirectory(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName);
+end;
+
+class function TFileSystemHelper.Copy(const ASource, ADestination: string; const ADoMove: Boolean;
+  const ABlockThread: Boolean = True): string;
+begin
+  Result := '';
+  ///
+
+  CoInitialize(nil);
+  try
+    var AFileOperation := CreateComObject(CLSID_FileOperation) as IFileOperation;
+    AFileOperation.SetOperationFlags(
+      FOF_SILENT or
+      FOF_NOCONFIRMATION or
+      FOF_NOERRORUI or
+      FOF_NOCONFIRMMKDIR or
+      FOFX_EARLYFAILURE or
+      FOF_RENAMEONCOLLISION
+    );
+
+    var ASourceShellItem, ADestinationShellItem: IShellItem;
+    OleCheck(SHCreateItemFromParsingName(PWideChar(ASource), nil, IShellItem, ASourceShellItem));
+    OleCheck(SHCreateItemFromParsingName(PWideChar(ADestination), nil, IShellItem, ADestinationShellItem));
+
+    var AFileOperationSink := TFileOperationSink.Create(ASource);
+    var ASinkInterface := IFileOperationProgressSink(AFileOperationSink);
+    try
+      if ADoMove then
+        AFileOperation.MoveItem(ASourceShellItem, ADestinationShellItem, nil, ASinkInterface)
+      else
+        AFileOperation.CopyItem(ASourceShellItem, ADestinationShellItem, nil, ASinkInterface);
+
+      if ABlockThread then begin
+        var AResult := AFileOperation.PerformOperations;
+        if Failed(AResult) then
+          raise ECOMException.Create('MoveItem|CopyItem', AResult);
+      end;
+
+      ///
+      Result := AFileOperationSink.LastOperationFinalPath;
+    finally
+      AFileOperation := nil;
+      ASourceShellItem := nil;
+      ADestinationShellItem := nil;
+      ASinkInterface := nil;
+    end;
+  finally
+    CoUninitialize;
+  end;
+end;
+
+class procedure TFileSystemHelper.Delete(const AFilePath: string; const ABlockThread: Boolean = True);
+begin
+  CoInitialize(nil);
+  try
+    var AFileOperation := CreateComObject(CLSID_FileOperation) as IFileOperation;
+    AFileOperation.SetOperationFlags(
+      FOF_SILENT or
+      FOF_NOCONFIRMATION or
+      FOF_NOERRORUI or
+      FOFX_EARLYFAILURE
+    );
+
+    var AShellItem: IShellItem;
+    OleCheck(SHCreateItemFromParsingName(PWideChar(AFilePath), nil, IShellItem, AShellItem));
+    try
+      AFileOperation.DeleteItem(AShellItem, nil);
+
+      if ABlockThread then begin
+        var AResult := AFileOperation.PerformOperations;
+        if Failed(AResult) then
+          raise ECOMException.Create('DeleteItem', AResult);
+      end;
+    finally
+      AFileOperation := nil;
+    end;
+  finally
+    CoUninitialize;
+  end;
+end;
+
+class function TFileSystemHelper.GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
+  ABuild : Cardinal) : Boolean;
+begin
+  Result := False;
+  ///
+
+  AMajor   := 0;
+  AMinor   := 0;
+  ARelease := 0;
+  ABuild   := 0;
+  ///
+
+  var ADummyHandle : DWORD;
+  var pVersionInfo : Pointer;
+  var AVersionInfoSize := GetFileVersionInfoSize(PWideChar(AFilePath), ADummyHandle);
+  GetMem(pVersionInfo, AVersionInfoSize);
+  try
+    if not GetFileVersionInfo(PWideChar(AFilePath), 0, AVersionInfoSize, pVersionInfo) then
+      Exit;
+
+    var AValueLength : UINT;
+    var pQueriedValue : Pointer;
+    if not VerQueryValue(pVersionInfo, '\', pQueriedValue, AValueLength) or (pQueriedValue = nil) then
+      Exit;
+
+    AMajor   := HiWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionMS);
+    AMinor   := LoWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionMS);
+    ARelease := HiWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionLS);
+    ABuild   := LoWord(PVSFixedFileInfo(pQueriedValue)^.dwFileVersionLS);
+
+    ///
+    Result := True;
+  finally
+    FreeMem(pVersionInfo, AVersionInfoSize);
+  end;
+end;
+
+class function TFileSystemHelper.GetFileVersion(const AFilePath : string) : string;
+begin
+  var AMajor, AMinor, ARelease, ABuild : Cardinal;
+  if not GetFileVersion(AFilePath, AMajor, AMinor, ARelease, ABuild) then
+    Exit;
+  ///
+
+  Result := Format('%d.%d.%d', [
+    AMajor,
+    AMinor,
+    ARelease
+  ]);
+end;
+
+class function TFileSystemHelper.ExtractFilePath(const AFilePath: string;
+  const AIncludeTrailingPathDelimiter: Boolean = False): string;
+begin
+  Result := System.SysUtils.ExtractFilePath(ExcludeTrailingPathDelimiter(AFilePath));
+  if AIncludeTrailingPathDelimiter then
+    Result := IncludeTrailingPathDelimiter(Result);
+end;
+
+class function TFileSystemHelper.ExtractFileName(const AFilePath: string): string;
+begin
+  Result := System.SysUtils.ExtractFileName(ExcludeTrailingPathDelimiter(AFilePath));
 end;
 
 (* TContentReader *)
 
-constructor TContentReader.Create(const AFilePath : String; const APageSize : UInt64);
+constructor TContentReader.Create(const AFilePath: string; const APageSize: UInt64);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FFileSize := 0;
@@ -756,28 +1025,28 @@ begin
   SetPageSize(APageSize);
 end;
 
-destructor TContentReader.Destroy();
+destructor TContentReader.Destroy;
 begin
   if FFileHandle <> INVALID_HANDLE_VALUE then
     CloseHandle(FFileHandle);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-function TContentReader.GetPageCount() : UInt64;
+function TContentReader.GetPageCount: UInt64;
 begin
-  result := 0;
+  Result := 0;
   ///
 
   if FFileHandle = INVALID_HANDLE_VALUE then
-    Exit();
+    Exit;
 
   ///
-  result := ceil(FFileSize / FPageSize);
+  Result := ceil(FFileSize / FPageSize);
 end;
 
-procedure TContentReader.SetPageSize(AValue : UInt64);
+procedure TContentReader.SetPageSize(AValue: UInt64);
 begin
   if AValue < MIN_PAGE_SIZE then
     AValue := MIN_PAGE_SIZE
@@ -791,13 +1060,13 @@ begin
   FPageSize := AValue;
 end;
 
-procedure TContentReader.ReadPage(APageNumber : UInt64; var pBuffer : Pointer; var ABufferSize : UInt64);
+procedure TContentReader.ReadPage(APageNumber: UInt64; var pBuffer: Pointer; var ABufferSize: UInt64);
 begin
   pBuffer := nil;
   ABufferSize := 0;
   ///
 
-  var APageCount := GetPageCount();
+  var APageCount := GetPageCount;
   ///
 
   if APageNumber > APageCount  then
@@ -811,7 +1080,7 @@ begin
 
   GetMem(pBuffer, FPageSize);
 
-  var ABytesRead : DWORD;
+  var ABytesRead: DWORD;
   if not ReadFile(FFileHandle, PByte(pBuffer)^, FPageSize, ABytesRead, nil) then
     raise EWindowsException.Create('ReadFile');
 
@@ -822,45 +1091,64 @@ end;
 
 (* TSimpleFolderInformation *)
 
-constructor TSimpleFolderInformation.Create(const AName, APath : String; const AAccess : TFileAccessAttributes;
-  const AIsRoot : Boolean);
+constructor TSimpleFolderInformation.Create(const APath: string; const AAccess: TFileAccessAttributes);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FName   := AName;
-  FPath   := IncludeTrailingPathDelimiter(APath);
+  UpdatePath(APath);
   FAccess := AAccess;
-  FIsRoot := AIsRoot;
 end;
 
-procedure TSimpleFolderInformation.Assign(ASource : TPersistent);
+procedure TSimpleFolderInformation.UpdatePath(APath: string);
+begin
+  FPath := IncludeTrailingPathDelimiter(APath);
+
+  APath := ExcludeTrailingPathDelimiter(APath);
+  if PathIsRootW(PWideCHar(FPath)) then
+    FName := APath
+  else
+    FName := ExtractFileName(APath);
+end;
+
+constructor TSimpleFolderInformation.Create(const AFileInformation : TFileInformation);
+begin
+  inherited Create;
+  ///
+
+  if not Assigned(AFileInformation) then
+    raise EOptixSystemException.Create('{73267E78-D356-460A-BCCE-3704E312335C}');
+
+  UpdatePath(AFileInformation.Path);
+  FAccess := AFileInformation.Access;
+end;
+
+procedure TSimpleFolderInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TSimpleFolderInformation then begin
-    FName   := TSimpleFolderInformation(ASource).FName;
-    FPath   := TSimpleFolderInformation(ASource).FPath;
+    FName := TSimpleFolderInformation(ASource).FName;
+    FPath := TSimpleFolderInformation(ASource).FPath;
     FAccess := TSimpleFolderInformation(ASource).FAccess;
-    FIsRoot := TSimpleFolderInformation(ASource).FIsRoot;
   end else
     inherited;
 end;
 
 (* TDriveInformation *)
 
-procedure TDriveInformation.Assign(ASource : TPersistent);
+procedure TDriveInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TDriveInformation then begin
-    FLetter    := TDriveInformation(ASource).FLetter;
-    FName      := TDriveInformation(ASource).FName;
-    FFormat    := TDriveInformation(ASource).FFormat;
-    FType      := TDriveInformation(ASource).FType;
+    FLetter := TDriveInformation(ASource).FLetter;
+    FName := TDriveInformation(ASource).FName;
+    FFormat := TDriveInformation(ASource).FFormat;
+    FType := TDriveInformation(ASource).FType;
     FTotalSize := TDriveInformation(ASource).FTotalSize;
-    FFreeSize  := TDriveInformation(ASource).FFreeSize;
+    FFreeSize := TDriveInformation(ASource).FFreeSize;
   end else
     inherited;
 end;
 
-constructor TDriveInformation.Create(const ADrive : String; const AIndex : Integer);
+constructor TDriveInformation.Create(const ADrive: string; const AIndex: Integer);
 begin
   FLetter := ADrive;
 
@@ -868,46 +1156,46 @@ begin
 
   try
     FTotalSize := DiskSize(AIndex);
-    FFreeSize  := DiskFree(AIndex);
+    FFreeSize := DiskFree(AIndex);
   except
     FTotalSize := 0;
-    FFreeSize  := 0;
+    FFreeSize := 0;
   end;
 end;
 
-function TDriveInformation.GetUsedPercentage() : Byte;
+function TDriveInformation.GetUsedPercentage: Byte;
 begin
   if (FTotalSize <= 0) or (FFreeSize <= 0) then
     Exit(0);
   ///
 
-  result := (GetUsedSize() * 100) div FTotalSize;
+  Result := (GetUsedSize * 100) div FTotalSize;
 end;
 
-function TDriveInformation.GetUsedSize() : Int64;
+function TDriveInformation.GetUsedSize: Int64;
 begin
   if FTotalSize <= 0 then
     Exit(0);
   ///
 
-  result := FTotalSize - FFreeSize;
+  Result := FTotalSize - FFreeSize;
 end;
 
 (* TOptixEnumDrives *)
 
-class procedure TOptixEnumDrives.Enum(var AList : TObjectList<TDriveInformation>);
+class procedure TOptixEnumDrives.Enum(var AList: TObjectList<TDriveInformation>);
 begin
   if not Assigned(AList) then
     AList := TObjectList<TDriveInformation>.Create(True)
   else
-    AList.Clear();
+    AList.Clear;
   ///
 
   {$I-}
-  var ALogicalDrives := GetLogicalDrives();
+  var ALogicalDrives := GetLogicalDrives;
 
   var AIndex := 0;
-  for var ALetter : Char in ['a'..'z'] do begin
+  for var ALetter: Char in ['a'..'z'] do begin
     if (ALogicalDrives and (1 shl AIndex)) = 0 then begin
       Inc(AIndex);
 
@@ -927,67 +1215,72 @@ end;
 
 (* TFileInformation *)
 
-function TFileInformation.GetFileTypeDescription() : String;
+function TFileInformation.GetFileTypeDescription: string;
 begin
   if FIsDirectory then
-    result := 'Directory'
+    Result := 'Directory'
   else
-    result := FTypeDescription;
+    Result := FTypeDescription;
 end;
 
-procedure TFileInformation.Assign(ASource : TPersistent);
+procedure TFileInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TFileInformation then begin
-    FPath             := TFileInformation(ASource).FPath;
-    FName             := TFileInformation(ASource).FName;
-    FIsDirectory      := TFileInformation(ASource).FIsDirectory;
-    FACL_SSDL         := TFileInformation(ASource).FACL_SSDL;
-    FAccess           := TFileInformation(ASource).FAccess;
-    FTypeDescription  := TFileInformation(ASource).FTypeDescription;
-    FSize             := TFileInformation(ASource).FSize;
-    FDateAreValid     := TFileInformation(ASource).FDateAreValid;
-    FCreatedDate      := TFileInformation(ASource).FCreatedDate;
+    FPath := TFileInformation(ASource).FPath;
+    FName := TFileInformation(ASource).FName;
+    FIsDirectory := TFileInformation(ASource).FIsDirectory;
+    FACL_SSDL := TFileInformation(ASource).FACL_SSDL;
+    FAccess := TFileInformation(ASource).FAccess;
+    FTypeDescription := TFileInformation(ASource).FTypeDescription;
+    FSize := TFileInformation(ASource).FSize;
+    FDateAreValid := TFileInformation(ASource).FDateAreValid;
+    FCreatedDate := TFileInformation(ASource).FCreatedDate;
     FLastModifiedDate := TFileInformation(ASource).FLastModifiedDate;
-    FLastAccessDate   := TFileInformation(ASource).FLastAccessDate;
+    FLastAccessDate := TFileInformation(ASource).FLastAccessDate;
   end else
     inherited;
 end;
 
-constructor TFileInformation.Create(const APath : String; const AIsDirectory : Boolean);
+procedure TFileInformation.UpdatePath(const APath: string);
 begin
-  FPath         := APath;
-  FName         := ExtractFileName(APath);
-  FIsDirectory  := AIsDirectory;
-  FACL_SSDL     := TFileSystemHelper.TryGetFileACLString(APath);
-  FAccess       := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
+  FPath := APath;
+  FName := ExtractFileName(APath);
+end;
+
+constructor TFileInformation.Create(const APath: string; const AIsDirectory: Boolean);
+begin
+  UpdatePath(APath);
+  FIsDirectory := AIsDirectory;
+  FACL_SSDL := TFileSystemHelper.TryGetFileACLString(APath);
+  FAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
   FDateAreValid := TFileSystemHelper.TryGetFileTime(APath, FCreatedDate, FLastModifiedDate, FLastAccessDate);
 
   if not FIsDirectory then begin
     FTypeDescription := TFileSystemHelper.GetFileTypeDescription(APath);
-    FSize            := TFileSystemHelper.TryGetFileSize(APath);
+    FSize := TFileSystemHelper.TryGetFileSize(APath);
   end else begin
     FTypeDescription := '';
-    FSize            := 0;
+    FSize := 0;
   end;
 end;
 
 (* TOptixEnumFiles *)
 
-class procedure TOptixEnumFiles.Enum(const APath : String; var AList : TObjectList<TFileInformation>;
-  var AIsRoot : Boolean; var AAccess : TFileAccessAttributes);
+class procedure TOptixEnumFiles.Enum(const APath: string; var AList: TObjectList<TFileInformation>;
+  var AIsRoot: Boolean; var AAccess: TFileAccessAttributes);
 begin
   if not Assigned(AList) then
     AList := TObjectList<TFileInformation>.Create(True)
   else
-    AList.Clear();
+    AList.Clear;
   ///
 
   if String.IsNullOrEmpty(APath) then
-    Exit();
+    Exit;
 
   var ASearchParameter := Format('%s*.*', [APath]);
 
-  var AWin32FindData : TWin32FindDataW;
+  var AWin32FindData: TWin32FindDataW;
 
   var hSearch := FindFirstFileW(PWideChar(ASearchParameter), AWin32FindData);
   if hSearch = INVALID_HANDLE_VALUE then
@@ -998,7 +1291,7 @@ begin
     AIsRoot := True;
     AAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
 
-    var AFileName : String;
+    var AFileName: string;
     repeat
       AFileName := String(AWin32FindData.cFileName);
       if AFileName = '.' then
@@ -1020,5 +1313,214 @@ begin
   end;
 end;
 
+(* TVirtualClipboard *)
+
+constructor TVirtualClipboard.Create;
+begin
+  inherited;
+  ///
+
+  FNotifyClipboardUpdateList := TList<TNotifyEvent>.Create;
+
+  Clear;
+end;
+
+destructor TVirtualClipboard.Destroy;
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Free;
+
+  ///
+  inherited;
+end;
+
+function TVirtualClipboard.IsEmpty: Boolean;
+begin
+  Result := string.IsNullOrWhiteSpace(Content);
+end;
+
+procedure TVirtualClipboard.SubscribeToClipboardUpdateSignal(const ASignalFunc: TNotifyEvent);
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Add(ASignalFunc);
+end;
+
+procedure TVirtualClipboard.UnsubscribeFromClipboardUpdateSignal(const ASignalFunc: TNotifyEvent);
+begin
+  if Assigned(FNotifyClipboardUpdateList) then
+    FNotifyClipboardUpdateList.Remove(ASignalFunc);
+end;
+
+procedure TVirtualClipboard.SignalClipboardUpdate;
+begin
+  if not Assigned(FNotifyClipboardUpdateList) then
+    Exit;
+  ///
+
+  for var ASubscriber in FNotifyClipboardUpdateList do
+    ASubscriber(self);
+end;
+
+procedure TVirtualClipboard.Clear;
+begin
+  FContent := '';
+  FCopyMode := vccmCopy;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+procedure TVirtualClipboard.SetContent(const AValue: string);
+begin
+  if AValue = FContent then
+    Exit;
+  ///
+
+  FContent := AValue;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+procedure TVirtualClipboard.SetCopyMode(const AValue: TVirtualClipboardCopyMode);
+begin
+  if AValue = FCopyMode then
+    Exit;
+  ///
+
+  FCopyMode := AValue;
+
+  ///
+  SignalClipboardUpdate;
+end;
+
+(* TFileOperationSink *)
+
+constructor TFileOperationSink.Create(const ASourcePath: string);
+begin
+  inherited Create;
+  ///
+
+  FSourcePath := ASourcePath;
+  FLastOperationFinalPath := '';
+end;
+
+function TFileOperationSink.PostMoveOrCopyItem(dwFlags: DWORD; const psiItem: IShellItem; const psiDestinationFolder: IShellItem;
+  pszNewName: LPCWSTR; hrCopyOrMove: HResult; const psiNewlyCreated: IShellItem): HResult;
+begin
+  if Assigned(psiItem) and Assigned(psiNewlyCreated) then begin
+    var ASource: PWideChar;
+    var ACurrent: PWideChar;
+    if Succeeded(psiItem.GetDisplayName(SIGDN_FILESYSPATH, ASource)) then begin
+      try
+        if Succeeded(psiNewlyCreated.GetDisplayName(SIGDN_FILESYSPATH, ACurrent)) and
+          (string.Compare(string(ASource), FSourcePath, True) = 0)
+        then begin
+          try
+            FLastOperationFinalPath := string(ACurrent);
+          finally
+            CoTaskMemFree(ACurrent);
+          end;
+        end;
+      finally
+        CoTaskMemFree(ASource);
+      end;
+    end;
+  end;
+
+  ///
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostCopyItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR; hrCopy: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := PostMoveOrCopyItem(dwFlags, psiItem, psiDestinationFolder, pszNewName, hrCopy, psiNewlyCreated);
+end;
+
+function TFileOperationSink.PostMoveItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR; hrMove: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := PostMoveOrCopyItem(dwFlags, psiItem, psiDestinationFolder, pszNewName, hrMove, psiNewlyCreated);
+end;
+
+function TFileOperationSink.StartOperations: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.FinishOperations(hrResult: HResult): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreRenameItem(dwFlags: DWORD; const psiItem: IShellItem;
+  pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostRenameItem(dwFlags: DWORD; const psiItem: IShellItem; pszNewName: LPCWSTR;
+  hrRename: HResult; const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreMoveItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreCopyItem(dwFlags: DWORD; const psiItem: IShellItem;
+  const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreDeleteItem(dwFlags: DWORD; const psiItem: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostDeleteItem(dwFlags: DWORD; const psiItem: IShellItem; hrDelete: HResult;
+  const psiNewlyCreated: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PreNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem;
+  pszNewName: LPCWSTR): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PostNewItem(dwFlags: DWORD; const psiDestinationFolder: IShellItem; pszNewName: LPCWSTR;
+  pszTemplateName: LPCWSTR; dwFileAttributes: DWORD; hrNew: HResult; const psiNewItem: IShellItem): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.UpdateProgress(iWorkTotal: UINT; iWorkSoFar: UINT): HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.ResetTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.PauseTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
+
+function TFileOperationSink.ResumeTimer: HResult; stdcall;
+begin
+  Result := S_OK;
+end;
 
 end.

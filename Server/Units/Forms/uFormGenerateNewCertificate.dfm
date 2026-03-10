@@ -45,7 +45,7 @@ object FormGenerateNewCertificate: TFormGenerateNewCertificate
       AlignWithMargins = True
       Left = 0
       Top = 96
-      Width = 240
+      Width = 75
       Height = 13
       Margins.Left = 0
       Margins.Top = 8
@@ -53,12 +53,11 @@ object FormGenerateNewCertificate: TFormGenerateNewCertificate
       Margins.Bottom = 0
       Align = alTop
       Caption = 'Common Name:'
-      ExplicitWidth = 75
     end
     object Label1: TLabel
       Left = 0
       Top = 8
-      Width = 240
+      Width = 73
       Height = 13
       Margins.Left = 0
       Margins.Top = 8
@@ -66,13 +65,12 @@ object FormGenerateNewCertificate: TFormGenerateNewCertificate
       Margins.Bottom = 0
       Align = alTop
       Caption = 'Country Name:'
-      ExplicitWidth = 73
     end
     object Label3: TLabel
       AlignWithMargins = True
       Left = 0
       Top = 52
-      Width = 240
+      Width = 95
       Height = 13
       Margins.Left = 0
       Margins.Top = 8
@@ -80,7 +78,6 @@ object FormGenerateNewCertificate: TFormGenerateNewCertificate
       Margins.Bottom = 0
       Align = alTop
       Caption = 'Organization Name:'
-      ExplicitWidth = 95
     end
     object EditCN: TFlatEdit
       Left = 0

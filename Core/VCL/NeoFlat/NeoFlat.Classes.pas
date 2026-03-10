@@ -55,30 +55,30 @@ uses
 type
   TFlatStateColors = class(TPersistent)
   private
-    FOwner    : TControl;
+    FOwner: TControl;
 
-    FNormal   : TColor;
-    FHover    : TColor;
-    FActive   : TColor;
-    FFocus    : TColor;
-    FDisabled : TColor;
+    FNormal: TColor;
+    FHover: TColor;
+    FActive: TColor;
+    FFocus: TColor;
+    FDisabled: TColor;
 
     {@M}
-    procedure SetColor(const AIndex : Integer; const AColor : TColor);
+    procedure SetColor(const AIndex: Integer; const AColor: TColor);
   public
     {@C}
-    constructor Create(AOwner : TControl); overload;
+    constructor Create(AOwner: TControl); overload;
 
     {@M}
-    procedure Assign(ASource : TPersistent); override;
-    function GetStateColor(const AState : TFlatControlStateEx) : TColor;
+    procedure Assign(ASource: TPersistent); override;
+    function GetStateColor(const AState: TFlatControlStateEx): TColor;
   published
     {@G/S}
-    property Normal   : TColor index 0 read FNormal   write SetColor;
-    property Hover    : TColor index 1 read FHover    write SetColor;
-    property Focus    : TColor index 2 read FFocus    write SetColor;
-    property Active   : TColor index 3 read FActive   write SetColor;
-    property Disabled : TColor index 4 read FDisabled write SetColor;
+    property Normal: TColor index 0 read FNormal write SetColor;
+    property Hover: TColor index 1 read FHover write SetColor;
+    property Focus: TColor index 2 read FFocus write SetColor;
+    property Active: TColor index 3 read FActive write SetColor;
+    property Disabled: TColor index 4 read FDisabled write SetColor;
   end;
 
 implementation
@@ -94,71 +94,71 @@ uses
 
 (* TFlatStateColors *)
 
-constructor TFlatStateColors.Create(AOwner : TControl);
+constructor TFlatStateColors.Create(AOwner: TControl);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FOwner    := AOwner;
+  FOwner := AOwner;
 
-  FNormal   := clNone;
-  FHover    := clNone;
-  FFocus    := clNone;
-  FActive   := clNone;
+  FNormal := clNone;
+  FHover := clNone;
+  FFocus := clNone;
+  FActive := clNone;
   FDisabled := clNone;
 end;
 
-function TFlatStateColors.GetStateColor(const AState : TFlatControlStateEx) : TColor;
+function TFlatStateColors.GetStateColor(const AState: TFlatControlStateEx): TColor;
 begin
   case AState of
-    csExNormal   : result := FNormal;
-    csExHover    : result := FHover;
-    csExActive   : result := FActive;
-    csExFocus    : result := FFocus;
-    csExDisabled : result := FDisabled;
+    csExNormal: Result := FNormal;
+    csExHover: Result := FHover;
+    csExActive: Result := FActive;
+    csExFocus: Result := FFocus;
+    csExDisabled: Result := FDisabled;
 
     else
-      result := clNone;
+      Result := clNone;
   end;
 end;
 
-procedure TFlatStateColors.Assign(ASource : TPersistent);
+procedure TFlatStateColors.Assign(ASource: TPersistent);
 begin
   if ASource is TFlatStateColors then begin
-    FNormal   := TFlatStateColors(ASource).Normal;
-    FHover    := TFlatStateColors(ASource).Hover;
-    FFocus    := TFlatStateColors(ASource).Focus;
-    FActive   := TFlatStateColors(ASource).Active;
+    FNormal := TFlatStateColors(ASource).Normal;
+    FHover := TFlatStateColors(ASource).Hover;
+    FFocus := TFlatStateColors(ASource).Focus;
+    FActive := TFlatStateColors(ASource).Active;
     FDisabled := TFlatStateColors(ASource).Disabled;
   end else
     inherited;
 end;
 
-procedure TFlatStateColors.SetColor(const AIndex : Integer; const AColor : TColor);
+procedure TFlatStateColors.SetColor(const AIndex: Integer; const AColor: TColor);
 begin
   case AIndex of
     {Normal}
-    0 : begin
+    0: begin
       FNormal := AColor;
     end;
 
     {Hover}
-    1 : begin
+    1: begin
       FHover := AColor;
     end;
 
     {Focus}
-    2 : begin
+    2: begin
       FFocus := AColor;
     end;
 
     {Active}
-    3 : begin
+    3: begin
       FActive := AColor;
     end;
 
     {Disabled}
-    4 : begin
+    4: begin
       FDisabled := AColor;
     end;
   end;

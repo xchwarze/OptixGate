@@ -57,21 +57,21 @@ uses
 type
   TFlatPopupMenu = class(TPopupMenu)
   private
-    FMenuBrushHandle : THandle;
-    FMetrics         : TFlatMetrics;
+    FMenuBrushHandle: THandle;
+    FMetrics: TFlatMetrics;
 
     {@M}
-    procedure CustomizeMenu(const AMenu : TObject);
+    procedure CustomizeMenu(const AMenu: TObject);
     procedure MeasureItem(Sender: TObject; ACanvas: TCanvas; var Width, Height: Integer);
     procedure DrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
-    procedure InitializeMenu(const AMenuHandle : HMENU);
+    procedure InitializeMenu(const AMenuHandle: HMENU);
   protected
     {@M}
     procedure DoPopup(Sender: TObject); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -83,15 +83,15 @@ uses
   NeoFlat.Theme, NeoFlat.CheckBox, NeoFlat.Types;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TFlatPopupMenu.InitializeMenu(const AMenuHandle : HMENU);
+procedure TFlatPopupMenu.InitializeMenu(const AMenuHandle: HMENU);
 begin
-  var AMenuInfo : TMenuInfo;
+  var AMenuInfo: TMenuInfo;
 
-  FillChar(AMenuInfo, SizeOf(TMenuInfo), #0);
+  AMenuInfo := Default(TMenuInfo);
 
-  AMenuInfo.cbSize  := SizeOf(TMenuInfo);
+  AMenuInfo.cbSize := SizeOf(TMenuInfo);
   AMenuInfo.hbrBack := FMenuBrushHandle;
-  AMenuInfo.fMask   := MIM_BACKGROUND or MIM_APPLYTOSUBMENUS;
+  AMenuInfo.fMask := MIM_BACKGROUND or MIM_APPLYTOSUBMENUS;
 
   ///
   SetMenuInfo(AMenuHandle, AMenuInfo);
@@ -124,16 +124,16 @@ begin
 
     var ASeparatorRect := TRect.Empty;
 
-    ASeparatorRect.Left   := ARect.Left + FMetrics._8;
-    ASeparatorRect.Top    := ARect.Top + (ARect.Height div 2) - FMetrics._1;
+    ASeparatorRect.Left := ARect.Left + FMetrics._8;
+    ASeparatorRect.Top := ARect.Top + (ARect.Height div 2) - FMetrics._1;
     ASeparatorRect.Height := FMetrics._2;
-    ASeparatorRect.Width  := ARect.Width - FMetrics._16;
+    ASeparatorRect.Width := ARect.Width - FMetrics._16;
 
     ACanvas.Brush.Color := MAIN_ACCENT;
 
     ACanvas.FillRect(ASeparatorRect);
   end else begin
-    var AColor : TColor;
+    var AColor: TColor;
     if Selected and M.Enabled then
       AColor := DARKER_GRAY
     else
@@ -141,15 +141,15 @@ begin
 
     ACanvas.Brush.Color := AColor;
 
-    var AFontColor : TColor;
+    var AFontColor: TColor;
     if M.Enabled then
       AFontColor := MAIN_ACCENT
     else
       AFontColor := clGray;
 
     ACanvas.Font.Color := AFontColor;
-    ACanvas.Font.Name  := FONT_1;
-    ACanvas.Font.Size  := 9;
+    ACanvas.Font.Name := FONT_1;
+    ACanvas.Font.Size := 9;
 
     ACanvas.FillRect(ARect);
 
@@ -158,7 +158,7 @@ begin
     ACanvas.TextRect(ARect, ACaption, [tfSingleLine, tfVerticalCenter]);
 
     if M.Checked then begin
-      var AGlyph : TByteArrayArray;
+      var AGlyph: TByteArrayArray;
 
       ScaleMatrixGlyph(CHECKBOX_GLYPH_TEMPLATE, AGlyph, round(FMetrics.ScaleFactor));
 
@@ -168,7 +168,7 @@ begin
   end;
 end;
 
-constructor TFlatPopupMenu.Create(AOwner : TComponent);
+constructor TFlatPopupMenu.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
@@ -182,7 +182,7 @@ begin
   InitializeMenu(Handle);
 end;
 
-destructor TFlatPopupMenu.Destroy();
+destructor TFlatPopupMenu.Destroy;
 begin
   DeleteObject(FMenuBrushHandle);
 
@@ -190,12 +190,12 @@ begin
     FreeAndNil(FMetrics);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TFlatPopupMenu.CustomizeMenu(const AMenu : TObject);
+procedure TFlatPopupMenu.CustomizeMenu(const AMenu: TObject);
 
-  procedure ApplyCustomization(const AMenuItem : TMenuItem);
+  procedure ApplyCustomization(const AMenuItem: TMenuItem);
   begin
     if not Assigned(AMenuItem.OnDrawItem) then
       AMenuItem.OnDrawItem := DrawItem;

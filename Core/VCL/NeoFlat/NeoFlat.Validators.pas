@@ -52,14 +52,14 @@ uses
   NeoFlat.Types, NeoFlat.Panel;
 // ---------------------------------------------------------------------------------------------------------------------
 
-function IsValidIpAddress(const AIP : String) : Boolean;
-function IsValidHost(const AHost : String) : Boolean;
-function IsValidNetworkAddress(const AValue : String) : Boolean;
+function IsValidIpAddress(const AIP: string): Boolean;
+function IsValidHost(const AHost: string): Boolean;
+function IsValidNetworkAddress(const AValue: string): Boolean;
 
-function IsValidPort(const APort : Integer) : Boolean; overload;
-function IsValidPort(const APort : String) : Boolean; overload
+function IsValidPort(const APort: Integer): Boolean; overload;
+function IsValidPort(const APort: string): Boolean; overload;
 
-function Validate(const AInput : String; const AValidators : TValidators) : Boolean;
+function Validate(const AInput: string; const AValidators: TValidators): Boolean;
 
 implementation
 
@@ -72,9 +72,9 @@ uses
   NeoFlat.Edit, NeoFlat.ComboBox;
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Validate(const AInput : String; const AValidators : TValidators) : Boolean;
+function Validate(const AInput: string; const AValidators: TValidators): Boolean;
 begin
-  result := False;
+  Result := False;
   ///
 
   { Filled }
@@ -98,43 +98,43 @@ begin
       Exit;
 
   ///
-  result := True;
+  Result := True;
 end;
 
-function IsValidIpAddress(const AIP : String) : Boolean;
+function IsValidIpAddress(const AIP: string): Boolean;
 begin
-  result := TRegEx.IsMatch(AIP,
+  Result := TRegEx.IsMatch(AIP,
     '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
   );
 end;
 
-function IsValidHost(const AHost : String) : Boolean;
+function IsValidHost(const AHost: string): Boolean;
 begin
-  result := TRegEx.IsMatch(AHost,
+  Result := TRegEx.IsMatch(AHost,
     '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
   );
 end;
 
-function IsValidNetworkAddress(const AValue : String) : Boolean;
+function IsValidNetworkAddress(const AValue: string): Boolean;
 begin
-  result := IsValidIpAddress(AValue) or
+  Result := IsValidIpAddress(AValue) or
             IsValidHost(AValue);
 end;
 
-function IsValidPort(const APort : Integer) : Boolean;
+function IsValidPort(const APort: Integer): Boolean;
 begin
-  result := (APort >= Low(word)) and (APort <= High(word));
+  Result := (APort >= Low(word)) and (APort <= High(word));
 end;
 
-function IsValidPort(const APort : String) : Boolean;
-var AValue : Integer;
+function IsValidPort(const APort: string): Boolean;
+var AValue: Integer;
 begin
-  result := False;
+  Result := False;
   if not TryStrToInt(APort, AValue) then
     Exit;
   ///
 
-  result := IsValidPort(AValue);
+  Result := IsValidPort(AValue);
 end;
 
 end.

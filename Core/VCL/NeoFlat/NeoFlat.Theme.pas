@@ -51,22 +51,22 @@ uses
 const
   FONT_1 = 'Tahoma';
 
-  MAIN_ACCENT     : TColor = clBlack;
-  GLYPH_COLOR     : TColor = clWhite;
-  MAIN_RED        : TColor = $000000D5;
+  MAIN_ACCENT: TColor = clBlack;
+  GLYPH_COLOR: TColor = clWhite;
+  MAIN_RED: TColor = $000000D5;
 
 var
-  MAIN_GRAY   : TColor;
-  DARKER_GRAY : TColor;
-  LIGHT_GRAY  : TColor;
+  MAIN_GRAY: TColor;
+  DARKER_GRAY: TColor;
+  LIGHT_GRAY: TColor;
 
   // Jade <3
 
 implementation
 
 initialization
-  MAIN_GRAY   := RGB(213, 211, 206);
-  LIGHT_GRAY  := RGB(240, 240, 240);
+  MAIN_GRAY := RGB(213, 211, 206);
+  LIGHT_GRAY := RGB(240, 240, 240);
   DARKER_GRAY := RGB(128, 128, 128);
 
 end.

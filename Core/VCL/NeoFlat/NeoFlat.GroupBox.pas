@@ -57,8 +57,8 @@ uses
 type
   TFlatGroupBox = class(TCustomControl)
   private
-    FBorderColor : TColor;
-    FMetrics     : TFlatMetrics;
+    FBorderColor: TColor;
+    FMetrics: TFlatMetrics;
 
     {@M}
     procedure CMEnabledChanged(var AMessage: TMessage); message CM_ENABLEDCHANGED;
@@ -73,7 +73,7 @@ type
   public
     {@C}
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy(); override;
+    destructor Destroy; override;
   published
     property Align;
     property Cursor;
@@ -143,30 +143,30 @@ begin
 
   DoubleBuffered := True;
 
-  Color        := MAIN_GRAY;
+  Color := MAIN_GRAY;
   FBorderColor := MAIN_ACCENT;
-  Font.Name    := FONT_1;
-  Font.Color   := MAIN_ACCENT;
-  Font.Height  := -11;
+  Font.Name := FONT_1;
+  Font.Color := MAIN_ACCENT;
+  Font.Height := -11;
 
   ///
   SetBounds(0, 0, FMetrics.ScaleValue(185), FMetrics.ScaleValue(105));
 end;
 
-destructor TFlatGroupBox.Destroy();
+destructor TFlatGroupBox.Destroy;
 begin
   if Assigned(FMetrics) then
     FreeAndNil(FMetrics);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFlatGroupBox.Paint;
 begin
   var AFormat := DT_TOP or DT_LEFT or DT_SINGLELINE;
 
-  Canvas.Lock();
+  Canvas.Lock;
   try
     Canvas.Font.Assign(Font);
 
@@ -242,7 +242,7 @@ begin
 
     Canvas.CopyRect(ClientRect, Canvas, ClientRect);
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 
@@ -281,7 +281,7 @@ procedure TFlatGroupBox.CMDialogChar(var AMessage: TCMDialogChar);
 begin
   with AMessage do
     if IsAccel(AMessage.CharCode, Caption) and CanFocus then begin
-      SetFocus();
+      SetFocus;
 
       Result := 1;
     end;

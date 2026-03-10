@@ -4,7 +4,7 @@ object ControlFormFileManager: TControlFormFileManager
   BorderStyle = bsNone
   BorderWidth = 2
   Caption = 'File Manager'
-  ClientHeight = 343
+  ClientHeight = 332
   ClientWidth = 454
   Color = clBlack
   DoubleBuffered = True
@@ -14,13 +14,14 @@ object ControlFormFileManager: TControlFormFileManager
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poOwnerFormCenter
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   TextHeight = 14
   object PanelMain: TFlatPanel
     Left = 0
     Top = 0
     Width = 454
-    Height = 343
+    Height = 332
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -40,7 +41,7 @@ object ControlFormFileManager: TControlFormFileManager
       Left = 4
       Top = 4
       Width = 366
-      Height = 310
+      Height = 299
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -59,18 +60,19 @@ object ControlFormFileManager: TControlFormFileManager
           Index = 1
         end>
       MinPosition = 0.020000000000000000
+      SplitterHoverColor = clHighlight
       Align = alClient
       ParentBackground = False
       Color = 13554645
       TabOrder = 0
       DesignSize = (
         366
-        310)
+        299)
       object PanelVSTFolders: TFlatPanel
         Left = 0
         Top = 0
         Width = 128
-        Height = 310
+        Height = 299
         Caption = 'PanelVSTFolders'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
@@ -95,7 +97,7 @@ object ControlFormFileManager: TControlFormFileManager
           Left = 2
           Top = 2
           Width = 124
-          Height = 306
+          Height = 295
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -137,7 +139,7 @@ object ControlFormFileManager: TControlFormFileManager
         Left = 131
         Top = 0
         Width = 235
-        Height = 310
+        Height = 299
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
         Font.Height = -11
@@ -160,7 +162,7 @@ object ControlFormFileManager: TControlFormFileManager
           Left = 2
           Top = 2
           Width = 231
-          Height = 306
+          Height = 295
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -187,9 +189,9 @@ object ControlFormFileManager: TControlFormFileManager
           OnDblClick = VSTFilesDblClick
           OnFreeNode = VSTFilesFreeNode
           OnGetText = VSTFilesGetText
+          OnPaintText = VSTFilesPaintText
           OnGetImageIndex = VSTFilesGetImageIndex
           OnGetNodeDataSize = VSTFilesGetNodeDataSize
-          OnMouseDown = VSTFilesMouseDown
           Touch.InteractiveGestures = [igPan, igPressAndTap]
           Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
           Columns = <
@@ -239,7 +241,7 @@ object ControlFormFileManager: TControlFormFileManager
     object PanelPath: TFlatPanel
       AlignWithMargins = True
       Left = 4
-      Top = 318
+      Top = 307
       Width = 446
       Height = 21
       Margins.Left = 4
@@ -292,7 +294,7 @@ object ControlFormFileManager: TControlFormFileManager
       Left = 374
       Top = 4
       Width = 80
-      Height = 310
+      Height = 299
       Margins.Left = 0
       Margins.Top = 4
       Margins.Right = 0
@@ -315,16 +317,19 @@ object ControlFormFileManager: TControlFormFileManager
       BorderBottom = 2
       Color = 13554645
       BorderColor = clBlack
-      object ButtonHome: TFlatButton
+      object ButtonDrives: TFlatButton
         Left = 6
         Top = 6
         Width = 68
         Height = 22
+        Hint = 
+          'Show available drives and connected storage devices, including e' +
+          'xternal media and removable disks.'
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        Caption = 'Home'
+        Caption = 'Drives'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
         Font.Height = -11
@@ -334,31 +339,34 @@ object ControlFormFileManager: TControlFormFileManager
         ShowHint = True
         ImageIndex = 17
         Value = 0
-        OnClick = ButtonHomeClick
+        OnClick = ButtonDrivesClick
         Busy = False
         ExplicitTop = 26
         ExplicitWidth = 69
       end
       object LabelAccess: TLabel
-        AlignWithMargins = True
-        Left = 45
-        Top = 289
-        Width = 21
+        Left = 6
+        Top = 278
+        Width = 68
         Height = 15
         Margins.Left = 8
         Margins.Top = 10
         Margins.Right = 8
         Margins.Bottom = 0
         Align = alBottom
-        Alignment = taRightJustify
+        Alignment = taCenter
         Caption = '___'
+        Color = clSilver
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -12
         Font.Name = 'Courier New'
         Font.Style = []
+        ParentColor = False
         ParentFont = False
+        Transparent = False
         Visible = False
+        ExplicitWidth = 21
       end
       object Shape1: TShape
         AlignWithMargins = True
@@ -379,6 +387,9 @@ object ControlFormFileManager: TControlFormFileManager
         Top = 32
         Width = 68
         Height = 22
+        Hint = 
+          'Refresh the files and folders in the current location to display' +
+          ' the latest information.'
         Margins.Left = 0
         Margins.Top = 4
         Margins.Right = 0
@@ -400,11 +411,14 @@ object ControlFormFileManager: TControlFormFileManager
       object ButtonGoTo: TFlatButton
         AlignWithMargins = True
         Left = 6
-        Top = 93
+        Top = 89
         Width = 68
         Height = 22
+        Hint = 
+          'Navigate to a specific folder. Supports environment variables in' +
+          ' the path.'
         Margins.Left = 0
-        Margins.Top = 4
+        Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
         Caption = 'Go To...'
@@ -424,9 +438,10 @@ object ControlFormFileManager: TControlFormFileManager
       object ButtonUpload: TFlatButton
         AlignWithMargins = True
         Left = 6
-        Top = 119
+        Top = 115
         Width = 68
         Height = 22
+        Hint = 'Upload a file to the current directory, if permissions allow.'
         Margins.Left = 0
         Margins.Top = 4
         Margins.Right = 0
@@ -449,11 +464,12 @@ object ControlFormFileManager: TControlFormFileManager
       object ButtonOptions: TFlatButton
         AlignWithMargins = True
         Left = 6
-        Top = 145
+        Top = 208
         Width = 68
         Height = 22
+        Hint = 'Open the file manager options.'
         Margins.Left = 0
-        Margins.Top = 4
+        Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
         Caption = 'Options'
@@ -468,7 +484,93 @@ object ControlFormFileManager: TControlFormFileManager
         Value = 0
         OnClick = ButtonOptionsClick
         Busy = False
-        ExplicitTop = 199
+        ExplicitTop = 241
+      end
+      object ButtonNewDirectory: TFlatButton
+        AlignWithMargins = True
+        Left = 6
+        Top = 146
+        Width = 68
+        Height = 22
+        Hint = 'Create a new directory, if permissions allow.'
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Caption = 'New Dir'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Align = alTop
+        ShowHint = True
+        ImageIndex = 17
+        Value = 0
+        OnClick = ButtonNewDirectoryClick
+        Busy = False
+        ExplicitTop = 168
+      end
+      object Shape2: TShape
+        AlignWithMargins = True
+        Left = 6
+        Top = 203
+        Width = 68
+        Height = 1
+        Margins.Left = 0
+        Margins.Top = 4
+        Margins.Right = 0
+        Margins.Bottom = 4
+        Align = alTop
+        ExplicitTop = 219
+      end
+      object Shape3: TShape
+        AlignWithMargins = True
+        Left = 6
+        Top = 141
+        Width = 68
+        Height = 1
+        Margins.Left = 0
+        Margins.Top = 4
+        Margins.Right = 0
+        Margins.Bottom = 4
+        Align = alTop
+      end
+      object Shape4: TShape
+        AlignWithMargins = True
+        Left = 6
+        Top = 172
+        Width = 68
+        Height = 1
+        Margins.Left = 0
+        Margins.Top = 4
+        Margins.Right = 0
+        Margins.Bottom = 4
+        Align = alTop
+      end
+      object ButtonPaste: TFlatButton
+        AlignWithMargins = True
+        Left = 6
+        Top = 177
+        Width = 68
+        Height = 22
+        Hint = 'Paste the clipboard contents into the current directory.'
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Caption = 'Paste'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Align = alTop
+        ShowHint = True
+        ImageIndex = 17
+        Value = 0
+        OnClick = ButtonPasteClick
+        Busy = False
       end
       object PanelDirection: TFlatPanel
         AlignWithMargins = True
@@ -499,6 +601,7 @@ object ControlFormFileManager: TControlFormFileManager
           Top = 0
           Width = 32
           Height = 22
+          Hint = 'Go back to the previous folder.'
           Margins.Left = 6
           Margins.Top = 0
           Margins.Right = 5
@@ -521,6 +624,7 @@ object ControlFormFileManager: TControlFormFileManager
           Top = 0
           Width = 32
           Height = 22
+          Hint = 'Go forward to the next folder.'
           Margins.Left = 6
           Margins.Top = 0
           Margins.Right = 5
@@ -545,14 +649,14 @@ object ControlFormFileManager: TControlFormFileManager
   object PopupMenu: TFlatPopupMenu
     OwnerDraw = True
     OnPopup = PopupMenuPopup
-    Left = 240
-    Top = 128
+    Left = 208
+    Top = 72
     object DownloadFile1: TMenuItem
       Caption = 'Download File'
       OnClick = DownloadFile1Click
     end
     object UploadToFolder1: TMenuItem
-      Caption = 'Upload To Folder'
+      Caption = 'Upload To Selected Folder'
       OnClick = UploadToFolder1Click
     end
     object N2: TMenuItem
@@ -562,11 +666,52 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Stream File Content (Open)'
       OnClick = StreamFileContentOpen1Click
     end
+    object N5: TMenuItem
+      Caption = '-'
+    end
+    object NewDirectory1: TMenuItem
+      Caption = 'New Directory'
+      OnClick = NewDirectory1Click
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object Cut1: TMenuItem
+      Caption = 'Cut'
+      OnClick = Cut1Click
+    end
+    object Copy1: TMenuItem
+      Caption = 'Copy'
+      OnClick = Copy1Click
+    end
+    object Paste1: TMenuItem
+      Caption = 'Paste'
+      OnClick = Paste1Click
+    end
+    object PasteToSelectedFolder1: TMenuItem
+      Caption = 'Paste To Selected Folder'
+      OnClick = PasteToSelectedFolder1Click
+    end
+    object ClearClipboard1: TMenuItem
+      Caption = 'Clear Clipboard'
+      OnClick = ClearClipboard1Click
+    end
+    object N4: TMenuItem
+      Caption = '-'
+    end
+    object Rename1: TMenuItem
+      Caption = 'Rename'
+      OnClick = Rename1Click
+    end
+    object Delete1: TMenuItem
+      Caption = 'Delete'
+      OnClick = Delete1Click
+    end
   end
   object PopupMenuOptions: TFlatPopupMenu
     OwnerDraw = True
-    Left = 168
-    Top = 80
+    Left = 256
+    Top = 168
     object ColoredFoldersAccessView1: TMenuItem
       AutoCheck = True
       Caption = 'Colored Folders (Access View)'
@@ -583,8 +728,8 @@ object ControlFormFileManager: TControlFormFileManager
   end
   object PopupFoldersTree: TFlatPopupMenu
     OwnerDraw = True
-    Left = 256
-    Top = 241
+    Left = 56
+    Top = 177
     object FullExpand1: TMenuItem
       Caption = 'Full Expand'
       OnClick = FullExpand1Click

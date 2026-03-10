@@ -48,9 +48,31 @@
 {******************************************************************************}
 
 (*
-  When Delphi 13 in Community Edition (Code Improvements):
-    - Replace "not (x in y)" by "x not in y"
-    - Ternary operator
+  -----------------------------------------------------------
+  - (!) Nice-to-Have Code Improvements / Best Practices (!) -
+  -----------------------------------------------------------
+
+  - Omit parentheses when calling both parameterless functions and procedures. Rely on standard Delphi syntax to keep
+    the code clean (MyProcedure; and Result := MyFunction;)
+
+  - Ensure that records used as node data in VirtualTreeView are properly finalized (using Finalize(pData^)) in the
+    OnFreeNode event, which is critical to prevent memory leaks
+
+  - Use FreeAndNil only when the object reference is expected to be reused or when clearing the reference improves
+    safety. Prefer Free when the variable goes out of scope
+
+  - When Delphi Community Edition 13 becomes available, review and adopt relevant language syntax improvements where
+    appropriate (e.g., 'if X is not in Y', ternary expressions etc..)
+
+  - Use Result (uppercase R) consistently for returning values from functions
+
+  - Ensure all variable types currently declared as 'String' are updated to lowercase 'string'
+
+  - Avoid using 'self' to access class-level variables or methods
+
+  - Work on 'TODO' Comments
+
+  -----------------------------------------------------------
 *)
 
 unit uFormMain;
@@ -72,22 +94,25 @@ uses
 
   OptixCore.Thread, OptixCore.Protocol.Preflight, Optix.Protocol.Server, OptixCore.Sockets.Helper,
   OptixCore.SessionInformation, Optix.Protocol.SessionHandler, OptixCore.Commands.Base, OptixCore.Protocol.Packet,
-  OptixCore.Commands,
+  OptixCore.Commands, Optix.ControlSingleton,
 
   NeoFlat.TreeView, NeoFlat.PopupMenu, NeoFlat.Panel, NeoFlat.Button, NeoFlat.Hint, NeoFlat.Window;
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
   TTreeData = record
-    Handler            : TOptixSessionHandlerThread;
-    SessionInformation : TOptixCommandReceiveSessionInformation;
-    SpawnDate          : TDateTime;
-    Forms              : TObjectList<TBaseFormControl>;
-    Workers            : TObjectList<TOptixThread>;
+    Handler: TOptixSessionHandlerThread;
+    SessionInformation: TOptixCommandReceiveSessionInformation;
+    SpawnDate: TDateTime;
+    Forms: TObjectList<TBaseFormControl>;
+    Workers: TObjectList<TOptixThread>;
+    HintText: string;
+    SharedClass: TOptixControlSingleton;
 
     ///
-    function ToString: String;
-    function GetUPN() : String;
+    function ToString: string;
+    function GetUPN: string;
+    function GetHintText: string;
   end;
   PTreeData = ^TTreeData;
 
@@ -164,40 +189,44 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure Server1Click(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure RegistryManager1Click(Sender: TObject);
     procedure ContentReader1Click(Sender: TObject);
+    procedure VSTGetHint(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+      var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
   private
-    FFileInfo : TSHFileInfo;
+    FFileInfo: TSHFileInfo;
 
     {@M}
-    procedure RegisterSession(const AHandler : TOptixSessionHandlerThread; const ASessionInformation : TOptixCommandReceiveSessionInformation);
-    function GetNodeByHandler(const AHandler : TOptixSessionHandlerThread) : PVirtualNode;
-    function GetHandlerByHandlerId(const AHandlerId : TGUID) : TOptixSessionHandlerThread;
-    function GetNodeByHandlerId(const AHandlerId : TGUID) : PVirtualNode;
-    function GetNodeByControlForm(const AForm : TBaseFormControl) : PVirtualNode;
-    procedure CreateOrOpenControlForm(const pNode : PVirtualNode; const AFormClass : TBaseFormControlClass);
+    procedure RegisterSession(const AHandler: TOptixSessionHandlerThread;
+      const ASessionInformation: TOptixCommandReceiveSessionInformation);
+    function GetNodeByHandler(const AHandler: TOptixSessionHandlerThread): PVirtualNode;
+    function GetHandlerByHandlerId(const AHandlerId: TGUID): TOptixSessionHandlerThread;
+    function GetNodeByHandlerId(const AHandlerId: TGUID): PVirtualNode;
+    function GetNodeByControlForm(const AForm: TBaseFormControl): PVirtualNode;
+    procedure CreateOrOpenControlForm(const pNode: PVirtualNode; const AFormClass: TBaseFormControlClass);
   public
     {@M}
-    function GetControlForm(const pNode : PVirtualNode; const AClass : TClass) : TBaseFormControl; overload;
-    function GetControlForm(const pNode : PVirtualNode; const AWindowGUID : TGUID) : TBaseFormControl; overload;
-    function GetControlForm(const AControlForm : TBaseFormControl; const AClass : TClass) : TBaseFormControl; overload;
-    function GetControlForms(const ASourceControlForm : TBaseFormControl; const AClassFamily : TClass) : TList<TBaseFormControl>;
-    procedure PurgeControlForm(const AControlForm : TBaseFormControl; const AWindowGUID : TGUID);
-    function ControlFormExists(const pNode : PVirtualNode; const AClass : TClass) : Boolean;
-    procedure SendCommand(const pNode : PVirtualNode; const ACommand : TOptixCommand); overload;
-    procedure SendCommand(const ACaller : TBaseFormControl; const ACommand : TOptixCommand); overload;
+    function GetControlForm(const pNode: PVirtualNode; const AClass: TClass): TBaseFormControl; overload;
+    function GetControlForm(const pNode: PVirtualNode; const AWindowGUID: TGUID): TBaseFormControl; overload;
+    function GetControlForm(const AControlForm: TBaseFormControl; const AClass: TClass): TBaseFormControl; overload;
+    function GetControlForms(const ASourceControlForm: TBaseFormControl;
+      const AClassFamily: TClass) : TList<TBaseFormControl>;
+    procedure PurgeControlForm(const AControlForm: TBaseFormControl; const AWindowGUID: TGUID);
+    function ControlFormExists(const pNode: PVirtualNode; const AClass: TClass): Boolean;
+    procedure SendCommand(const pNode: PVirtualNode; const ACommand: TOptixCommand); overload;
+    procedure SendCommand(const ACaller: TBaseFormControl; const ACommand: TOptixCommand); overload;
 
-    function CreateNewControlForm(const pNode : PVirtualNode; const AFormClass : TBaseFormControlClass;
-      const ADoShow : Boolean = True) : TBaseFormControl; overload;
-    function CreateNewControlForm(const AControlForm : TBaseFormControl; const AFormClass : TBaseFormControlClass;
-      const ADoShow : Boolean = True) : TBaseFormControl; overload;
+    function CreateNewControlForm(const pNode: PVirtualNode; const AFormClass: TBaseFormControlClass;
+      const ADoShow: Boolean = True) : TBaseFormControl; overload;
+    function CreateNewControlForm(const AControlForm: TBaseFormControl; const AFormClass: TBaseFormControlClass;
+      const ADoShow: Boolean = True) : TBaseFormControl; overload;
 
     {@ME}
-    procedure OnSessionDisconnect(Sender : TOptixSessionHandlerThread);
-    procedure OnReceivePacket(Sender : TOptixSessionHandlerThread; const AOptixPacket : TOptixPacket;
-      var ACallHandleMemory : Boolean);
-    procedure OnRegisterWorker(Sender : TOptixServerThread; const AClient : TClientSocket; const AHandlerId  : TGUID; const AWorkerKind : TClientKind);
+    procedure OnSessionDisconnect(Sender: TOptixSessionHandlerThread);
+    procedure OnReceivePacket(Sender: TOptixSessionHandlerThread; const AOptixPacket: TOptixPacket;
+      var ACallHandleMemory: Boolean);
+    procedure OnRegisterWorker(Sender: TOptixServerThread; const AClient: TClientSocket; const AHandlerId: TGUID;
+      const AWorkerKind: TClientKind);
   end;
 
 var
@@ -207,7 +236,7 @@ implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.DateUtils, System.Rtti,
+  System.DateUtils, System.Rtti, System.Math,
 
   uControlFormProcessManager, uControlFormLogs, uFormAbout, uControlFormTransfers, uControlFormControlForms,
   uControlFormFileManager, uFormDebugThreads, uControlFormTasks, uControlFormRemoteShell, uFormListen, uFormServers,
@@ -222,64 +251,114 @@ uses
 {$R *.dfm}
 
 (* TTreeData *)
-function TTreeData.ToString: String;
+function TTreeData.ToString: string;
 begin
   if not Assigned(SessionInformation) or not Assigned(Handler) then
-    result := ''
+    Result := ''
   else
-    result := Format('%s@%s:%s', [
+    Result := Format('%s@%s:%s', [
       SessionInformation.Username,
       SessionInformation.Computer,
       Handler.PeerAddress
     ]);
 end;
 
-function TTreeData.GetUPN() : String;
+function TTreeData.GetUPN: string;
 begin
   if Assigned(SessionInformation) then
-    result := Format('%s@%s', [SessionInformation.Username, SessionInformation.Computer])
+    Result := Format('%s@%s', [SessionInformation.Username, SessionInformation.Computer])
   else
-    result := '';
+    Result := '';
+end;
+
+function TTreeData.GetHintText: string;
+begin
+  Result := '';
+  ///
+
+  if not Assigned(Handler) or not Assigned(SessionInformation) then
+    Exit;
+
+  var ADictionary := TOrderedDictionary<String, String>.Create;
+  var AStringBuilder := TStringBuilder.Create;
+  try
+    ADictionary.Add('Remote Address / Port', Format('%s/%d', [Handler.PeerAddress, Handler.Port]));
+    ADictionary.Add('Username@Computer', GetUPN);
+
+    if not string.IsNullOrWhiteSpace(SessionInformation.Langroup) then
+      ADictionary.Add('LAN Group Name', SessionInformation.Langroup);
+
+    if not string.IsNullOrWhiteSpace(SessionInformation.DomainName) then
+      ADictionary.Add('Domain Name', SessionInformation.DomainName);
+
+    ADictionary.Add('Windows Version', SessionInformation.WindowsVersion);
+    ADictionary.Add('Spawn Since', TOptixHelper.ElapsedDateTime(SpawnDate, Now));
+    ADictionary.Add('Spawn Date', DateTimeToStr(SpawnDate));
+    ADictionary.Add('Elevated Status', SessionInformation.ElevatedStatus_STR);
+    ADictionary.Add('User In Admin Group', BoolToStr(SessionInformation.IsInAdminGroup, True));
+    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem));
+    ADictionary.Add('User SID', SessionInformation.UserSid);
+    ADictionary.Add('Image', SessionInformation.ProcessDetail);
+
+    var AMaxKeyLength := 0;
+    for var AKey in ADictionary.Keys do
+      AMaxKeyLength := Max(AMaxKeyLength, AKey.Length);
+
+    AStringBuilder.Append(HINT_IS_MONO);
+
+    for var APair in ADictionary do
+      AStringBuilder.Append(Format('%s: %s%s', [
+        APair.Key.PadRight(AMaxKeyLength),
+        APair.Value,
+        sLineBreak
+      ]));
+
+    ///
+    Result := AStringBuilder.ToString.TrimRight;
+  finally
+    AStringBuilder.Free;
+    ADictionary.Free;
+  end;
 end;
 
 (* TFormMain *)
 
-procedure TFormMain.PurgeControlForm(const AControlForm : TBaseFormControl; const AWindowGUID : TGUID);
+procedure TFormMain.PurgeControlForm(const AControlForm: TBaseFormControl; const AWindowGUID: TGUID);
 begin
   var pNode := GetNodeByControlForm(AControlForm);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
   if not Assigned(pData^.Forms) then
-    Exit();
+    Exit;
 
   var AForm := GetControlForm(pNode, AWindowGUID);
   if Assigned(AForm) then begin
-    AForm.PurgeRequest();
+    AForm.PurgeRequest;
 
     pData.Forms.Remove(AForm);
   end;
 end;
 
-function TFormMain.GetControlForm(const pNode : PVirtualNode; const AClass : TClass) : TBaseFormControl;
+function TFormMain.GetControlForm(const pNode: PVirtualNode; const AClass: TClass): TBaseFormControl;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
 
   if not Assigned(pData^.Forms) then
-    Exit();
+    Exit;
 
   for var AForm in pData^.Forms do begin
     if AForm is AClass then begin
-      result := AForm;
+      Result := AForm;
 
       ///
       break;
@@ -287,22 +366,22 @@ begin
   end;
 end;
 
-function TFormMain.GetControlForm(const pNode : PVirtualNode; const AWindowGUID : TGUID) : TBaseFormControl;
+function TFormMain.GetControlForm(const pNode: PVirtualNode; const AWindowGUID: TGUID): TBaseFormControl;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
 
   if not Assigned(pData^.Forms) then
-    Exit();
+    Exit;
 
   for var AForm in pData^.Forms do begin
     if AForm.GUID = AWindowGUID then begin
-      result := AForm;
+      Result := AForm;
 
       ///
       break;
@@ -310,43 +389,44 @@ begin
   end;
 end;
 
-function TFormMain.GetControlForm(const AControlForm : TBaseFormControl; const AClass : TClass) : TBaseFormControl;
+function TFormMain.GetControlForm(const AControlForm: TBaseFormControl; const AClass: TClass): TBaseFormControl;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(AControlForm) then
-    Exit();
+    Exit;
 
   var pNode := GetNodeByControlForm(AControlForm);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   ///
-  result := GetControlForm(pNode, AClass);
+  Result := GetControlForm(pNode, AClass);
 end;
 
-function TFormMain.GetControlForms(const ASourceControlForm : TBaseFormControl; const AClassFamily : TClass) : TList<TBaseFormControl>;
+function TFormMain.GetControlForms(const ASourceControlForm: TBaseFormControl;
+  const AClassFamily: TClass) : TList<TBaseFormControl>;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(ASourceControlForm) then
-    Exit();
+    Exit;
 
   var pNode := GetNodeByControlForm(ASourceControlForm);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
   if not Assigned(pData) or not Assigned(pData^.Forms) then
-    Exit();
+    Exit;
 
-  result := TList<TBaseFormControl>.Create();
+  Result := TList<TBaseFormControl>.Create;
 
   for var AForm in pData^.Forms do begin
     if AForm is AClassFamily then
-      result.Add(AForm);
+      Result.Add(AForm);
   end;
 end;
 
@@ -355,9 +435,9 @@ begin
   CreateNewControlForm(VST.FocusedNode, TControlFormSetupContentReader);
 end;
 
-function TFormMain.ControlFormExists(const pNode : PVirtualNode; const AClass : TClass) : Boolean;
+function TFormMain.ControlFormExists(const pNode: PVirtualNode; const AClass: TClass): Boolean;
 begin
-  result := GetControlForm(pNode, AClass) <> nil;
+  Result := GetControlForm(pNode, AClass) <> nil;
 end;
 
 procedure TFormMain.ControlForms1Click(Sender: TObject);
@@ -365,10 +445,10 @@ begin
   CreateOrOpenControlForm(VST.FocusedNode, TControlFormControlForms);
 end;
 
-procedure TFormMain.SendCommand(const pNode : PVirtualNode; const ACommand : TOptixCommand);
+procedure TFormMain.SendCommand(const pNode: PVirtualNode; const ACommand: TOptixCommand);
 begin
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
@@ -376,13 +456,13 @@ begin
     pData^.Handler.AddPacket(ACommand);
 end;
 
-function TFormMain.GetNodeByControlForm(const AForm : TBaseFormControl) : PVirtualNode;
+function TFormMain.GetNodeByControlForm(const AForm: TBaseFormControl): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(AForm) then
-    Exit();
+    Exit;
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
@@ -391,7 +471,7 @@ begin
 
     for var ACandidate in pData^.Forms do begin
       if ACandidate = AForm then begin
-        result := pNode;
+        Result := pNode;
 
         ///
         break;
@@ -400,10 +480,10 @@ begin
   end;
 end;
 
-procedure TFormMain.SendCommand(const ACaller : TBaseFormControl; const ACommand : TOptixCommand);
+procedure TFormMain.SendCommand(const ACaller: TBaseFormControl; const ACommand: TOptixCommand);
 begin
   if not Assigned(ACaller) then
-    Exit();
+    Exit;
   ///
 
   var pNode := GetNodeByControlForm(ACaller);
@@ -414,18 +494,18 @@ end;
 
 procedure TFormMain.Server1Click(Sender: TObject);
 begin
-  FormServers.Show();
+  FormServers.Show;
 end;
 
 procedure TFormMain.hreads1Click(Sender: TObject);
 begin
-  FormDebugThreads.Show();
+  FormDebugThreads.Show;
 end;
 
-procedure TFormMain.CreateOrOpenControlForm(const pNode : PVirtualNode; const AFormClass : TBaseFormControlClass);
+procedure TFormMain.CreateOrOpenControlForm(const pNode: PVirtualNode; const AFormClass: TBaseFormControlClass);
 begin
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var AForm := GetControlForm(pNode, AFormClass);
 
@@ -436,6 +516,7 @@ begin
     if AFormClass = TControlFormProcessManager then
       AForm := TControlFormProcessManager.Create(
         self,
+        pData^.SharedClass,
         pData^.ToString,
         pData^.SessionInformation.Architecture,
         pData^.SessionInformation.WindowsArchitecture
@@ -450,32 +531,32 @@ begin
     TOptixHelper.ShowForm(AForm);
 end;
 
-function TFormMain.CreateNewControlForm(const pNode : PVirtualNode; const AFormClass : TBaseFormControlClass;
-  const ADoShow : Boolean = True) : TBaseFormControl;
+function TFormMain.CreateNewControlForm(const pNode: PVirtualNode; const AFormClass: TBaseFormControlClass;
+  const ADoShow: Boolean = True) : TBaseFormControl;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if pNode = nil then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
   if not Assigned(pData^.Forms) then
-    Exit();
+    Exit;
 
-  var AForm := AFormClass.Create(self, pData^.ToString);
+  var AForm := AFormClass.Create(self, pData^.SharedClass, pData^.ToString);
   pData^.Forms.Add(AForm);
 
-  result := AForm;
+  Result := AForm;
 
   if ADoShow then
     TOptixHelper.ShowForm(AForm);
 end;
 
-function TFormMain.CreateNewControlForm(const AControlForm : TBaseFormControl; const AFormClass : TBaseFormControlClass;
-  const ADoShow : Boolean = True) : TBaseFormControl;
+function TFormMain.CreateNewControlForm(const AControlForm: TBaseFormControl; const AFormClass: TBaseFormControlClass;
+  const ADoShow: Boolean = True) : TBaseFormControl;
 begin
-  result := CreateNewControlForm(GetNodeByControlForm(AControlForm), AFormClass, ADoShow);
+  Result := CreateNewControlForm(GetNodeByControlForm(AControlForm), AFormClass, ADoShow);
 end;
 
 procedure TFormMain.Logs1Click(Sender: TObject);
@@ -483,19 +564,19 @@ begin
   CreateOrOpenControlForm(VST.FocusedNode, TControlFormLogs);
 end;
 
-function TFormMain.GetNodeByHandler(const AHandler : TOptixSessionHandlerThread) : PVirtualNode;
+function TFormMain.GetNodeByHandler(const AHandler: TOptixSessionHandlerThread): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(AHandler) then
-    Exit();
+    Exit;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if Assigned(pData^.Handler) and (pData^.Handler = AHandler) then begin
-      result := pNode;
+      Result := pNode;
 
       ///
       break;
@@ -503,35 +584,38 @@ begin
   end;
 end;
 
-procedure TFormMain.RegisterSession(const AHandler : TOptixSessionHandlerThread; const ASessionInformation : TOptixCommandReceiveSessionInformation);
+procedure TFormMain.RegisterSession(const AHandler: TOptixSessionHandlerThread;
+  const ASessionInformation: TOptixCommandReceiveSessionInformation);
 begin
   if not Assigned(ASessionInformation) or not Assigned(AHandler) then
-    Exit();
+    Exit;
   ///
 
   var pNode := VST.AddChild(nil);
   var pData := PTreeData(pNode.GetData);
   ///
 
-  VST.BeginUpdate(); // Trigger sort. I haven't found a better method yet...
+  VST.BeginUpdate; // Trigger sort. I haven't found a better method yet...
   try
     pData^.Handler := AHandler;
     pData^.SessionInformation := ASessionInformation;
     pData^.SpawnDate := Now;
+    pData^.HintText := pData^.GetHintText;
+    pData^.SharedClass := TOptixControlSingleton.Create;
 
     // Create not mandatory windows
 
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormLogs.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormLogs.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormControlForms.Create(self, pData^.ToString, pData));
+    pData^.Forms.Add(TControlFormControlForms.Create(self, pData^.SharedClass, pData^.ToString, pData));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormTransfers.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormTransfers.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
-    pData^.Forms.Add(TControlFormTasks.Create(self, pData^.ToString, True));
+    pData^.Forms.Add(TControlFormTasks.Create(self, pData^.SharedClass, pData^.ToString, True));
     // -----------------------------------------------------------------------------------------------------------------
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -548,7 +632,7 @@ end;
 procedure TFormMain.rustedCertificates1Click(Sender: TObject);
 begin
   {$IFDEF USETLS}
-  FormTrustedCertificates.Show();
+  FormTrustedCertificates.Show
   {$ENDIF}
 end;
 
@@ -558,7 +642,7 @@ procedure TFormMain.VSTBeforeCellPaint(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or not Assigned(pData^.SessionInformation) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
@@ -580,7 +664,7 @@ procedure TFormMain.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   if Assigned(pData^.SessionInformation) then
@@ -603,6 +687,23 @@ begin
     ///
     FreeAndNil(pData^.Workers);
   end;
+
+  if Assigned(pData^.SharedClass) then
+    FreeAndNil(pData^.SharedClass);
+
+  ///
+  Finalize(pData^);
+end;
+
+procedure TFormMain.VSTGetHint(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
+begin
+  var pData := PTreeData(Node.GetData);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  HintText := pData^.HintText;
 end;
 
 procedure TFormMain.VSTGetImageIndex(Sender: TBaseVirtualTree;
@@ -611,7 +712,7 @@ procedure TFormMain.VSTGetImageIndex(Sender: TBaseVirtualTree;
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   case Kind of
@@ -651,7 +752,7 @@ begin
   if not Assigned(pData1) or not Assigned(pData2) then begin
     Result := 0;
 
-    Exit();
+    Exit;
   end;
 
   if not Assigned(pData1^.SessionInformation) or not Assigned(pData2^.SessionInformation) then
@@ -660,17 +761,17 @@ begin
     Result := TOptixHelper.CompareObjectAssignement(pData1^.Handler, pData2^.Handler)
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.Handler.PeerAddress, pData2^.Handler.PeerAddress);
-      1 : Result := CompareText(pData1^.GetUPN(), pData2^.GetUPN());
-      2 : Result := CompareText(pData1^.SessionInformation.Langroup, pData2^.SessionInformation.Langroup);
-      3 : Result := CompareText(pData1^.SessionInformation.DomainName, pData2^.SessionInformation.DomainName);
-      4 : Result := CompareText(pData1^.SessionInformation.WindowsVersion, pData2^.SessionInformation.WindowsVersion);
-      5 : Result := CompareDateTime(pData1^.SpawnDate, pData2^.SpawnDate);
-      6 : Result := CompareText(pData1^.SessionInformation.ProcessDetail, pData2^.SessionInformation.ProcessDetail);
-      7 : Result := CompareText(
+      0: Result := CompareText(pData1^.Handler.PeerAddress, pData2^.Handler.PeerAddress);
+      1: Result := CompareText(pData1^.GetUPN, pData2^.GetUPN);
+      2: Result := CompareText(pData1^.SessionInformation.Langroup, pData2^.SessionInformation.Langroup);
+      3: Result := CompareText(pData1^.SessionInformation.DomainName, pData2^.SessionInformation.DomainName);
+      4: Result := CompareText(pData1^.SessionInformation.WindowsVersion, pData2^.SessionInformation.WindowsVersion);
+      5: Result := CompareDateTime(pData1^.SpawnDate, pData2^.SpawnDate);
+      6: Result := CompareText(pData1^.SessionInformation.ProcessDetail, pData2^.SessionInformation.ProcessDetail);
+      7: Result := CompareText(
         pData1^.SessionInformation.ElevatedStatus_STR, pData2^.SessionInformation.ElevatedStatus_STR
       );
-      8 : Result := Ord(pData1^.SessionInformation.IsInAdminGroup) - Ord(pData2^.SessionInformation.IsInAdminGroup);
+      8: Result := Ord(pData1^.SessionInformation.IsInAdminGroup) - Ord(pData2^.SessionInformation.IsInAdminGroup);
     end;
   end;
 end;
@@ -685,15 +786,15 @@ begin
 
   if Assigned(pData) and Assigned(pData^.SessionInformation) and Assigned(pData^.Handler) then begin
     case Column of
-      0 : CellText := pData^.Handler.PeerAddress;
-      1 : CellText := pData^.GetUPN;
-      2 : CellText := TOptixHelper.DefaultIfEmpty(pData^.SessionInformation.Langroup);
-      3 : CellText := TOptixHelper.DefaultIfEmpty(pData^.SessionInformation.DomainName);
-      4 : CellText := pData^.SessionInformation.WindowsVersion;
-      5 : CellText := TOptixHelper.ElapsedDateTime(pData^.SpawnDate, Now);
-      6 : CellText := pData^.SessionInformation.ProcessDetail;
-      7 : CellText := pData^.SessionInformation.ElevatedStatus_STR;
-      8 : CellText := BoolToStr(pData^.SessionInformation.IsInAdminGroup, True);
+      0: CellText := pData^.Handler.PeerAddress;
+      1: CellText := pData^.GetUPN;
+      2: CellText := TOptixHelper.DefaultIfEmpty(pData^.SessionInformation.Langroup);
+      3: CellText := TOptixHelper.DefaultIfEmpty(pData^.SessionInformation.DomainName);
+      4: CellText := pData^.SessionInformation.WindowsVersion;
+      5: CellText := TOptixHelper.ElapsedDateTime(pData^.SpawnDate, Now);
+      6: CellText := pData^.SessionInformation.ProcessDetail;
+      7: CellText := pData^.SessionInformation.ElevatedStatus_STR;
+      8: CellText := BoolToStr(pData^.SessionInformation.IsInAdminGroup, True);
     end;
   end;
 
@@ -711,11 +812,11 @@ begin
   pData^.Workers := TObjectList<TOptixThread>.Create(False);
 end;
 
-procedure TFormMain.OnSessionDisconnect(Sender : TOptixSessionHandlerThread);
+procedure TFormMain.OnSessionDisconnect(Sender: TOptixSessionHandlerThread);
 begin
   var pNode := GetNodeByHandler(Sender);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   VST.DeleteNode(pNode);
 end;
@@ -726,14 +827,14 @@ begin
 
   var AVisible := VST.FocusedNode <> nil;
 
-  erminate1.Visible        := AVisible;
-  System1.Visible          := AVisible;
-  FileSystem1.Visible      := AVisible;
-  Logs1.Visible            := AVisible;
-  ControlForms1.Visible    := AVisible;
-  transfers1.Visible       := AVisible;
-  asks1.Visible            := AVisible;
-  RemoteShell1.Visible     := AVisible;
+  erminate1.Visible := AVisible;
+  System1.Visible := AVisible;
+  FileSystem1.Visible := AVisible;
+  Logs1.Visible := AVisible;
+  ControlForms1.Visible := AVisible;
+  transfers1.Visible := AVisible;
+  asks1.Visible := AVisible;
+  RemoteShell1.Visible := AVisible;
 end;
 
 procedure TFormMain.ProcessManager1Click(Sender: TObject);
@@ -746,8 +847,8 @@ begin
   CreateOrOpenControlForm(VST.FocusedNode, TControlFormTransfers);
 end;
 
-procedure TFormMain.OnReceivePacket(Sender : TOptixSessionHandlerThread; const AOptixPacket : TOptixPacket;
-  var ACallHandleMemory : Boolean);
+procedure TFormMain.OnReceivePacket(Sender: TOptixSessionHandlerThread; const AOptixPacket: TOptixPacket;
+  var ACallHandleMemory: Boolean);
 begin
   if not Assigned(AOptixPacket) then
     Exit;
@@ -760,7 +861,7 @@ begin
     end else begin
       var pNode := GetNodeByHandler(Sender);
       if not Assigned(pNode) then
-        Exit();
+        Exit;
       ///
 
       // ---------------------------------------------------------------------------------------------------------------
@@ -774,7 +875,8 @@ begin
 
       if AOptixPacket.WindowGUID.IsEmpty then begin
         // -------------------------------------------------------------------------------------------------------------
-        if (AOptixPacket is TOptixCommandReceiveLogMessage) or (AOptixPacket is TOptixCommandReceiveTransferException) then begin
+        if (AOptixPacket is TOptixCommandReceiveLogMessage) or (AOptixPacket is TOptixCommandReceiveTransferException)
+        then begin
           var ALogsForm := GetControlForm(pNode, TControlFormLogs);
           if Assigned(ALogsForm) then
             ALogsForm.ReceivePacket(AOptixPacket, ACallHandleMemory);
@@ -792,78 +894,79 @@ begin
       end;
     end;
   except
-    on E : Exception do begin
+    on E: Exception do begin
       // TODO: log packet errors
     end;
   end;
 end;
 
-function TFormMain.GetHandlerByHandlerId(const AHandlerId : TGUID) : TOptixSessionHandlerThread;
+function TFormMain.GetHandlerByHandlerId(const AHandlerId: TGUID): TOptixSessionHandlerThread;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if Assigned(pData^.Handler) and (pData^.Handler.HandlerId = AHandlerId) then begin
-      result := pData^.Handler;
+      Result := pData^.Handler;
 
       break;
     end;
   end;
 end;
 
-function TFormMain.GetNodeByHandlerId(const AHandlerId : TGUID) : PVirtualNode;
+function TFormMain.GetNodeByHandlerId(const AHandlerId: TGUID): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   var AHandler := GetHandlerByHandlerId(AHandlerId);
   if Assigned(AHandler) then
-    result := GetNodeByHandler(AHandler);
+    Result := GetNodeByHandler(AHandler);
 end;
 
-procedure TFormMain.OnRegisterWorker(Sender : TOptixServerThread; const AClient : TClientSocket; const AHandlerId  : TGUID; const AWorkerKind : TClientKind);
+procedure TFormMain.OnRegisterWorker(Sender: TOptixServerThread; const AClient: TClientSocket;
+  const AHandlerId: TGUID; const AWorkerKind: TClientKind);
 begin
   var pNode := GetNodeByHandlerId(AHandlerId);
   if not Assigned(pNode) then
-    FreeAndNil(AClient)
+    AClient.Free
   else begin
     var pData := PTreeData(pNode.GetData);
     ///
 
-    var AWorker : TOptixThread := nil;
+    var AWorker: TOptixThread := nil;
 
     case AWorkerKind of
       // File Transfer Worker ------------------------------------------------------------------------------------------
-      ckFileTransfer : begin
+      ckFileTransfer: begin
         AWorker := TOptixFileTransferWorker.Create(AClient);
 
         var AForm := TControlFormTransfers(GetControlForm(pNode, TControlFormTransfers));
         if Assigned(AWorker) then begin
           TOptixFileTransferWorker(AWorker).OnRequestTransferTask := AForm.OnRequestTransferTask;
-          TOptixFileTransferWorker(AWorker).OnTransferError       := AForm.OnTransferError;
-          TOptixFileTransferWorker(AWorker).OnTransferBegins      := AForm.OnTransferBegins;
-          TOptixFileTransferWorker(AWorker).OnTransferUpdate      := AForm.OnTransferUpdate;
-          TOptixFileTransferWorker(AWorker).OnTransferEnds        := AForm.OnTransferEnds;
+          TOptixFileTransferWorker(AWorker).OnTransferError := AForm.OnTransferError;
+          TOptixFileTransferWorker(AWorker).OnTransferBegins := AForm.OnTransferBegins;
+          TOptixFileTransferWorker(AWorker).OnTransferUpdate := AForm.OnTransferUpdate;
+          TOptixFileTransferWorker(AWorker).OnTransferEnds := AForm.OnTransferEnds;
         end;
       // Unknown -------------------------------------------------------------------------------------------------------
       end else
-        FreeAndNil(AClient);
+        AClient.Free;
     end;
 
     if Assigned(AWorker) then begin
       pData^.Workers.Add(AWorker);
 
       ///
-      AWorker.Start();
+      AWorker.Start;
     end;
   end;
 end;
 
 procedure TFormMain.About1Click(Sender: TObject);
 begin
-  FormAbout.ShowModal();
+  FormAbout.ShowModal;
 end;
 
 procedure TFormMain.asks1Click(Sender: TObject);
@@ -874,7 +977,7 @@ end;
 procedure TFormMain.Certificates1Click(Sender: TObject);
 begin
   {$IFDEF USETLS}
-  FormCertificatesStore.Show();
+  FormCertificatesStore.Show
   {$ENDIF}
 end;
 
@@ -885,7 +988,7 @@ end;
 
 procedure TFormMain.erminate1Click(Sender: TObject);
 begin
-  SendCommand(VST.FocusedNode, TOptixCommandTerminateCurrentProcess.Create());
+  SendCommand(VST.FocusedNode, TOptixCommandTerminateCurrentProcess.Create);
 end;
 
 procedure TFormMain.FileManager1Click(Sender: TObject);
@@ -895,13 +998,16 @@ end;
 
 procedure TFormMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  TOptixThread.SignalHiveAndFlush();
+  TOptixThread.SignalHiveAndFlush;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   TOptixHelper.InitializeSystemIcons(ImageSystem, FFileInfo);
   ///
+
+  Constraints.MinWidth := ScaleValue(250);
+  Constraints.MinHeight := ScaleValue(150);
 
   Caption := Format('%s - %s', [Caption, OPTIX_PROTOCOL_VERSION]);
 
@@ -912,12 +1018,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TFormMain.FormDestroy(Sender: TObject);
-begin
-
-end;
-
-//procedure TFormMain.StopServer();
+//procedure TFormMain.StopServer
 //begin
 //  if Assigned(FServer) then begin
 //    TOptixThread.TerminateWait(FServer);
@@ -929,7 +1030,7 @@ end;
 
 procedure TFormMain.TimerRefreshTimer(Sender: TObject);
 begin
-  VST.Refresh();
+  VST.Refresh;
 end;
 
 end.

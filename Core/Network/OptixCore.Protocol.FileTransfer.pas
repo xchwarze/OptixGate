@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Protocol.FileTransfer;
 
 interface
@@ -80,51 +78,51 @@ type
 
   TOptixTransferTask = class
   private
-    FFileHandle : THandle;
-    FWorkCount  : Int64;
-    FBuffer     : array[0..FILE_CHUNK_SIZE-1] of byte;
-    FIsEmpty    : Boolean;
-    FCanceled   : Boolean;
+    FFileHandle: THandle;
+    FWorkCount: Int64;
+    FBuffer: array[0..FILE_CHUNK_SIZE-1] of byte;
+    FIsEmpty: Boolean;
+    FCanceled: Boolean;
 
     {@M}
-    function GetState() : TOptixTransferState;
+    function GetState: TOptixTransferState;
   protected
-    FFileSize : Int64;
+    FFileSize: Int64;
 
     {@M}
-    procedure IncWorkCount(const AValue : UInt64);
+    procedure IncWorkCount(const AValue: UInt64);
   public
     {@C}
-    constructor Create(const AFilePath : String); virtual;
-    destructor Destroy(); override;
+    constructor Create(const AFilePath: string); virtual;
+    destructor Destroy; override;
 
     {@G}
-    property WorkCount : Int64               read FWorkCount;
-    property State     : TOptixTransferState read GetState;
-    property FileSize  : Int64               read FFileSize;
-    property IsEmpty   : Boolean             read FIsEmpty;
+    property WorkCount: Int64 read FWorkCount;
+    property State: TOptixTransferState read GetState;
+    property FileSize: Int64 read FFileSize;
+    property IsEmpty: Boolean read FIsEmpty;
 
     {@G/S}
-    property Canceled  : Boolean  read FCanceled write FCanceled;
+    property Canceled: Boolean read FCanceled write FCanceled;
   end;
 
   TOptixDownloadTask = class(TOptixTransferTask)
   public
     {@M}
-    procedure DownloadChunk(const AClient : TClientSocket);
-    procedure SetFileSize(const AValue : Int64);
+    procedure DownloadChunk(const AClient: TClientSocket);
+    procedure SetFileSize(const AValue: Int64);
 
     {@C}
-    constructor Create(const AFilePath : String); override;
+    constructor Create(const AFilePath: string); override;
   end;
 
   TOptixUploadTask = class(TOptixTransferTask)
   public
     {@M}
-    procedure UploadChunk(const AClient : TClientSocket);
+    procedure UploadChunk(const AClient: TClientSocket);
 
     {@C}
-    constructor Create(const AFilePath : String); override;
+    constructor Create(const AFilePath: string); override;
   end;
 
 implementation
@@ -138,31 +136,31 @@ uses
 
 (* TOptixTransferTask *)
 
-constructor TOptixTransferTask.Create(const AFilePath : String);
+constructor TOptixTransferTask.Create(const AFilePath: string);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FFileHandle := INVALID_HANDLE_VALUE;
-  FFileSize   := 0;
-  FWorkCount  := 0;
-  FIsEmpty    := False;
-  FCanceled   := False;
+  FFileSize := 0;
+  FWorkCount := 0;
+  FIsEmpty := False;
+  FCanceled := False;
 end;
 
-destructor TOptixTransferTask.Destroy();
+destructor TOptixTransferTask.Destroy;
 begin
   if FFileHandle <> INVALID_HANDLE_VALUE then
     CloseHandle(FFileHandle);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixTransferTask.IncWorkCount(const AValue : UInt64);
+procedure TOptixTransferTask.IncWorkCount(const AValue: UInt64);
 begin
   if FWorkCount = FFileSize then
-    Exit();
+    Exit;
 
   Inc(FWorkCount, AValue);
 
@@ -170,38 +168,38 @@ begin
     FWorkCount := FFileSize;
 end;
 
-function TOptixTransferTask.GetState() : TOptixTransferState;
+function TOptixTransferTask.GetState: TOptixTransferState;
 begin
   if FWorkCount = 0 then
-    result := otsBegin
+    Result := otsBegin
   else if FWorkCount = FFileSize then
-    result := otsEnd
+    Result := otsEnd
   else if FWorkCount < FFileSize then
-    result := otsProgress
+    Result := otsProgress
   else
-    result := otsError;
+    Result := otsError;
 end;
 
 (* TOptixDownloadTask *)
 
-procedure TOptixDownloadTask.DownloadChunk(const AClient : TClientSocket);
+procedure TOptixDownloadTask.DownloadChunk(const AClient: TClientSocket);
 begin
   if (FFileHandle = INVALID_HANDLE_VALUE) or (FFileSize = 0) or not Assigned(AClient) then
-    Exit(); // TODO: Log?
+    Exit; // TODO: Log?
 
   var ABufferSize := min(FILE_CHUNK_SIZE, (FFileSize - FWorkCount));
-  var ABytesWritten : DWORD;
+  var ABytesWritten: DWORD;
 
   AClient.Recv(FBuffer, ABufferSize);
 
   if not WriteFile(FFileHandle, FBuffer[0], ABufferSize, ABytesWritten, nil) then
-    Exit(); // TODO: raise exception and handle it
+    Exit; // TODO: raise exception and handle it
 
   ///
   IncWorkCount(ABufferSize);
 end;
 
-procedure TOptixDownloadTask.SetFileSize(const AValue : Int64);
+procedure TOptixDownloadTask.SetFileSize(const AValue: Int64);
 begin
   FIsEmpty := AValue = 0;
 
@@ -209,7 +207,7 @@ begin
   FFileSize := AValue;
 end;
 
-constructor TOptixDownloadTask.Create(const AFilePath : String);
+constructor TOptixDownloadTask.Create(const AFilePath: string);
 begin
   inherited Create(AFilePath);
   ///
@@ -222,23 +220,23 @@ end;
 
 (* TOptixUploadTask *)
 
-procedure TOptixUploadTask.UploadChunk(const AClient : TClientSocket);
+procedure TOptixUploadTask.UploadChunk(const AClient: TClientSocket);
 begin
   if (FFileHandle = INVALID_HANDLE_VALUE) or (FFileSize = 0) or not Assigned(AClient) then
-    Exit(); // TODO: Log?
+    Exit; // TODO: Log?
 
-  var ABytesRead : DWORD;
+  var ABytesRead: DWORD;
   var ABufferSize := min(FILE_CHUNK_SIZE, (FFileSize - FWorkCount));
 
   if not ReadFile(FFileHandle, FBuffer[0], ABufferSize, ABytesRead, nil) then
-    Exit(); // TODO: raise exception and handle it.
+    Exit; // TODO: raise exception and handle it.
 
   AClient.Send(FBuffer[0], ABufferSize);
 
   IncWorkCount(ABufferSize);
 end;
 
-constructor TOptixUploadTask.Create(const AFilePath : String);
+constructor TOptixUploadTask.Create(const AFilePath: string);
 begin
   inherited Create(AFilePath);
   ///

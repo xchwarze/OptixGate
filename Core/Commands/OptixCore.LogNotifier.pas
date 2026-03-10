@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.LogNotifier;
 
 interface
@@ -70,78 +68,78 @@ type
   TOptixCommandReceiveLogMessage = class(TOptixCommand)
   private
     [OptixSerializableAttribute]
-    FMessage : String;
+    FMessage: string;
 
     [OptixSerializableAttribute]
-    FContext : String;
+    FContext: string;
 
     [OptixSerializableAttribute]
-    FKind : TLogKind;
+    FKind: TLogKind;
   protected
     {@M}
-    function GetDetailedMessage() : String; virtual;
+    function GetDetailedMessage: string; virtual;
   public
     {@C}
-    constructor Create(const AMessage : String; const AContext : String; const AKind : TLogKind); overload;
+    constructor Create(const AMessage: string; const AContext: string; const AKind: TLogKind); overload;
 
     {@G}
-    property Kind            : TLogKind read FKind;
-    property LogMessage      : String   read FMessage;
-    property DetailedMessage : String   read GetDetailedMessage;
-    property Context         : String   read FContext;
+    property Kind: TLogKind read FKind;
+    property LogMessage: string read FMessage;
+    property DetailedMessage: string read GetDetailedMessage;
+    property Context: string read FContext;
   end;
 
   TOptixCommandReceiveTransferException = class(TOptixCommandReceiveLogMessage)
   private
     [OptixSerializableAttribute]
-    FTransferId : TGUID;
+    FTransferId: TGUID;
   protected
     {@M}
-    function GetDetailedMessage() : String; override;
+    function GetDetailedMessage: string; override;
   public
     {@C}
-    constructor Create(const ATransferId : TGUID; const AMessage : String; const AContext : String = ''); overload;
+    constructor Create(const ATransferId: TGUID; const AMessage: string; const AContext: string = ''); overload;
 
     {@}
-    property TransferId : TGUID read FTransferId;
+    property TransferId: TGUID read FTransferId;
   end;
 
-  function LogKindToString(const AValue : TLogKind) : String;
+  function LogKindToString(const AValue: TLogKind): string;
 
 implementation
 
 (* TOptixCommandReceiveLogMessage *)
 
-constructor TOptixCommandReceiveLogMessage.Create(const AMessage : String; const AContext : String; const AKind : TLogKind);
+constructor TOptixCommandReceiveLogMessage.Create(const AMessage: string; const AContext: string; const AKind: TLogKind);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FKind    := AKind;
+  FKind := AKind;
   FMessage := AMessage;
   FContext := AContext;
 end;
 
-function TOptixCommandReceiveLogMessage.GetDetailedMessage() : String;
+function TOptixCommandReceiveLogMessage.GetDetailedMessage: string;
 begin
-  result := FMessage;
+  Result := FMessage;
 end;
 
 (* TLogKind *)
 
-function LogKindToString(const AValue : TLogKind) : String;
+function LogKindToString(const AValue: TLogKind): string;
 begin
   case AValue of
-    lkInformation : result := 'Information';
-    lkException   : result := 'Exception';
+    lkInformation: Result := 'Information';
+    lkException: Result := 'Exception';
     else
-      result := 'Unknown';
+      Result := 'Unknown';
   end;
 end;
 
 (* TOptixCommandReceiveTransferException *)
 
-constructor TOptixCommandReceiveTransferException.Create(const ATransferId : TGUID; const AMessage : String; const AContext : String = '');
+constructor TOptixCommandReceiveTransferException.Create(const ATransferId: TGUID; const AMessage: string; const AContext: string = '');
 begin
   inherited Create(AMessage, AContext, TLogKind.lkException);
   ///
@@ -149,9 +147,9 @@ begin
   FTransferId := ATransferId;
 end;
 
-function TOptixCommandReceiveTransferException.GetDetailedMessage() : String;
+function TOptixCommandReceiveTransferException.GetDetailedMessage: string;
 begin
-  result := Format('Transfer Id:[%s] %s', [
+  Result := Format('Transfer Id:[%s] %s', [
     FTransferId.ToString,
     FMessage
   ]);

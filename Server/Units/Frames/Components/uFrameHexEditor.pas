@@ -90,58 +90,58 @@ type
   private
     const
       MINIMUM_PAGE_SIZE = 1024;
-      DEFAULT_PAGESIZE  = MINIMUM_PAGE_SIZE * 8;
-      ROW_SIZE          = 16;
+      DEFAULT_PAGESIZE = MINIMUM_PAGE_SIZE * 8;
+      ROW_SIZE = 16;
 
     var
-      FPageSize              : UInt64;
-      FBuffer                : Pointer;
-      FTotalBufferSize       : UInt64;
-      FRealSize              : UInt64;
-      FOffsetBase            : UInt64;
+      FPageSize: UInt64;
+      FBuffer: Pointer;
+      FTotalBufferSize: UInt64;
+      FRealSize: UInt64;
+      FOffsetBase: UInt64;
 
-      FSelKind               : TGridSectionKind;
-      FSelStart              : Int64;
-      FSelEnd                : Int64;
+      FSelKind: TGridSectionKind;
+      FSelStart: Int64;
+      FSelEnd: Int64;
 
-      FEditHexCellPos        : Byte;
+      FEditHexCellPos: Byte;
 
-      FReadOnly              : Boolean;
-      FExpandable            : Boolean;
-      FSelectFirstCellOnInit : Boolean;
+      FReadOnly: Boolean;
+      FExpandable: Boolean;
+      FSelectFirstCellOnInit: Boolean;
 
     {@M}
-    procedure RefreshHexGrid();
-    procedure InitializeGridHeader();
-    procedure UnselectAll();
-    procedure UpdateSelection(const ASelStart : Int64);
-    procedure InvalidateNodes(const AFromSel : Int64; AToSel : Int64 = -1);
-    procedure InvalidateSelectedNodes();
-    function GetNodeByIndex(const AIndex : Int64) : PVirtualNode;
-    procedure UpdateRealSize(const AValue : Int64);
-    procedure IncRealSize();
-    procedure FreeBytesAndRelocate(const AFreeFrom : UInt64; AFreeTo : UInt64 = 0);
-    procedure SetPageSize(const AValue : UInt64);
+    procedure RefreshHexGrid;
+    procedure InitializeGridHeader;
+    procedure UnselectAll;
+    procedure UpdateSelection(const ASelStart: Int64);
+    procedure InvalidateNodes(const AFromSel: Int64; AToSel: Int64 = -1);
+    procedure InvalidateSelectedNodes;
+    function GetNodeByIndex(const AIndex: Int64): PVirtualNode;
+    procedure UpdateRealSize(const AValue: Int64);
+    procedure IncRealSize;
+    procedure FreeBytesAndRelocate(const AFreeFrom: UInt64; AFreeTo: UInt64 = 0);
+    procedure SetPageSize(const AValue: UInt64);
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     {@M}
-    procedure LoadData(const pData : Pointer; const ADataSize : UInt64; const AOffsetBase : UInt64 = 0;
-      const AReadOnly : Boolean = False);
+    procedure LoadData(const pData: Pointer; const ADataSize: UInt64; const AOffsetBase: UInt64 = 0;
+      const AReadOnly: Boolean = False);
 
-    procedure Clear();
+    procedure Clear;
 
     {@G}
-    property Data            : Pointer read FBuffer;
-    property DataSize        : UInt64  read FRealSize;
-    property TotalBufferSize : UInt64  read FTotalBufferSize;
+    property Data: Pointer read FBuffer;
+    property DataSize: UInt64 read FRealSize;
+    property TotalBufferSize: UInt64 read FTotalBufferSize;
   published
     {@G/S}
-    property Expandable            : Boolean read FExpandable            write FExpandable;
-    property SelectFirstCellOnInit : Boolean read FSelectFirstCellOnInit write FSelectFirstCellOnInit;
-    property PageSize              : UInt64  read FPageSize              write SetPageSize;
+    property Expandable: Boolean read FExpandable write FExpandable;
+    property SelectFirstCellOnInit: Boolean read FSelectFirstCellOnInit write FSelectFirstCellOnInit;
+    property PageSize: UInt64 read FPageSize write SetPageSize;
   end;
 
 implementation
@@ -156,11 +156,11 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 {$R *.dfm}
-procedure TFrameHexEditor.Clear();
+procedure TFrameHexEditor.Clear;
 begin
   FSelStart := -1;
-  FSelEnd   := -1;
-  FSelKind  := gskNone;
+  FSelEnd := -1;
+  FSelKind := gskNone;
 
   if not FReadOnly and Assigned(FBuffer) then begin
     FEditHexCellPos := 0;
@@ -173,29 +173,29 @@ begin
       FTotalBufferSize := FPageSize;
       FRealSize := 0;
 
-      RefreshHexGrid();
+      RefreshHexGrid;
     end;
   end;
 
   ///
-  VST.Refresh();
+  VST.Refresh;
 end;
-constructor TFrameHexEditor.Create(AOwner : TComponent);
+constructor TFrameHexEditor.Create(AOwner: TComponent);
 begin
   inherited;
   ///
 
-  InitializeGridHeader();
+  InitializeGridHeader;
 
   FReadOnly := False;
   FExpandable := True;
   FSelectFirstCellOnInit := True;
 
-  FPageSize        := DEFAULT_PAGESIZE;
+  FPageSize := DEFAULT_PAGESIZE;
   FTotalBufferSize := FPageSize;
-  FRealSize        := 0;
-  FEditHexCellPos  := 0;
-  FOffsetBase      := 0;
+  FRealSize := 0;
+  FEditHexCellPos := 0;
+  FOffsetBase := 0;
 
   GetMem(FBuffer, FPageSize);
   ZeroMemory(FBuffer, FPageSize);
@@ -203,7 +203,7 @@ begin
   FSelKind := gskNone;
 
   FSelStart := -1;
-  FSelEnd   := -1;
+  FSelEnd := -1;
 
   if FSelectFirstCellOnInit then begin
     Inc(FSelStart);
@@ -215,9 +215,9 @@ begin
   VST.Colors.GridLineColor := MAIN_GRAY;
 
   ///
-  RefreshHexGrid();
+  RefreshHexGrid;
 end;
-destructor TFrameHexEditor.Destroy();
+destructor TFrameHexEditor.Destroy;
 begin
   if Assigned(FBuffer) then
     FreeMem(FBuffer, FTotalBufferSize);
@@ -229,9 +229,9 @@ end;
 procedure TFrameHexEditor.VSTNodeClick(Sender: TBaseVirtualTree; const HitInfo: THitInfo);
 begin
   if not (HitInfo.HitColumn in [1..ROW_SIZE, ROW_SIZE +1..(ROW_SIZE * 2) +1]) or not Assigned(HitInfo.HitNode) then
-    Exit();
+    Exit;
 
-  var AByteIndex : Byte;
+  var AByteIndex: Byte;
   if HitInfo.HitColumn in [1..ROW_SIZE] then begin
     AByteIndex := HitInfo.HitColumn -1;
 
@@ -253,13 +253,13 @@ procedure TFrameHexEditor.VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCan
 begin
   var AColor := clNone;
 
-  var AByteIndex : Integer := -1;
+  var AByteIndex: Integer := -1;
   var AGridSectionKind := gskNone;
 
   case Column of
-    0 : AColor := RGB(220, 220, 220);
+    0: AColor := RGB(220, 220, 220);
 
-    1..ROW_SIZE : begin
+    1..ROW_SIZE: begin
       AByteIndex := Column - 1;
 
       AGridSectionKind := gskHex;
@@ -268,7 +268,7 @@ begin
         AColor := RGB(240, 240, 240);
     end;
 
-    ROW_SIZE +1..(ROW_SIZE * 2) +1 : begin
+    ROW_SIZE +1..(ROW_SIZE * 2) +1: begin
       AGridSectionKind := gskAscii;
 
       AByteIndex := Column - (ROW_SIZE +1);
@@ -276,7 +276,7 @@ begin
   end;
 
   if AByteIndex >= 0 then begin
-    var ABufferPos : Int64 := (Integer(Node.Index) * ROW_SIZE) + AByteIndex;
+    var ABufferPos: Int64 := (Integer(Node.Index) * ROW_SIZE) + AByteIndex;
     if (ABufferPos >= FSelStart) and (ABufferPos <= FSelEnd) then begin
       if AGridSectionKind = FSelKind then
         AColor := COLOR_LIST_DARKER_BLUE
@@ -303,28 +303,28 @@ begin
   ///
 
   if not Assigned(FBuffer) or (FRealSize <= 0) then
-    Exit();
+    Exit;
   ///
 
   var pRowOffset := PByte(NativeUInt(FBuffer) + (Node.Index * ROW_SIZE));
 
   case Column of
     // Offset
-    0 : begin
+    0: begin
       var AOffset := FOffsetBase + (Node.Index * ROW_SIZE);
       var AWidth := IfThen(AOffset > High(Cardinal), 16, 8);
       CellText := IntToHex(AOffset, AWidth);
     end;
 
     // Hex
-    1..ROW_SIZE : begin
+    1..ROW_SIZE: begin
       var pColumnOffset := PByte(NativeUInt(pRowOffset) + Cardinal(Column -1));
       if NativeUInt(pColumnOffset) < NativeUInt(FBuffer) + FRealSize then
         CellText := IntToHex(pColumnOffset^);
     end;
 
     // Ascii
-    ROW_SIZE +1..(ROW_SIZE * 2) +1 : begin
+    ROW_SIZE +1..(ROW_SIZE * 2) +1: begin
       var pColumnOffset := PByte(NativeUInt(pRowOffset) + Cardinal(Column - (ROW_SIZE +1)));
       if NativeUInt(pColumnOffset) < NativeUInt(FBuffer) + FRealSize then begin
         var AByte := PByte(NativeUInt(pRowOffset) + Cardinal(Column - (ROW_SIZE +1)))^;
@@ -340,33 +340,33 @@ end;
 procedure TFrameHexEditor.VSTKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    VK_LEFT   : UpdateSelection(FSelStart -1);
-    VK_UP     : UpdateSelection(FSelStart - ROW_SIZE);
-    VK_RIGHT  : UpdateSelection(FSelStart +1);
-    VK_DOWN   : UpdateSelection(FSelStart + ROW_SIZE);
-    VK_RETURN : UpdateSelection(FSelStart+1);
-    VK_END    : ; // TODO
-    VK_HOME   : ; // TODO
+    VK_LEFT: UpdateSelection(FSelStart -1);
+    VK_UP: UpdateSelection(FSelStart - ROW_SIZE);
+    VK_RIGHT: UpdateSelection(FSelStart +1);
+    VK_DOWN: UpdateSelection(FSelStart + ROW_SIZE);
+    VK_RETURN: UpdateSelection(FSelStart+1);
+    VK_END: ; // TODO
+    VK_HOME: ; // TODO
   end;
 
   if FReadOnly or (FSelStart < 0) then
-    Exit();
+    Exit;
   ///
 
   case Key of
-    VK_BACK : begin
+    VK_BACK: begin
       if FSelStart > 0 then
         FreeBytesAndRelocate(FSelStart-1);
     end;
 
-    VK_DELETE : FreeBytesAndRelocate(FSelStart);
+    VK_DELETE: FreeBytesAndRelocate(FSelStart);
   end;
 end;
 
 procedure TFrameHexEditor.VSTKeyPress(Sender: TObject; var Key: Char);
 begin
   if FReadOnly then
-    Exit();
+    Exit;
   ///
 
   const HEX_CANDIDATES = ['a'..'f', 'A'..'F', '0'..'9'];
@@ -376,13 +376,13 @@ begin
   var AIsHex := (FSelKind = gskHex) and CharInSet(Key, HEX_CANDIDATES);
   var AIsAscii := (FSelKind = gskAscii) and CharInSet(Key, ASCII_CANDIDATES);
   if (FSelStart < 0) or (not AIsHex and not AIsAscii) then
-    Exit();
+    Exit;
   ///
 
   var ptrByte := PByte(NativeUInt(FBuffer) + UInt64(FSelStart));
 
   if (FSelStart >= FRealSize) and FExpandable then
-    IncRealSize(); // Initialize new cell
+    IncRealSize; // Initialize new cell
 
   // Hex Values (On Hex Columns)
   if AIsHex then begin
@@ -394,7 +394,7 @@ begin
       else
         ptrByte^ := (ptrByte^ and $F0) or (StrToInt('$' + Key) and $0F);
 
-      InvalidateSelectedNodes();
+      InvalidateSelectedNodes;
 
       if FEditHexCellPos = 2 then begin
         UpdateSelection(FSelStart+1);
@@ -411,27 +411,27 @@ begin
   end;
 end;
 
-procedure TFrameHexEditor.InitializeGridHeader();
+procedure TFrameHexEditor.InitializeGridHeader;
 begin
   VST.NodeAlignment := naProportional;
-  VST.TextMargin    := 0;
+  VST.TextMargin := 0;
   ///
 
   var AColumns := VST.Header.Columns;
-  AColumns.Clear();
+  AColumns.Clear;
   ///
 
   // Offset
   with AColumns.Add do begin
-    Text      := 'Offset (h)';
-    Width     := ScaleValue(150);
+    Text := 'Offset (h)';
+    Width := ScaleValue(150);
     Alignment := taCenter;
   end;
 
   // Hex
   for var I := 0 to ROW_SIZE-1 do begin
     with AColumns.Add do begin
-      Text  := IntToHex(I, 2);
+      Text := IntToHex(I, 2);
       Width := ScaleValue(20);
     end;
   end;
@@ -439,10 +439,10 @@ begin
   // Ascii
   for var I := 0 to ROW_SIZE-1 do begin
     with AColumns.Add do begin
-      Text    := '';
-      Width   := ScaleValue(15);
+      Text := '';
+      Width := ScaleValue(15);
       Spacing := 0;
-      Margin  := 0;
+      Margin := 0;
 
       ///
       if I = 0 then
@@ -451,40 +451,40 @@ begin
   end;
 end;
 
-procedure TFrameHexEditor.RefreshHexGrid();
+procedure TFrameHexEditor.RefreshHexGrid;
 begin
   var ARowCount := Cardinal(ceil((FRealSize +1) / ROW_SIZE));
   ///
 
   if ARowCount = VST.RootNodeCount then
-    Exit();
+    Exit;
   ///
 
   VST.RootNodeCount := ARowCount;
 end;
 
-function TFrameHexEditor.GetNodeByIndex(const AIndex : Int64) : PVirtualNode;
+function TFrameHexEditor.GetNodeByIndex(const AIndex: Int64): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     if pNode.Index = AIndex then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-procedure TFrameHexEditor.InvalidateNodes(const AFromSel : Int64; AToSel : Int64 = -1);
+procedure TFrameHexEditor.InvalidateNodes(const AFromSel: Int64; AToSel: Int64 = -1);
 begin
   if AToSel = -1 then
     AToSel := AFromSel;
   ///
 
   var AFromIndex := AFromSel div ROW_SIZE;
-  var AToIndex   := AToSel div ROW_SIZE;
+  var AToIndex := AToSel div ROW_SIZE;
 
   for var pNode in VST.Nodes do begin
     if (pNode.Index >= AFromIndex) and (pNode.Index <= AToIndex) then
@@ -494,31 +494,31 @@ begin
   end;
 end;
 
-procedure TFrameHexEditor.InvalidateSelectedNodes();
+procedure TFrameHexEditor.InvalidateSelectedNodes;
 begin
   if FSelStart >= 0 then
     InvalidateNodes(FSelStart, FSelEnd);
 end;
 
-procedure TFrameHexEditor.UnselectAll();
+procedure TFrameHexEditor.UnselectAll;
 begin
   InvalidateNodes(FSelStart, FSelEnd);
   ///
 
   FSelStart := -1;
-  FSelEnd   := -1;
+  FSelEnd := -1;
 end;
 
-procedure TFrameHexEditor.FreeBytesAndRelocate(const AFreeFrom : UInt64; AFreeTo : UInt64 = 0);
+procedure TFrameHexEditor.FreeBytesAndRelocate(const AFreeFrom: UInt64; AFreeTo: UInt64 = 0);
 begin
   if FReadOnly or (AFreeFrom < 0) then
-    Exit();
+    Exit;
 
   if AFreeTo <= 0 then
     AFreeTo := AFreeFrom +1;
 
   if AFreeTo > FRealSize then
-    Exit();
+    Exit;
 
   MoveMemory(
     Pointer(NativeUInt(FBuffer) + AFreeFrom),
@@ -533,13 +533,13 @@ begin
   ///
   InvalidateNodes(AFreeFrom, FRealSize);
   UpdateSelection(AFreeFrom);
-  RefreshHexGrid();
+  RefreshHexGrid;
 end;
 
-procedure TFrameHexEditor.UpdateRealSize(const AValue : Int64);
+procedure TFrameHexEditor.UpdateRealSize(const AValue: Int64);
 begin
   if FReadOnly or (not FExpandable and (AValue > FTotalBufferSize)) or (AValue = FRealSize) then
-    Exit();
+    Exit;
 
   if FRealSize +1 > FTotalBufferSize then begin
     Inc(FTotalBufferSize, FPageSize);
@@ -550,18 +550,18 @@ begin
 
   FRealSize := AValue;
 
-  RefreshHexGrid();
+  RefreshHexGrid;
 end;
 
-procedure TFrameHexEditor.IncRealSize();
+procedure TFrameHexEditor.IncRealSize;
 begin
   UpdateRealSize(FRealSize +1);
 end;
 
-procedure TFrameHexEditor.UpdateSelection(const ASelStart : Int64);
+procedure TFrameHexEditor.UpdateSelection(const ASelStart: Int64);
 begin
   if (ASelStart <> FSelStart) and (ASelStart >= 0) and (ASelStart < FRealSize +1) then begin
-    UnselectAll();
+    UnselectAll;
     ///
 
     FEditHexCellPos := 0;
@@ -576,11 +576,11 @@ begin
   end;
 end;
 
-procedure TFrameHexEditor.LoadData(const pData : Pointer; const ADataSize : UInt64; const AOffsetBase : UInt64 = 0;
-  const AReadOnly : Boolean = False);
+procedure TFrameHexEditor.LoadData(const pData: Pointer; const ADataSize: UInt64; const AOffsetBase: UInt64 = 0;
+  const AReadOnly: Boolean = False);
 begin
   if not Assigned(pData) or (ADataSize = 0) then
-    Exit();
+    Exit;
   ///
 
   if ADataSize > FTotalBufferSize then begin
@@ -589,27 +589,27 @@ begin
     FTotalBufferSize := ADataSize;
   end;
 
-  FRealSize   := ADataSize;
+  FRealSize := ADataSize;
   FOffsetBase := AOffsetBase;
-  FReadOnly   := AReadOnly;
+  FReadOnly := AReadOnly;
 
   CopyMemory(FBuffer, pData, ADataSize);
   ZeroMemory(PByte(NativeUInt(FBuffer) + ADataSize), FTotalBufferSize - ADataSize);
 
   FEditHexCellPos := 0;
-  FSelStart       := -1;
-  FSelEnd         := -1;
+  FSelStart := -1;
+  FSelEnd := -1;
 
-  RefreshHexGrid();
+  RefreshHexGrid;
 
   ///
-  VST.Refresh();
+  VST.Refresh;
 end;
 
-procedure TFrameHexEditor.SetPageSize(const AValue : UInt64);
+procedure TFrameHexEditor.SetPageSize(const AValue: UInt64);
 begin
   if (FPageSize = AValue) then
-    Exit();
+    Exit;
 
   if AValue < MINIMUM_PAGE_SIZE then
     FPageSize := MINIMUM_PAGE_SIZE

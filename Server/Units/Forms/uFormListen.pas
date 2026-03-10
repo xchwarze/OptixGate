@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uFormListen;
 
 interface
@@ -98,13 +96,13 @@ type
     procedure ButtonCancelClick(Sender: TObject);
   private
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
+    constructor Create(AOwner: TComponent); override;
 
     {@M}
-    function GetServerConfiguration() : TServerConfiguration;
+    function GetServerConfiguration: TServerConfiguration;
   end;
 
 var
@@ -125,7 +123,7 @@ uses
 
 {$R *.dfm}
 
-function TFormListen.GetServerConfiguration() : TServerConfiguration;
+function TFormListen.GetServerConfiguration: TServerConfiguration;
 begin
   var APort := StrToInt(EditPort.Text);
   if APort < 0 then
@@ -134,35 +132,35 @@ begin
     APort := High(Word);
   ///
 
-  result.Address   := EditServerBindAddress.Text;
-  result.Port      := APort;
-  result.Version   := TIpVersion(ComboIpVersion.ItemIndex);
-  result.Debug     := False;
+  Result.Address := EditServerBindAddress.Text;
+  Result.Port := APort;
+  Result.Version := TIpVersion(ComboIpVersion.ItemIndex);
+  Result.Debug := False;
 
   if RadioBindCustom.Checked then
-    result.Address := EditServerBindAddress.Text
+    Result.Address := EditServerBindAddress.Text
   else begin
-    case result.Version of
-      ipv4 : begin
+    case Result.Version of
+      ipv4: begin
         if RadioBindLocal.Checked then
-          result.Address := '127.0.0.1'
+          Result.Address := '127.0.0.1'
         else
-          result.Address := '0.0.0.0';
+          Result.Address := '0.0.0.0';
       end;
 
-      ipv6 : begin
+      ipv6: begin
         if RadioBindLocal.checked then
-          result.Address := '::1'
+          Result.Address := '::1'
         else
-          result.Address := '::';
+          Result.Address := '::';
       end;
     end;
   end;
 
-  result.AutoStart := CheckBoxAutoStart.Checked;
+  Result.AutoStart := CheckBoxAutoStart.Checked;
 
   {$IFDEF USETLS}
-  result.CertificateFingerprint := ComboCertificate.Text;
+  Result.CertificateFingerprint := ComboCertificate.Text;
   {$ENDIF}
 end;
 
@@ -181,13 +179,13 @@ begin
   EditServerBindAddress.Enabled := False;
 end;
 
-procedure TFormListen.DoResize();
+procedure TFormListen.DoResize;
 begin
   ButtonConnect.Top := (PanelBottom.Height div 2) - (ButtonConnect.Height div 2);
-  ButtonCancel.Top  := ButtonConnect.Top;
+  ButtonCancel.Top := ButtonConnect.Top;
 
   ButtonConnect.Left := PanelBottom.Width - ButtonConnect.Width - 8;
-  ButtonCancel.Left  := ButtonConnect.Left - ButtonConnect.Width - 8;
+  ButtonCancel.Left := ButtonConnect.Left - ButtonConnect.Width - 8;
 
   var ANewHeight := PanelBottom.Height;
 
@@ -202,14 +200,14 @@ end;
 procedure TFormListen.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : ButtonConnectClick(ButtonConnect);
-    27 : ModalResult := mrCancel;
+    13: ButtonConnectClick(ButtonConnect);
+    27: ModalResult := mrCancel;
   end;
 end;
 
 procedure TFormListen.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormListen.FormCreate(Sender: TObject);
@@ -228,7 +226,7 @@ begin
   ComboCertificate.ItemIndex := 0;
   {$ENDIF}
 
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormListen.EditPortChange(Sender: TObject);
@@ -246,7 +244,7 @@ end;
 
 procedure TFormListen.ButtonConnectClick(Sender: TObject);
 begin
-  var AConfiguration := GetServerConfiguration();
+  var AConfiguration := GetServerConfiguration;
   ///
 
   var AErrorDialog := TOptixErrorDialog.Create(self);
@@ -263,29 +261,29 @@ begin
       );
 
     if AErrorDialog.ShowErrors then
-      Exit();
+      Exit;
   finally
-    FreeAndNil(AErrorDialog);
+    AErrorDialog.Free;
   end;
 
   ///
   ModalResult := mrOk;
 end;
 
-constructor TFormListen.Create(AOwner : TComponent);
+constructor TFormListen.Create(AOwner: TComponent);
 begin
   inherited;
   ///
 
   {$IFDEF USETLS}
-    ComboCertificate.Clear();
+    ComboCertificate.Clear;
 
-    var AFingerprints := FormCertificatesStore.GetCertificatesFingerprints();
+    var AFingerprints := FormCertificatesStore.GetCertificatesFingerprints;
     try
       for var AFingerprint in AFingerprints do
         ComboCertificate.Items.Add(AFingerprint);
     finally
-      FreeAndNil(AFingerprints);
+      AFingerprints.Free;
     end;
   {$ENDIF}
 end;

@@ -32,8 +32,7 @@ object ControlFormRegistryManager: TControlFormRegistryManager
     BorderBottom = 0
     Color = 13554645
     BorderColor = clBlack
-    ExplicitWidth = 527
-    ExplicitHeight = 279
+    ExplicitWidth = 547
     object OMultiPanel: TOMultiPanel
       AlignWithMargins = True
       Left = 4
@@ -61,8 +60,7 @@ object ControlFormRegistryManager: TControlFormRegistryManager
       SplitterHoverColor = clHighlight
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 519
-      ExplicitHeight = 246
+      ExplicitWidth = 539
       DesignSize = (
         529
         278)
@@ -123,6 +121,8 @@ object ControlFormRegistryManager: TControlFormRegistryManager
           OnGetNodeDataSize = VSTKeysGetNodeDataSize
           Touch.InteractiveGestures = [igPan, igPressAndTap]
           Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+          ExplicitWidth = 167
+          ExplicitHeight = 242
           Columns = <
             item
               Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus, coEditable, coStyleColor]
@@ -188,6 +188,8 @@ object ControlFormRegistryManager: TControlFormRegistryManager
           OnGetNodeDataSize = VSTValuesGetNodeDataSize
           Touch.InteractiveGestures = [igPan, igPressAndTap]
           Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+          ExplicitWidth = 341
+          ExplicitHeight = 242
           Columns = <
             item
               Position = 0

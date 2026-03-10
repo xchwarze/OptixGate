@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Interfaces;
 
 interface
@@ -60,18 +58,18 @@ uses
 
 type
   IOptixEnumerator = Interface(IInterface)
-    function Refresh() : Integer;
+    function Refresh: Integer;
 
-    procedure Clear();
+    procedure Clear;
   end;
 
   IOptixSerializable = Interface(IInterface)
-    function Serialize() : TJsonObject;
-    procedure DeSerialize(const ASerializedObject : TJsonObject);
+    function Serialize: TJsonObject;
+    procedure DeSerialize(const ASerializedObject: TJsonObject);
   end;
 
   IOptixAction = Interface(IInterface)
-    procedure DoAction();
+    procedure DoAction;
   End;
 
 implementation

@@ -80,7 +80,6 @@ object FormAbout: TFormAbout
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 0
-      ExplicitHeight = 212
     end
   end
   object ImageCollection: TImageCollection

@@ -63,7 +63,7 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
         AlignWithMargins = True
         Left = 4
         Top = 4
-        Width = 449
+        Width = 31
         Height = 13
         Margins.Left = 0
         Margins.Top = 0
@@ -71,7 +71,6 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
         Margins.Bottom = 4
         Align = alTop
         Caption = 'Name:'
-        ExplicitWidth = 31
       end
       object EditName: TFlatEdit
         Left = 4
@@ -123,7 +122,7 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             AlignWithMargins = True
             Left = 4
             Top = 4
-            Width = 449
+            Width = 30
             Height = 13
             Margins.Left = 0
             Margins.Top = 0
@@ -131,7 +130,6 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             Margins.Bottom = 4
             Align = alTop
             Caption = 'Value:'
-            ExplicitWidth = 30
           end
           object EditSZ: TFlatEdit
             Left = 4
@@ -176,7 +174,7 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             AlignWithMargins = True
             Left = 4
             Top = 4
-            Width = 449
+            Width = 30
             Height = 13
             Margins.Left = 0
             Margins.Top = 0
@@ -184,7 +182,6 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             Margins.Bottom = 4
             Align = alTop
             Caption = 'Value:'
-            ExplicitWidth = 30
           end
           object PanelRichMSZ: TFlatPanel
             AlignWithMargins = True
@@ -238,6 +235,8 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
         Left = 0
         Top = 0
         Caption = 'DQWord'
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object PanelQDword: TPanel
           Left = 0
           Top = 0
@@ -256,7 +255,7 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             AlignWithMargins = True
             Left = 4
             Top = 4
-            Width = 449
+            Width = 30
             Height = 13
             Margins.Left = 0
             Margins.Top = 0
@@ -264,7 +263,6 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
             Margins.Bottom = 4
             Align = alTop
             Caption = 'Value:'
-            ExplicitWidth = 30
           end
           object EditQDword: TFlatEdit
             Left = 4
@@ -353,6 +351,8 @@ object ControlFormRegistryEditor: TControlFormRegistryEditor
         Left = 0
         Top = 0
         Caption = 'Binary'
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object PanelBinary: TPanel
           Left = 0
           Top = 0

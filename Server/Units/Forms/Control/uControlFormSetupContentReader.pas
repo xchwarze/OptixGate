@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormSetupContentReader;
 
 interface
@@ -85,7 +83,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     { Public declarations }
   end;
@@ -104,12 +102,12 @@ uses
 
 procedure TControlFormSetupContentReader.ButtonCancelClick(Sender: TObject);
 begin
-  Close();
+  Close;
 end;
 
 procedure TControlFormSetupContentReader.ButtonStartClick(Sender: TObject);
 begin
-  if String.IsNullOrWhiteSpace(EditPath.Text) then begin
+  if string.IsNullOrWhiteSpace(EditPath.Text) then begin
     EditPath.SetFocus;
 
     ///
@@ -125,16 +123,16 @@ begin
   StreamFileContent(EditPath.Text, APageSize);
 
   ///
-  Close();
+  Close;
 end;
 
-procedure TControlFormSetupContentReader.DoResize();
+procedure TControlFormSetupContentReader.DoResize;
 begin
   ButtonStart.Top := (PanelBottom.Height div 2) - (ButtonStart.Height div 2);
-  ButtonCancel.Top  := ButtonStart.Top;
+  ButtonCancel.Top := ButtonStart.Top;
 
   ButtonStart.Left := PanelBottom.Width - ButtonStart.Width - ScaleValue(8);
-  ButtonCancel.Left  := ButtonStart.Left - ButtonStart.Width - ScaleValue(4);
+  ButtonCancel.Left := ButtonStart.Left - ButtonStart.Width - ScaleValue(4);
 
   ClientHeight := PanelMain.Top + EditPageSize.Top + EditPageSize.Height + ScaleValue(16) + PanelBottom.Height;
 end;
@@ -157,21 +155,21 @@ end;
 procedure TControlFormSetupContentReader.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : ButtonStartClick(ButtonStart);
-    27 : ButtonCancelClick(ButtonCancel);
+    13: ButtonStartClick(ButtonStart);
+    27: ButtonCancelClick(ButtonCancel);
   end;
 end;
 
 procedure TControlFormSetupContentReader.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TControlFormSetupContentReader.FormShow(Sender: TObject);
 begin
   EditPath.SetFocus;
 
-  DoResize();
+  DoResize;
 end;
 
 end.

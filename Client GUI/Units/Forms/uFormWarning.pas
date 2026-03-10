@@ -87,13 +87,13 @@ type
     procedure ButtonAcceptTheRiskClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FValidated : Boolean;
+    FValidated: Boolean;
 
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     {@G}
-    property Validated : Boolean read FValidated;
+    property Validated: Boolean read FValidated;
   end;
 
 var
@@ -110,31 +110,30 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 {$R *.dfm}
-{$R control_agreement.res}
 
-procedure TFormWarning.DoResize();
+procedure TFormWarning.DoResize;
 begin
   ButtonAcceptTheRisk.Left := PanelFooter.Width - ButtonAcceptTheRisk.Width - ScaleValue(8);
-  ButtonCancel.Left        := ButtonAcceptTheRisk.Left - ButtonAcceptTheRisk.Width - ScaleValue(4);
+  ButtonCancel.Left := ButtonAcceptTheRisk.Left - ButtonAcceptTheRisk.Width - ScaleValue(4);
 
-  ButtonAcceptTheRisk.Top  := (PanelFooter.Height div 2) - (ButtonAcceptTheRisk.Height div 2);
-  ButtonCancel.Top         := ButtonAcceptTheRisk.Top;
+  ButtonAcceptTheRisk.Top := (PanelFooter.Height div 2) - (ButtonAcceptTheRisk.Height div 2);
+  ButtonCancel.Top := ButtonAcceptTheRisk.Top;
 
   LabelAccept.Top := (PanelAcceptSentence.Height div 2) - ((LabelAccept.Height + EditAccept.Height + ScaleValue(4)) div 2);
-  EditAccept.Top  := LabelAccept.Top + LabelAccept.Height + ScaleValue(4);
+  EditAccept.Top := LabelAccept.Top + LabelAccept.Height + ScaleValue(4);
 
   LabelAccept.Left := ScaleValue(8);
-  EditAccept.Left  := LabelAccept.Left;
+  EditAccept.Left := LabelAccept.Left;
 
   EditAccept.Width := PanelAcceptSentence.Width - (ScaleValue(8) * 2);
 end;
 
 procedure TFormWarning.ButtonAcceptTheRiskClick(Sender: TObject);
 begin
-  if String.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0 then begin
+  if string.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0 then begin
     FValidated := True;
 
-    Close();
+    Close;
   end;
 end;
 
@@ -152,17 +151,17 @@ procedure TFormWarning.FormCreate(Sender: TObject);
 begin
   FValidated := False;
 
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormWarning.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormWarning.FormShow(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
   ///
   try
     RichAgreement.Text := TOptixHelper.ReadResourceString('CONTROL_AGREEMENT');
@@ -187,18 +186,18 @@ end;
 
 procedure TFormWarning.TimerTimer(Sender: TObject);
 begin
-  ButtonAcceptTheRisk.Enabled := String.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0;
+  ButtonAcceptTheRisk.Enabled := string.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0;
 
   ///
 
   if PanelAcceptSentence.Visible then
-    Exit();
+    Exit;
 
-  var AScrollInfo : TScrollInfo;
+  var AScrollInfo: TScrollInfo;
   AScrollInfo.cbSize := SizeOf(TScrollInfo);
   AScrollInfo.fMask := SIF_ALL;
 
-  var ASuccess : Boolean;
+  var ASuccess: Boolean;
 
   if GetScrollInfo(RichAgreement.Handle, SB_VERT, AScrollInfo) then
     ASuccess := AScrollInfo.nPos + Integer(AScrollInfo.nPage) >= AScrollInfo.nMax

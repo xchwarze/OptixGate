@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uFormTrustedCertificates;
 
 interface
@@ -67,7 +65,7 @@ uses
 
 type
   TTreeData = record
-    Fingerprint : String;
+    Fingerprint: string;
   end;
   PTreeData = ^TTreeData;
 
@@ -93,19 +91,20 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure AddFingerprint1Click(Sender: TObject);
+    procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    function GetNodeByFingerprint(const AFingerprint : String) : PVirtualNode;
-    procedure AddTrustedCertificate(const AFingerprint : String);
-    function GetTrustedCertificateCount() : Integer;
-    procedure Save();
-    procedure Load();
+    function GetNodeByFingerprint(const AFingerprint: string): PVirtualNode;
+    procedure AddTrustedCertificate(const AFingerprint: string);
+    function GetTrustedCertificateCount: Integer;
+    procedure Save;
+    procedure Load;
   public
     {@M}
-    procedure OnVerifyPeerCertificate(Sender : TObject; const APeerFingerprint : String; var ASuccess : Boolean);
+    procedure OnVerifyPeerCertificate(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean);
 
     {@G}
-    property TrustedCertificateCount : Integer read GetTrustedCertificateCount;
+    property TrustedCertificateCount: Integer read GetTrustedCertificateCount;
   end;
 
 var
@@ -121,10 +120,10 @@ uses
 
 {$R *.dfm}
 
-procedure TFormTrustedCertificates.Save();
+procedure TFormTrustedCertificates.Save;
 begin
   try
-    var AConfig := TOptixConfigTrustedCertificateStore.Create();
+    var AConfig := TOptixConfigTrustedCertificateStore.Create;
     try
       for var pNode in VST.Nodes do begin
         var pData := PTreeData(pNode.GetData);
@@ -135,22 +134,22 @@ begin
       CONFIG_HELPER.Write('TrustedCertificates', AConfig);
 
       ///
-      FreeAndNil(AConfig);
+      AConfig.Free;
     end;
   except
   end;
 end;
 
-procedure TFormTrustedCertificates.Load();
+procedure TFormTrustedCertificates.Load;
 begin
-  VST.Clear();
+  VST.Clear;
   ///
 
   var AConfig := TOptixConfigTrustedCertificateStore(CONFIG_HELPER.Read('TrustedCertificates'));
   if not Assigned(AConfig) then
-    Exit();
+    Exit;
   try
-    VST.BeginUpdate();
+    VST.BeginUpdate;
     try
       for var AFingerprint in AConfig do begin
         if String.IsNullOrWhitespace(AFingerprint) then
@@ -160,42 +159,42 @@ begin
         AddTrustedCertificate(AFingerprint);
       end;
     finally
-      VST.EndUpdate();
+      VST.EndUpdate;
     end;
   finally
-    FreeAndNil(AConfig);
+    AConfig.Free;
   end;
 end;
 
-procedure TFormTrustedCertificates.OnVerifyPeerCertificate(Sender : TObject; const APeerFingerprint : String; var ASuccess : Boolean);
+procedure TFormTrustedCertificates.OnVerifyPeerCertificate(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean);
 begin
   {$IFDEF DEBUG}
-    ASuccess := String.Compare(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint, True) = 0;
+    ASuccess := string.Compare(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint, True) = 0;
     if ASuccess then
-      Exit();
+      Exit;
   {$ENDIF}
 
   ASuccess := GetNodeByFingerprint(APeerFingerprint) <> nil;
 end;
 
-function TFormTrustedCertificates.GetTrustedCertificateCount() : Integer;
+function TFormTrustedCertificates.GetTrustedCertificateCount: Integer;
 begin
-  result := VST.RootNodeCount;
+  Result := VST.RootNodeCount;
 end;
 
-function TFormTrustedCertificates.GetNodeByFingerprint(const AFingerprint : String) : PVirtualNode;
+function TFormTrustedCertificates.GetNodeByFingerprint(const AFingerprint: string): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if String.IsNullOrWhitespace(AFingerprint) then
-    Exit();
+    Exit;
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
-    if String.Compare(pData^.Fingerprint, AFingerprint, True) = 0 then begin
-      result := pNode;
+    if string.Compare(pData^.Fingerprint, AFingerprint, True) = 0 then begin
+      Result := pNode;
 
       break;
     end;
@@ -207,16 +206,16 @@ begin
   AddTrustedCertificate1Click(AddTrustedCertificate1);
 end;
 
-procedure TFormTrustedCertificates.AddTrustedCertificate(const AFingerprint : String);
+procedure TFormTrustedCertificates.AddTrustedCertificate(const AFingerprint: string);
 begin
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     var pNode := VST.AddChild(nil);
     var pData := PTreeData(pNode.GetData);
 
     pData^.Fingerprint := AFingerprint;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -225,7 +224,7 @@ begin
   var AFingerprint := '';
 
   if not InputQuery('Add Trusted Certificate', 'Please enter a valid SHA-512 certificate fingerprint:', AFingerprint) then
-    Exit();
+    Exit;
 
   TOptixHelper.CheckCertificateFingerprint(AFingerprint);
 
@@ -234,17 +233,17 @@ end;
 
 procedure TFormTrustedCertificates.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Save();
+  Save;
 end;
 
 procedure TFormTrustedCertificates.FormCreate(Sender: TObject);
 begin
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
   {$ENDIF}
 
-  Load();
+  Load;
 end;
 
 procedure TFormTrustedCertificates.PopupMenuPopup(Sender: TObject);
@@ -255,13 +254,13 @@ end;
 procedure TFormTrustedCertificates.Remove1Click(Sender: TObject);
 begin
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     VST.DeleteNode(VST.FocusedNode);
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -276,19 +275,26 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.Fingerprint, pData2^.Fingerprint);
+      0: Result := CompareText(pData1^.Fingerprint, pData2^.Fingerprint);
     end;
   end;
+end;
+
+procedure TFormTrustedCertificates.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
 end;
 
 procedure TFormTrustedCertificates.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
   Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if Column <> 0 then
-    Exit();
+    Exit;
 
   case Kind of
-    TVTImageKind.ikNormal, TVTImageKind.ikSelected :
+    TVTImageKind.ikNormal, TVTImageKind.ikSelected: 
       ImageIndex := IMAGE_LOCK;
   end;
 end;
@@ -307,7 +313,7 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := pData^.Fingerprint;
+      0: CellText := pData^.Fingerprint;
     end;
   end;
 

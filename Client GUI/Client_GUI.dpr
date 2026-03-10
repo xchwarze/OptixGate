@@ -53,32 +53,40 @@ uses
   Winapi.Windows,
   System.SysUtils,
   Vcl.Forms,
-  Vcl.Themes,
-  Vcl.Styles,
   OptixCore.Exceptions in '..\Core\OptixCore.Exceptions.pas',
   OptixCore.Sockets.Helper in '..\Core\Network\OptixCore.Sockets.Helper.pas',
-  OptixCore.Protocol.Packet in '..\Core\Network\OptixCore.Protocol.Packet.pas',
   OptixCore.Sockets.Exceptions in '..\Core\Network\OptixCore.Sockets.Exceptions.pas',
-  OptixCore.Commands in '..\Core\Commands\OptixCore.Commands.pas',
   OptixCore.Interfaces in '..\Core\OptixCore.Interfaces.pas',
   OptixCore.Thread in '..\Core\OptixCore.Thread.pas',
-  OptixCore.Protocol.Client.Handler in '..\Core\Network\OptixCore.Protocol.Client.Handler.pas',
-  OptixCore.System.InformationGathering in '..\Core\System\OptixCore.System.InformationGathering.pas',
-  OptixCore.System.Process in '..\Core\System\OptixCore.System.Process.pas',
-  OptixCore.SessionInformation in '..\Core\Commands\OptixCore.SessionInformation.pas',
-  Optix.Protocol.SessionHandler in 'Units\Threads\Optix.Protocol.SessionHandler.pas',
-  Optix.Protocol.Client in 'Units\Threads\Optix.Protocol.Client.pas',
-  OptixCore.WinApiEx in '..\Core\OptixCore.WinApiEx.pas',
-  OptixCore.System.Helper in '..\Core\System\OptixCore.System.Helper.pas',
   OptixCore.Types in '..\Core\OptixCore.Types.pas',
+  OptixCore.Helper in '..\Core\OptixCore.Helper.pas',
+  OptixCore.WinApiEx in '..\Core\OptixCore.WinApiEx.pas',
   OptixCore.LogNotifier in '..\Core\Commands\OptixCore.LogNotifier.pas',
   OptixCore.Classes in '..\Core\OptixCore.Classes.pas',
+  OptixCore.ClassesRegistry in '..\Core\OptixCore.ClassesRegistry.pas',
+  OptixCore.System.Helper in '..\Core\System\OptixCore.System.Helper.pas',
+  OptixCore.System.InformationGathering in '..\Core\System\OptixCore.System.InformationGathering.pas',
+  OptixCore.System.Process in '..\Core\System\OptixCore.System.Process.pas',
   OptixCore.System.FileSystem in '..\Core\System\OptixCore.System.FileSystem.pas',
+  OptixCore.System.Registry in '..\Core\System\OptixCore.System.Registry.pas',
+  OptixCore.Protocol.Packet in '..\Core\Network\OptixCore.Protocol.Packet.pas',
+  OptixCore.Protocol.Client.Handler in '..\Core\Network\OptixCore.Protocol.Client.Handler.pas',
   OptixCore.Protocol.Preflight in '..\Core\Network\OptixCore.Protocol.Preflight.pas',
   OptixCore.Protocol.Exceptions in '..\Core\Network\OptixCore.Protocol.Exceptions.pas',
-  Optix.Protocol.Worker.FileTransfer in 'Units\Threads\Optix.Protocol.Worker.FileTransfer.pas',
   OptixCore.Protocol.FileTransfer in '..\Core\Network\OptixCore.Protocol.FileTransfer.pas',
+  OptixCore.SessionInformation in '..\Core\Commands\OptixCore.SessionInformation.pas',
+  OptixCore.Commands in '..\Core\Commands\OptixCore.Commands.pas',
+  OptixCore.Commands.Base in '..\Core\Commands\OptixCore.Commands.Base.pas',
+  OptixCore.Commands.FileSystem in '..\Core\Commands\OptixCore.Commands.FileSystem.pas',
+  OptixCore.Commands.Process in '..\Core\Commands\OptixCore.Commands.Process.pas',
+  OptixCore.Commands.Shell in '..\Core\Commands\OptixCore.Commands.Shell.pas',
+  OptixCore.Commands.Registry in '..\Core\Commands\OptixCore.Commands.Registry.pas',
+  OptixCore.Commands.ContentReader in '..\Core\Commands\OptixCore.Commands.ContentReader.pas',
   OptixCore.Task.ProcessDump in '..\Core\Tasks\OptixCore.Task.ProcessDump.pas',
+  OptixCore.Task.FileOperations in '..\..\Public\Core\Tasks\OptixCore.Task.FileOperations.pas',
+  Optix.Protocol.SessionHandler in 'Units\Threads\Optix.Protocol.SessionHandler.pas',
+  Optix.Protocol.Client in 'Units\Threads\Optix.Protocol.Client.pas',
+  Optix.Protocol.Worker.FileTransfer in 'Units\Threads\Optix.Protocol.Worker.FileTransfer.pas',
   Optix.Actions.ProcessHandler in 'Units\Actions\Optix.Actions.ProcessHandler.pas',
   Optix.Helper in '..\Server\Units\Optix.Helper.pas',
   Optix.Constants in '..\Server\Units\Optix.Constants.pas',
@@ -87,57 +95,28 @@ uses
   uFormConnectToServer in 'Units\Forms\uFormConnectToServer.pas' {FormConnectToServer},
   uFormAbout in '..\Server\Units\Forms\uFormAbout.pas' {FormAbout},
   uFormDebugThreads in '..\Server\Units\Forms\uFormDebugThreads.pas' {FormDebugThreads},
-  OptixCore.Commands.Base in '..\Core\Commands\OptixCore.Commands.Base.pas',
-  OptixCore.ClassesRegistry in '..\Core\OptixCore.ClassesRegistry.pas',
-  OptixCore.Commands.FileSystem in '..\Core\Commands\OptixCore.Commands.FileSystem.pas',
-  OptixCore.Commands.Process in '..\Core\Commands\OptixCore.Commands.Process.pas',
-  OptixCore.Commands.Shell in '..\Core\Commands\OptixCore.Commands.Shell.pas',
-  OptixCore.Commands.Registry in '..\Core\Commands\OptixCore.Commands.Registry.pas',
-  OptixCore.System.Registry in '..\Core\System\OptixCore.System.Registry.pas',
-  OptixCore.Commands.ContentReader in '..\Core\Commands\OptixCore.Commands.ContentReader.pas',
-  OptixCore.Helper in '..\Core\OptixCore.Helper.pas',
   uFormWarning in 'Units\Forms\uFormWarning.pas' {FormWarning};
 
 {$R *.res}
-{$R ..\Server\data.res}
+
+{$I Includes\ExtraResourceFiles.inc}
 
 begin
-  IsMultiThread := True;
-  ///
+  {$I ..\Core\Includes\EntryPoint.inc}
 
-  {$IFNDEF CLIENT}
-  'The CLIENT compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT.'
-  {$ENDIF}
+  {$I Includes\ClientDirectiveCheck.inc}
 
-  {$IFNDEF CLIENT_GUI}
-  'The CLIENT_GUI compiler directive is missing from the project options. Please define it in the respective build '
-  'configuration by navigating to Project > Options > Delphi Compiler > Conditional defines, and adding CLIENT_GUI.'
-  {$ENDIF}
-  
-  var AUserUID := TOptixInformationGathering.GetUserUID();
-  var AMutex := CreateMutexW(nil, True, PWideChar(AUserUID.ToString));
-  if AMutex = 0 then
-    raise EWindowsException.Create('CreateMutexW');
-  try
-    if GetLastError() = ERROR_ALREADY_EXISTS then
-      Exit();
-    ///
+  {$I Includes\ClientGUIDirectiveCheck.inc}
 
-    // Enable certain useful privileges (if possible)
-    TSystemHelper.TryNTSetPrivilege('SeDebugPrivilege', True);
-    TSystemHelper.TryNTSetPrivilege('SeTakeOwnershipPrivilege', True);
+  {$I Includes\EnableWinPrivilegesOnStartup.inc}
 
-    ///
+  Application.Initialize;
 
-    Application.Initialize;
-    Application.MainFormOnTaskbar := True;
-    Application.CreateForm(TFormMain, FormMain);
-    Application.CreateForm(TFormAbout, FormAbout);
-    Application.CreateForm(TFormDebugThreads, FormDebugThreads);
-  // Application.CreateForm(TFormConnectToServer, FormConnectToServer);
-    Application.Run;
-  finally
-    CloseHandle(AMutex);
-  end;
+  {$I ..\Core\Includes\ApplicationConfiguration.inc}
+
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormAbout, FormAbout);
+  Application.CreateForm(TFormDebugThreads, FormDebugThreads);
+
+  Application.Run;
 end.

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Classes;
 
 interface
@@ -69,42 +67,42 @@ type
       SEARCH_LIST_PATTERN = '(?:.*\.|^)(TObjectList|TList)<\s*(?:.*\.)?([A-Za-z_]\w*)\s*>';
   protected
     {@M}
-    procedure BeforeDeserialize(); virtual;
-    procedure DeSerialize(const ASerializedObject : TJsonObject); virtual;
-    procedure AfterCreate(); virtual;
+    procedure BeforeDeserialize; virtual;
+    procedure DeSerialize(const ASerializedObject: TJsonObject); virtual;
+    procedure AfterCreate; virtual;
   public
     {@M}
-    function Serialize() : TJsonObject; virtual;
+    function Serialize: TJsonObject; virtual;
 
     {@C}
-    constructor Create(); overload; virtual;
-    constructor Create(const ASerializedObject : TJsonObject); overload; virtual;
+    constructor Create; overload; virtual;
+    constructor Create(const ASerializedObject: TJsonObject); overload; virtual;
   end;
 
   TOptixMemoryObject = class
   private
-    FAddress    : Pointer;
-    FSize       : UInt64;
-    FOwnsMemory : Boolean;
+    FAddress: Pointer;
+    FSize: UInt64;
+    FOwnsMemory: Boolean;
 
     {@M}
-    procedure FreeMemory();
-    function GetAsBase64() : String;
-    function GetHasData() : Boolean;
+    procedure FreeMemory;
+    function GetAsBase64: string;
+    function GetHasData: Boolean;
   public
     {@C}
-    constructor Create(); overload;
-    procedure CopyFrom(const pCopyFromAddress : Pointer; const ASize : UInt64); overload;
-    procedure CopyFrom(const AOptixMemoryObject : TOptixMemoryObject); overload;
-    procedure Assign(const pMemoryAddress : Pointer; const ASize : UInt64);
-    constructor Create(const ABase64Data : String); overload;
-    destructor Destroy(); override;
+    constructor Create; overload;
+    procedure CopyFrom(const pCopyFromAddress: Pointer; const ASize: UInt64); overload;
+    procedure CopyFrom(const AOptixMemoryObject: TOptixMemoryObject); overload;
+    procedure Assign(const pMemoryAddress: Pointer; const ASize: UInt64);
+    constructor Create(const ABase64Data: string); overload;
+    destructor Destroy; override;
 
     {@G}
-    property HasData  : Boolean read GetHasData;
-    property Address  : Pointer read FAddress;
-    property Size     : UInt64  read FSize;
-    property ToBase64 : String  read GetAsBase64;
+    property HasData: Boolean read GetHasData;
+    property Address: Pointer read FAddress;
+    property Size: UInt64 read FSize;
+    property ToBase64: string read GetAsBase64;
   end;
 
 implementation
@@ -116,32 +114,32 @@ uses
   System.NetEncoding, System.Rtti, System.TypInfo, System.SysUtils, System.Hash, System.RegularExpressions;
 // ---------------------------------------------------------------------------------------------------------------------
 
-function TOptixSerializableObject.Serialize() : TJsonObject;
+function TOptixSerializableObject.Serialize: TJsonObject;
 begin
-  result := TJsonObject.Create();
+  Result := TJsonObject.Create;
   try
-    result.AddPair('META_CLASSNAME', ClassName);
+    Result.AddPair('META_CLASSNAME', ClassName);
 
-    var AContext := TRttiContext.Create();
+    var AContext := TRttiContext.Create;
     var AType := AContext.GetType(ClassType);
 
-    for var AField in AType.GetFields() do begin
-      for var AFieldAttribute in AField.GetAttributes() do begin
+    for var AField in AType.GetFields do begin
+      for var AFieldAttribute in AField.GetAttributes do begin
         if not (AFieldAttribute is OptixSerializableAttribute) then
           continue;
         ///
 
         case AField.FieldType.TypeKind of
           // Handle compatible records ---------------------------------------------------------------------------------
-          tkRecord : begin
+          tkRecord: begin
             // TGUID ---------------------------------------------------------------------------------------------------
             if AField.FieldType.Handle = TypeInfo(TGUID) then
-              result.AddPair(AField.Name, AField.GetValue(self).AsType<TGUID>.ToString());
+              Result.AddPair(AField.Name, AField.GetValue(self).AsType<TGUID>.ToString);
             // ---------------------------------------------------------------------------------------------------------
           end;
 
           // Objects ---------------------------------------------------------------------------------------------------
-          tkClass : begin
+          tkClass: begin
             var AFieldClass := AField.FieldType.AsInstance.MetaclassType;
             var AObject := AField.GetValue(self).AsObject;
             if not Assigned(AObject) then
@@ -153,80 +151,80 @@ begin
               var ASerializableObject := AObject as TOptixSerializableObject;
 
               ///
-              result.AddPair(AField.Name, ASerializableObject.Serialize());
+              Result.AddPair(AField.Name, ASerializableObject.Serialize);
             // Memory Object -------------------------------------------------------------------------------------------
             end else if AFieldClass.InheritsFrom(TOptixMemoryObject) then
-              result.AddPair(AField.Name, (AObject as TOptixMemoryObject).ToBase64)
+              Result.AddPair(AField.Name, (AObject as TOptixMemoryObject).ToBase64)
             else if TRegEx.Match(AFieldClass.ClassName, SEARCH_LIST_PATTERN).Success then begin
               var AToArrayMethod := AField.FieldType.GetMethod('ToArray');
               if not Assigned(AToArrayMethod) then
-                Exit();
+                Exit;
               ///
 
               var AInvokedMethod := AToArrayMethod.Invoke(AObject, []);
 
-              var AJsonArray := TJSONArray.Create();
+              var AJsonArray := TJSONArray.Create;
               try
                 for var I := 0 to AInvokedMethod.GetArrayLength -1 do begin
-                  var AItemObject := AInvokedMethod.GetArrayElement(I).AsObject();
+                  var AItemObject := AInvokedMethod.GetArrayElement(I).AsObject;
                   ///
 
                   if not Assigned(AItemObject) or not (AItemObject is TOptixSerializableObject) then
                     continue;
 
                   ///
-                  AJsonArray.AddElement(TOptixSerializableObject(AItemObject).Serialize())
+                  AJsonArray.AddElement(TOptixSerializableObject(AItemObject).Serialize)
                 end;
 
                 ///
-                result.AddPair(AField.Name, AJsonArray);
+                Result.AddPair(AField.Name, AJsonArray);
               except
-                FreeAndNil(AJsonArray);
+                AJsonArray.Free;
               end;
             end;
             // ---------------------------------------------------------------------------------------------------------
           end;
           // Sets ------------------------------------------------------------------------------------------------------
-          tkSet :
-            result.AddPair(
+          tkSet: 
+            Result.AddPair(
               AField.Name, SetToString(AField.FieldType.Handle, AField.GetValue(self).GetReferenceToRawData)
             );
           // Enum ------------------------------------------------------------------------------------------------------
-          tkEnumeration :
-            result.AddPair(AField.Name, AField.GetValue(self).AsOrdinal());
+          tkEnumeration: 
+            Result.AddPair(AField.Name, AField.GetValue(self).AsOrdinal);
           // Other Primitives ------------------------------------------------------------------------------------------
           tkInteger, tkInt64:
-            result.AddPair(AField.Name, AField.GetValue(Self).AsInt64);
+            Result.AddPair(AField.Name, AField.GetValue(Self).AsInt64);
 
           tkFloat:
-            result.AddPair(AField.Name, AField.GetValue(Self).AsExtended);
+            Result.AddPair(AField.Name, AField.GetValue(Self).AsExtended);
 
           tkChar, tkString, tkWChar, tkLString, tkWString, tkUString:
-            result.AddPair(AField.Name, AField.GetValue(Self).AsString);
+            Result.AddPair(AField.Name, AField.GetValue(Self).AsString);
           // -----------------------------------------------------------------------------------------------------------
         end;
       end;
     end;
   except
-    result.Free;
-    result := nil;
+    Result.Free;
+    Result := nil;
   end;
 end;
 
-procedure TOptixSerializableObject.BeforeDeserialize();
+procedure TOptixSerializableObject.BeforeDeserialize;
 begin
   ///
 end;
 
-procedure TOptixSerializableObject.DeSerialize(const ASerializedObject : TJsonObject);
+procedure TOptixSerializableObject.DeSerialize(const ASerializedObject: TJsonObject);
 begin
   if not Assigned(ASerializedObject) then
     Exit;
   ///
 
-  BeforeDeserialize();
+  BeforeDeserialize;
 
-  var AContext := TRttiContext.Create();
+  var AContext := TRttiContext.Create;
   var AType := AContext.GetType(ClassType);
 
   for var APair in ASerializedObject do begin
@@ -239,7 +237,7 @@ begin
 
     case AField.FieldType.TypeKind of
       // Handle compatible records -------------------------------------------------------------------------------------
-      tkRecord : begin
+      tkRecord: begin
         // TGUID -------------------------------------------------------------------------------------------------------
         if AField.FieldType.Handle = TypeInfo(TGUID) then
           AField.SetValue(Self, TValue.From<TGUID>(StringToGUID(AJsonValue.Value)));
@@ -247,7 +245,7 @@ begin
       end;
 
       // Objects -------------------------------------------------------------------------------------------------------
-      tkClass : begin
+      tkClass: begin
         var AFieldClass := AField.FieldType.AsInstance.MetaclassType;
         var AObject := AField.GetValue(self).AsObject;
         ///
@@ -277,12 +275,12 @@ begin
 
           var AJsonArray := AJsonValue as TJSONArray;
 
-          // Trick to get <TObjectKind> class from the list using its first argument ("Add() method")
+          // Trick to get <TObjectKind> class from the list using its first argument ("Add method")
           var AItemType := AAddMethod.GetParameters[0].ParamType;
           var AItemClass := AItemType.AsInstance.MetaclassType;
 
           for var I := 0 to AJsonArray.Count -1 do begin
-            var AItem := AItemClass.Create();
+            var AItem := AItemClass.Create;
             if not (AItem is TOptixSerializableObject) then begin
               FreeAndNil(AItem);
 
@@ -309,7 +307,7 @@ begin
         AField.SetValue(Self, AJsonValue.Value);
 
       // Enums ---------------------------------------------------------------------------------------------------------
-      tkEnumeration : begin
+      tkEnumeration: begin
         var ATypeData := GetTypeData(AField.FieldType.Handle);
         var AIntegerValue := AJsonValue.AsType<Integer>;
         ///
@@ -319,7 +317,7 @@ begin
       end;
 
       // Sets ----------------------------------------------------------------------------------------------------------
-      tkSet :
+      tkSet: 
         try
           StringToSet(AField.FieldType.Handle, AJsonValue.Value, Pointer(NativeUInt(Self) + NativeUInt(AField.Offset)));
         except
@@ -329,22 +327,22 @@ begin
   end;
 end;
 
-procedure TOptixSerializableObject.AfterCreate();
+procedure TOptixSerializableObject.AfterCreate;
 begin
   ///
 end;
 
-constructor TOptixSerializableObject.Create();
+constructor TOptixSerializableObject.Create;
 begin
   inherited;
   ///
 
-  AfterCreate();
+  AfterCreate;
 end;
 
-constructor TOptixSerializableObject.Create(const ASerializedObject : TJsonObject);
+constructor TOptixSerializableObject.Create(const ASerializedObject: TJsonObject);
 begin
-  Create();
+  Create;
   ///
 
   if Assigned(ASerializedObject) then
@@ -353,17 +351,17 @@ end;
 
 (* TOptixMemoryObject *)
 
-constructor TOptixMemoryObject.Create();
+constructor TOptixMemoryObject.Create;
 begin
   inherited;
   ///
 
   FOwnsMemory := False;
 
-  FreeMemory();
+  FreeMemory;
 end;
 
-procedure TOptixMemoryObject.FreeMemory();
+procedure TOptixMemoryObject.FreeMemory;
 begin
   if FOwnsMemory and Assigned(FAddress) then
     FreeMem(FAddress, FSize);
@@ -373,14 +371,14 @@ begin
   FSize := 0;
 end;
 
-procedure TOptixMemoryObject.CopyFrom(const pCopyFromAddress : Pointer; const ASize : UInt64);
+procedure TOptixMemoryObject.CopyFrom(const pCopyFromAddress: Pointer; const ASize: UInt64);
 begin
-  FreeMemory();
+  FreeMemory;
   FOwnsMemory := True;
   ///
 
   if ASize = 0 then
-    Exit();
+    Exit;
 
   FSize := ASize;
 
@@ -389,15 +387,15 @@ begin
   CopyMemory(FAddress, pCopyFromAddress, FSize);
 end;
 
-procedure TOptixMemoryObject.CopyFrom(const AOptixMemoryObject : TOptixMemoryObject);
+procedure TOptixMemoryObject.CopyFrom(const AOptixMemoryObject: TOptixMemoryObject);
 begin
   if Assigned(AOptixMemoryObject) then
     CopyFrom(AOptixMemoryObject.Address, AOptixMemoryObject.Size);
 end;
 
-procedure TOptixMemoryObject.Assign(const pMemoryAddress : Pointer; const ASize : UInt64);
+procedure TOptixMemoryObject.Assign(const pMemoryAddress: Pointer; const ASize: UInt64);
 begin
-  FreeMemory();
+  FreeMemory;
   FOwnsMemory := False;
   ///
 
@@ -405,15 +403,15 @@ begin
   FSize := ASize;
 end;
 
-function TOptixMemoryObject.GetHasData() : Boolean;
+function TOptixMemoryObject.GetHasData: Boolean;
 begin
-  result := Assigned(FAddress) and (FSize > 0);
+  Result := Assigned(FAddress) and (FSize > 0);
 end;
 
-constructor TOptixMemoryObject.Create(const ABase64Data : String);
+constructor TOptixMemoryObject.Create(const ABase64Data: string);
 begin
-  if String.IsNullOrWhiteSpace(ABase64Data) then
-    Create()
+  if string.IsNullOrWhiteSpace(ABase64Data) then
+    Create
   else begin
     var ABytes := TNetEncoding.Base64.DecodeStringToBytes(ABase64Data);
 
@@ -422,21 +420,21 @@ begin
   end;
 end;
 
-destructor TOptixMemoryObject.Destroy();
+destructor TOptixMemoryObject.Destroy;
 begin
-  FreeMemory();
+  FreeMemory;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-function TOptixMemoryObject.GetAsBase64() : String;
+function TOptixMemoryObject.GetAsBase64: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if Assigned(FAddress) and (FSize > 0) then
-    result := TNetEncoding.Base64.EncodeBytesToString(FAddress, FSize);
+    Result := TNetEncoding.Base64.EncodeBytesToString(FAddress, FSize);
 end;
 
 end.

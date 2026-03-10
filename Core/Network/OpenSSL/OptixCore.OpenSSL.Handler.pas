@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.OpenSSL.Handler;
 
 interface
@@ -63,27 +61,27 @@ uses
 type
   TOptixOpenSSLHandler = class
   private
-    FContext       : TOptixOpenSSLContext;
-    FSSLConnection : Pointer;
-    FSocketFd      : TSocket;
+    FContext: TOptixOpenSSLContext;
+    FSSLConnection: Pointer;
+    FSocketFd: TSocket;
 
     {@M}
-    procedure SSLFree();
-    function GetPeerCertificateFingerprint() : String;
+    procedure SSLFree;
+    function GetPeerCertificateFingerprint: string;
   public
     {@C}
-    constructor Create(AContext : TOptixOpenSSLContext; const ASocketFd : TSocket);
-    destructor Destroy(); override;
+    constructor Create(AContext: TOptixOpenSSLContext; const ASocketFd: TSocket);
+    destructor Destroy; override;
 
     {@M}
-    procedure Connect();
-    function IsDataPending() : Boolean;
-    function IsConnectionAlive() : Boolean;
-    procedure Send(const buf; const len : Integer);
-    procedure Recv(var buf; const len : Integer);
+    procedure Connect;
+    function IsDataPending: Boolean;
+    function IsConnectionAlive: Boolean;
+    procedure Send(const buf; const len: Integer);
+    procedure Recv(var buf; const len: Integer);
 
     {@G}
-    property PeerCertificateFingerprint : String read GetPeerCertificateFingerprint;
+    property PeerCertificateFingerprint: string read GetPeerCertificateFingerprint;
   end;
 
 implementation
@@ -97,26 +95,26 @@ uses
   OptixCore.OpenSSL.Exceptions, OptixCore.OpenSSL.Headers, OptixCore.OpenSSL.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
 
-constructor TOptixOpenSSLHandler.Create(AContext : TOptixOpenSSLContext; const ASocketFd : TSocket);
+constructor TOptixOpenSSLHandler.Create(AContext: TOptixOpenSSLContext; const ASocketFd: TSocket);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FContext  := AContext;
+  FContext := AContext;
   FSocketFd := ASocketFd;
 
   FSSLConnection := nil;
 end;
 
-destructor TOptixOpenSSLHandler.Destroy();
+destructor TOptixOpenSSLHandler.Destroy;
 begin
-  SSLFree();
+  SSLFree;
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TOptixOpenSSLHandler.SSLFree();
+procedure TOptixOpenSSLHandler.SSLFree;
 begin
   if Assigned(FSSLConnection) then begin
     SSL_free(FSSLConnection);
@@ -125,36 +123,36 @@ begin
   end;
 end;
 
-procedure TOptixOpenSSLHandler.Connect();
+procedure TOptixOpenSSLHandler.Connect;
 begin
   if not Assigned(FContext) or (FSocketFd = INVALID_SOCKET) then
-    Exit();
+    Exit;
   ///
 
   if Assigned(FSSLConnection) then
-    SSLFree();
+    SSLFree;
 
   FSSLConnection := SSL_new(FContext.Context);
   if not Assigned(FSSLConnection) then
-    raise EOpenSSLBaseException.Create();
+    raise EOpenSSLBaseException.Create;
 
   if SSL_set_fd(FSSLConnection, FSocketFd) <> 1 then
-    raise EOpenSSLBaseException.Create();
+    raise EOpenSSLBaseException.Create;
 
-  var AReturn : Integer;
+  var AReturn: Integer;
 
   case FContext.Method of
-    sslClient : AReturn := SSL_connect(FSSLConnection);
-    sslServer : AReturn := SSL_accept(FSSLConnection);
+    sslClient: AReturn := SSL_connect(FSSLConnection);
+    sslServer: AReturn := SSL_accept(FSSLConnection);
     else
-      Exit();
+      Exit;
   end;
 
   if AReturn <> 1 then
     raise EOpenSSLBaseException.Create.Create(FSSLConnection);
 end;
 
-procedure TOptixOpenSSLHandler.Send(const buf; const len : Integer);
+procedure TOptixOpenSSLHandler.Send(const buf; const len: Integer);
 begin
   while True do begin
     var AReturn := SSL_Write(FSSLConnection, buf, len);
@@ -163,7 +161,7 @@ begin
     ///
 
     case SSL_get_error(FSSLConnection, AReturn) of
-      SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE :
+      SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE: 
         continue;
 
       else
@@ -172,7 +170,7 @@ begin
   end;
 end;
 
-procedure TOptixOpenSSLHandler.Recv(var buf; const len : Integer);
+procedure TOptixOpenSSLHandler.Recv(var buf; const len: Integer);
 begin
   while True do begin
     var AReturn := SSL_Read(FSSLConnection, buf, len);
@@ -181,7 +179,7 @@ begin
     ///
 
     case SSL_get_error(FSSLConnection, AReturn) of
-      SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE :
+      SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE: 
         continue;
 
       else
@@ -190,38 +188,38 @@ begin
   end;
 end;
 
-function TOptixOpenSSLHandler.IsDataPending() : Boolean;
+function TOptixOpenSSLHandler.IsDataPending: Boolean;
 begin
-  result := SSL_pending(FSSLConnection) > 0;
+  Result := SSL_pending(FSSLConnection) > 0;
 end;
 
-function TOptixOpenSSLHandler.IsConnectionAlive() : Boolean;
+function TOptixOpenSSLHandler.IsConnectionAlive: Boolean;
 begin
-  var ADummyBuffer : array[0..0] of Byte;
+  var ADummyBuffer: array[0..0] of Byte;
 
   var AReturn := SSL_peek(FSSLConnection, @ADummyBuffer, 1);
   if AReturn > 0 then
-    result := True
+    Result := True
   else begin
     var AError := SSL_get_error(FSSLConnection, AReturn);
     case AError of
-      SSL_ERROR_ZERO_RETURN : result := False;
+      SSL_ERROR_ZERO_RETURN: Result := False;
 
       SSL_ERROR_WANT_READ,
-      SSL_ERROR_WANT_WRITE : result := True;
+      SSL_ERROR_WANT_WRITE: Result := True;
     else
       raise EOpenSSLBaseException.Create(FSSLConnection);
     end;
   end;
 end;
 
-function TOptixOpenSSLHandler.GetPeerCertificateFingerprint() : String;
+function TOptixOpenSSLHandler.GetPeerCertificateFingerprint: string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if Assigned(FSSLConnection) then
-    result := TOptixOpenSSLHelper.GetPeerSha512Fingerprint(FSSLConnection);
+    Result := TOptixOpenSSLHelper.GetPeerSha512Fingerprint(FSSLConnection);
 end;
 
 end.

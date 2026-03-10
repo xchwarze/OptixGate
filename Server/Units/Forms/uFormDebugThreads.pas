@@ -65,16 +65,16 @@ uses
 
 type
   TTreeData = record
-    Guid         : TGUID;
-    Id           : Cardinal;
-    ClassName    : String;
+    Guid: TGUID;
+    Id: Cardinal;
+    ClassName: string;
     {$WARN SYMBOL_PLATFORM OFF}
-    Priority     : TThreadPriority;
+    Priority: TThreadPriority;
     {$WARN SYMBOL_PLATFORM ON}
-    CreatedTime  : TDateTime;
-    Running      : Boolean;
-    Tick         : UInt64;
-    TerminateReq : Boolean;
+    CreatedTime: TDateTime;
+    Running: Boolean;
+    Tick: UInt64;
+    TerminateReq: Boolean;
   end;
   PTreeData = ^TTreeData;
 
@@ -99,12 +99,13 @@ type
     procedure VSTCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormCreate(Sender: TObject);
+    procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    FRefreshTick : UInt64;
+    FRefreshTick: UInt64;
 
-    procedure RefreshThreads();
-    function GetNodeByGUID(const AGuid : TGUID) : PVirtualNode;
+    procedure RefreshThreads;
+    function GetNodeByGUID(const AGuid: TGUID): PVirtualNode;
   public
     { Public declarations }
   end;
@@ -127,16 +128,16 @@ uses
 
 {$R *.dfm}
 
-function TFormDebugThreads.GetNodeByGUID(const AGuid : TGUID) : PVirtualNode;
+function TFormDebugThreads.GetNodeByGUID(const AGuid: TGUID): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
     if pData^.Guid = AGuid then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
@@ -146,21 +147,21 @@ end;
 procedure TFormDebugThreads.PopupMenuPopup(Sender: TObject);
 begin
   var pNode := VST.FocusedNode;
-  var pData : PTreeData := nil;
+  var pData: PTreeData := nil;
   if Assigned(pNode) then
     pData := pNode.GetData;
 
-  self.Terminate1.Visible := Assigned(pData) and (pData^.Running and not pData^.TerminateReq);
+  Terminate1.Visible := Assigned(pData) and (pData^.Running and not pData^.TerminateReq);
 end;
 
-procedure TFormDebugThreads.RefreshThreads();
+procedure TFormDebugThreads.RefreshThreads;
 begin
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     Inc(FRefreshTick);
     ///
 
-    var AList := OPTIX_THREAD_HIVE.LockList();
+    var AList := OPTIX_THREAD_HIVE.LockList;
     try
       for var AThread in AList do begin
         if not Assigned(AThread) then
@@ -179,22 +180,22 @@ begin
         var pData := PTreeData(pNode.GetData);
 
         if ACreated then begin
-          pData^.Guid         := AThread.Guid;
-          pData^.Id           := AThread.ThreadID;
-          pData^.ClassName    := AThread.ClassName;
-          pData^.CreatedTime  := AThread.CreatedDate;
+          pData^.Guid := AThread.Guid;
+          pData^.Id := AThread.ThreadID;
+          pData^.ClassName := AThread.ClassName;
+          pData^.CreatedTime := AThread.CreatedDate;
           pData^.TerminateReq := False;
         end;
 
         pData^.Priority := AThread.Priority;
-        pData^.Running  := AThread.Running;
-        pData^.Tick     := FRefreshTick;
+        pData^.Running := AThread.Running;
+        pData^.Tick := FRefreshTick;
 
         if pData^.TerminateReq then
-          AThread.Terminate();
+          AThread.Terminate;
       end;
     finally
-      OPTIX_THREAD_HIVE.UnlockList();
+      OPTIX_THREAD_HIVE.UnlockList;
     end;
 
     // Clean destroyed threads
@@ -204,7 +205,7 @@ begin
         VST.DeleteNode(pNode);
     end;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -213,13 +214,13 @@ begin
   TimerRefresh.Enabled := False;
 
   ///
-  VST.Clear();
+  VST.Clear;
 end;
 
 procedure TFormDebugThreads.FormCreate(Sender: TObject);
 begin
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
   {$ENDIF}
 end;
@@ -227,10 +228,10 @@ end;
 procedure TFormDebugThreads.FormShow(Sender: TObject);
 begin
   FRefreshTick := 0;
-  VST.Clear();
+  VST.Clear;
   ///
 
-  RefreshThreads();
+  RefreshThreads;
 
   ///
   TimerRefresh.Enabled := True;
@@ -239,7 +240,7 @@ end;
 procedure TFormDebugThreads.Terminate1Click(Sender: TObject);
 begin
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(VST.FocusedNode.GetData);
@@ -249,7 +250,7 @@ end;
 
 procedure TFormDebugThreads.TimerRefreshTimer(Sender: TObject);
 begin
-  RefreshThreads();
+  RefreshThreads;
 end;
 
 procedure TFormDebugThreads.VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
@@ -257,7 +258,7 @@ procedure TFormDebugThreads.VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetC
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
@@ -283,13 +284,20 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareValue(pData1^.Id, pData2^.Id);
-      1 : Result := CompareText(pData1^.ClassName, pData2^.ClassName);
-      2 : Result := Ord(pData1^.Running) - Ord(pData2^.Running);
-      3 : Result := CompareDateTime(pData1^.CreatedTime, pData2^.CreatedTime);
-      4 : Result := CompareValue(Cardinal(pData1^.Priority), Cardinal(pData2^.Priority));
+      0: Result := CompareValue(pData1^.Id, pData2^.Id);
+      1: Result := CompareText(pData1^.ClassName, pData2^.ClassName);
+      2: Result := Ord(pData1^.Running) - Ord(pData2^.Running);
+      3: Result := CompareDateTime(pData1^.CreatedTime, pData2^.CreatedTime);
+      4: Result := CompareValue(Cardinal(pData1^.Priority), Cardinal(pData2^.Priority));
     end;
   end;
+end;
+
+procedure TFormDebugThreads.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
 end;
 
 procedure TFormDebugThreads.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -298,10 +306,10 @@ begin
   var pData := PTreeData(Node.GetData);
 
   if not Assigned(pData) or ((Kind <> TVTImageKind.ikNormal) and (Kind <> TVTImageKind.ikSelected)) then
-    Exit();
+    Exit;
 
   case Column of
-    0 : begin
+    0: begin
       if pData^.TerminateReq then
         ImageIndex := IMAGE_BRICK_WARNING
       else if pData^.Running then
@@ -310,7 +318,7 @@ begin
         ImageIndex := IMAGE_BRICK_ERROR;
     end;
 
-    1 : begin
+    1: begin
       {$IFDEF SERVER}
       if pData^.ClassName = TOptixServerThread.ClassName then
         ImageIndex := IMAGE_SERVER
@@ -347,11 +355,11 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := Format('%d (0x%x)' , [pData^.Id, pData^.id]);
-      1 : CellText := pData^.ClassName;
-      2 : CellText := IfThen(pData^.Running, 'Yes', 'No');
-      3 : CellText := TOptixHelper.ElapsedDateTime(pData^.CreatedTime, Now);
-      4 : CellText := ThreadPriorityToString(pData^.Priority);
+      0: CellText := Format('%d (0x%x)' , [pData^.Id, pData^.id]);
+      1: CellText := pData^.ClassName;
+      2: CellText := IfThen(pData^.Running, 'Yes', 'No');
+      3: CellText := TOptixHelper.ElapsedDateTime(pData^.CreatedTime, Now);
+      4: CellText := ThreadPriorityToString(pData^.Priority);
     end;
   end;
 

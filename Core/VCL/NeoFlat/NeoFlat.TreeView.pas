@@ -56,17 +56,17 @@ uses
 
 type
   TTreeData = record
-    ItemName   : String;
-    Index      : Integer;
-    ImageIndex : Integer;
+    ItemName: string;
+    Index: Integer;
+    ImageIndex: Integer;
   end;
   PTreeData = ^TTreeData;
 
-  TOnItemClick = procedure(Sender : TObject; AIndex : Integer; AItemName : String) of object;
+  TOnItemClick = procedure(Sender: TObject; AIndex: Integer; AItemName: string) of object;
 
   TFlatVirtualStringTree = class(TCustomVirtualStringTree)
   private
-    FOnItemClick : TOnItemClick;
+    FOnItemClick: TOnItemClick;
   protected
     procedure DoPaintText(Node: PVirtualNode; const Canvas: TCanvas; Column: TColumnIndex;
       TextType: TVSTTextType); override;
@@ -80,14 +80,14 @@ type
       var ImageIndex: System.UITypes.TImageIndex): TCustomImageList; override;
   public
     {@M}
-    function AddItem(const ACaption : String; const AIndex : Cardinal; AParent : PVirtualNode = nil;
-      const AImageIndex : Integer = -1) : PVirtualNode; overload;
-    function AddItem(const ACaption : String; const AIndex : Cardinal;
-      const AImageIndex : Integer = -1) : PVirtualNode; overload;
+    function AddItem(const ACaption: string; const AIndex: Cardinal; AParent: PVirtualNode = nil;
+      const AImageIndex: Integer = -1) : PVirtualNode; overload;
+    function AddItem(const ACaption: string; const AIndex: Cardinal;
+      const AImageIndex: Integer = -1) : PVirtualNode; overload;
 
     {@C}
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy(); override;
+    destructor Destroy; override;
   published
     property Align;
     property Margins;
@@ -97,7 +97,7 @@ type
     property Images;
 
     {@G/S}
-    property OnItemClick : TOnItemClick read FOnItemClick write FOnItemClick;
+    property OnItemClick: TOnItemClick read FOnItemClick write FOnItemClick;
   end;
 
 implementation
@@ -111,7 +111,7 @@ uses
   NeoFlat.Theme;
 // ---------------------------------------------------------------------------------------------------------------------
 
-constructor TFlatVirtualStringTree.Create(AOwner : TComponent);
+constructor TFlatVirtualStringTree.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
@@ -134,16 +134,16 @@ begin
     toHideFocusRect
   ];
 
-  Font.Name   := FONT_1;
-  Font.Color  := MAIN_ACCENT;
+  Font.Name := FONT_1;
+  Font.Color := MAIN_ACCENT;
   Font.Height := -11;
 
-  Header.Font.Name   := FONT_1;
+  Header.Font.Name := FONT_1;
   Header.Font.Height := -11;
 
   BorderStyle := bsNone;
 
-  Header.Columns.Add();
+  Header.Columns.Add;
 
   NodeDataSize := SizeOf(TTreeData);
 
@@ -152,43 +152,43 @@ begin
   FOnItemClick := nil;
 end;
 
-destructor TFlatVirtualStringTree.Destroy();
+destructor TFlatVirtualStringTree.Destroy;
 begin
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-function TFlatVirtualStringTree.AddItem(const ACaption : String; const AIndex : Cardinal; AParent : PVirtualNode = nil;
-  const AImageIndex : Integer = -1) : PVirtualNode;
-var AData : PTreeData;
-    ANode : PVirtualNode;
+function TFlatVirtualStringTree.AddItem(const ACaption: string; const AIndex: Cardinal; AParent: PVirtualNode = nil;
+  const AImageIndex: Integer = -1) : PVirtualNode;
+var AData: PTreeData;
+    ANode: PVirtualNode;
 begin
-  ANode := self.AddChild(AParent);
-  AData := self.GetNodeData(ANode);
+  ANode := AddChild(AParent);
+  AData := GetNodeData(ANode);
 
-  AData^.ItemName   := ACaption;
-  AData^.Index      := AIndex;
+  AData^.ItemName := ACaption;
+  AData^.Index := AIndex;
   AData^.ImageIndex := AImageIndex;
 
   ///
-  result := ANode;
+  Result := ANode;
 end;
 
-function TFlatVirtualStringTree.AddItem(const ACaption : String; const AIndex : Cardinal;
-  const AImageIndex : Integer = -1) : PVirtualNode;
+function TFlatVirtualStringTree.AddItem(const ACaption: string; const AIndex: Cardinal;
+  const AImageIndex: Integer = -1) : PVirtualNode;
 begin
-  result := AddItem(ACaption, AIndex, nil, AImageIndex);
+  Result := AddItem(ACaption, AIndex, nil, AImageIndex);
 end;
 
 function TFlatVirtualStringTree.DoGetImageIndex(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: System.UITypes.TImageIndex): TCustomImageList;
-var pData : PTreeData;
+var pData: PTreeData;
 begin
-  result := inherited DoGetImageIndex(Node, Kind, Column, Ghosted, ImageIndex);
+  Result := inherited DoGetImageIndex(Node, Kind, Column, Ghosted, ImageIndex);
   ///
 
-  pData := Node.GetData();
+  pData := Node.GetData;
   if not Assigned(pData) then
     Exit;
 
@@ -217,7 +217,7 @@ end;
 
 procedure TFlatVirtualStringTree.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-var ASelected : Boolean;
+var ASelected: Boolean;
 begin
   inherited DoBeforeCellPaint(Canvas, Node, Column, CellPaintMode, CellRect, ContentRect);
   ///
@@ -237,7 +237,7 @@ begin
 end;
 
 procedure TFlatVirtualStringTree.DoNodeClick(const HitInfo: THitInfo);
-var AData : PTreeData;
+var AData: PTreeData;
 begin
   inherited;
 
@@ -252,7 +252,7 @@ begin
 end;
 
 procedure TFlatVirtualStringTree.DoGetText(var pEventArgs: TVSTGetCellTextEventArgs);
-var AData : PTreeData;
+var AData: PTreeData;
 begin
   inherited;
   ///

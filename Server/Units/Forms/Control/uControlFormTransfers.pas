@@ -80,16 +80,16 @@ type
   );
 
   TTreeData = record
-    Id                  : TGUID;
-    SourceFilePath      : String;
-    DestinationFilePath : String;
-    Direction           : TOptixTransferDirection;
-    FileSize            : Int64;
-    Context             : String;
-    Description         : String;
-    State               : TTransferState;
-    WorkCount           : Int64;
-    ImageIndex          : Integer;
+    Id: TGUID;
+    SourceFilePath: string;
+    DestinationFilePath: string;
+    Direction: TOptixTransferDirection;
+    FileSize: Int64;
+    Context: string;
+    Description: string;
+    State: TTransferState;
+    WorkCount: Int64;
+    ImageIndex: Integer;
   end;
   PTreeData = ^TTreeData;
 
@@ -113,29 +113,29 @@ type
     procedure PopupMenuPopup(Sender: TObject);
     procedure CancelTransfer1Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+    procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    function RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath : String; const ADirection : TOptixTransferDirection; const AContext : String = '') : TGUID;
+    function RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: string = ''): TGUID;
 
-    function GetNodeByTransferId(const ATransferId : TGUID) : PVirtualNode;
+    function GetNodeByTransferId(const ATransferId: TGUID): PVirtualNode;
   public
     {@M}
-    function RequestFileDownload(ARemoteFilePath : String = ''; ALocalFilePath : String = ''; const AContext : String = '') : TGUID; override;
-    function RequestFileUpload(ALocalFilePath : String; ARemoteFilePath : String = ''; const AContext : String = '') : TGUID; override;
+    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID; override;
+    function RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID; override;
 
-    procedure ApplyTransferException(const ATransferId : TGUID; const AReason : String); overload;
-    procedure ApplyTransferException(const ALogTransferException : TOptixCommandReceiveTransferException); overload;
+    procedure ApplyTransferException(const ATransferId: TGUID; const AReason: string); overload;
+    procedure ApplyTransferException(const ALogTransferException: TOptixCommandReceiveTransferException); overload;
 
-    procedure OnRequestTransferTask(Sender : TObject; const ATransferId : TGUID; var ATask : TOptixTransferTask);
-    procedure OnTransferError(Sender : TObject; const ATransferId : TGUID; const AReason : String);
-    procedure OnTransferBegins(Sender : TObject; const ATransferId : TGUID; const AFileSize : Int64);
-    procedure OnTransferUpdate(Sender : TObject; const ATransferId : TGUID; const AWorkCount : Int64; var ACanceled : Boolean);
-    procedure OnTransferEnds(Sender : TObject; const ATransferId : TGUID);
+    procedure OnRequestTransferTask(Sender: TObject; const ATransferId: TGUID; var ATask: TOptixTransferTask);
+    procedure OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: string);
+    procedure OnTransferBegins(Sender: TObject; const ATransferId: TGUID; const AFileSize: Int64);
+    procedure OnTransferUpdate(Sender: TObject; const ATransferId: TGUID; const AWorkCount: Int64; var ACanceled: Boolean);
+    procedure OnTransferEnds(Sender: TObject; const ATransferId: TGUID);
 
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
   end;
 
 var
@@ -155,54 +155,44 @@ uses
 
 {$R *.dfm}
 
-procedure TControlFormTransfers.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormTransfers.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
 
   // -------------------------------------------------------------------------------------------------------------------
   if AOptixPacket is TOptixCommandGetUploadedFileInformation then begin
-    var AForms := FormMain.GetControlForms(self, TControlFormFileManager);
-    if not Assigned(AForms) then
-      Exit();
-    try
-      var AFileInformation := TOptixCommandGetUploadedFileInformation(AOptixPacket);
-      if Assigned(AFileInformation.FileInformation) then
-        for var AForm in AForms do
-          TControlFormFileManager(AForm).RegisterNewFile(
-            ExtractFilePath(AFileInformation.FileName),
-            AFileInformation.FileInformation
-          );
-    finally
-      FreeAndNil(AForms);
-    end;
+    var ACastedPacket := TOptixCommandGetUploadedFileInformation(AOptixPacket);
+    ///
+
+    RegisterNewFileOnFileManagers(ExtractFilePath(ACastedPacket.FileName), ACastedPacket.FileInformation);
   end;
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormTransfers.OnTransferBegins(Sender : TObject; const ATransferId : TGUID; const AFileSize : Int64);
+procedure TControlFormTransfers.OnTransferBegins(Sender: TObject; const ATransferId: TGUID; const AFileSize: Int64);
 begin
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
-    pData^.State    := tsProgress;
+    pData^.State := tsProgress;
     pData^.FileSize := AFileSize;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
-procedure TControlFormTransfers.OnTransferUpdate(Sender : TObject; const ATransferId : TGUID; const AWorkCount : Int64; var ACanceled : Boolean);
+procedure TControlFormTransfers.OnTransferUpdate(Sender: TObject; const ATransferId: TGUID; const AWorkCount: Int64; var ACanceled: Boolean);
 begin
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
@@ -210,11 +200,11 @@ begin
   ACanceled := pData^.State = tsCancelRequest;
 
   if pData^.State = tsProgress then begin
-    VST.BeginUpdate();
+    VST.BeginUpdate;
     try
       pData^.WorkCount := AWorkCount;
     finally
-      VST.EndUpdate();
+      VST.EndUpdate;
     end;
   end;
 end;
@@ -224,7 +214,7 @@ begin
   TOptixHelper.HideAllPopupMenuRootItems(TPopupMenu(Sender));
   ///
 
-  UploadaFile1.Visible   := True;
+  UploadaFile1.Visible := True;
   DownloadaFile1.Visible := True;
 
   var pNode := VST.FocusedNode;
@@ -234,16 +224,16 @@ begin
   end;
 end;
 
-procedure TControlFormTransfers.OnTransferEnds(Sender : TObject; const ATransferId : TGUID);
+procedure TControlFormTransfers.OnTransferEnds(Sender: TObject; const ATransferId: TGUID);
 begin
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     if pData^.State = tsCancelRequest then
       pData^.State := tsCanceled
@@ -254,13 +244,13 @@ begin
       SendCommand(TOptixCommandGetUploadedFileInformation.Create(pData^.DestinationFilePath, False));
     end;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
-function TControlFormTransfers.GetNodeByTransferId(const ATransferId : TGUID) : PVirtualNode;
+function TControlFormTransfers.GetNodeByTransferId(const ATransferId: TGUID): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
@@ -268,167 +258,167 @@ begin
     if pData^.Id <> ATransferId then
       continue;
 
-    result := pNode;
+    Result := pNode;
 
     break;
   end;
 end;
 
-procedure TControlFormTransfers.ApplyTransferException(const ATransferId : TGUID; const AReason : String);
+procedure TControlFormTransfers.ApplyTransferException(const ATransferId: TGUID; const AReason: string);
 begin
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
-    pData^.State       := tsError;
+    pData^.State := tsError;
     pData^.Description := AReason;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
-procedure TControlFormTransfers.ApplyTransferException(const ALogTransferException : TOptixCommandReceiveTransferException);
+procedure TControlFormTransfers.ApplyTransferException(const ALogTransferException: TOptixCommandReceiveTransferException);
 begin
   if not Assigned(ALogTransferException) then
-    Exit();
+    Exit;
   ///
 
   ApplyTransferException(ALogTransferException.TransferId, ALogTransferException.LogMessage);
 end;
 
-procedure TControlFormTransfers.OnRequestTransferTask(Sender : TObject; const ATransferId : TGUID; var ATask : TOptixTransferTask);
+procedure TControlFormTransfers.OnRequestTransferTask(Sender: TObject; const ATransferId: TGUID; var ATask: TOptixTransferTask);
 begin
   ATask := nil;
   ///
 
   if VST.IsUpdating then
-    Exit();
+    Exit;
 
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
   if pData^.State <> tsQueued then
-    Exit();
+    Exit;
 
   try
     case pData^.Direction of
       // Server Req File Download
-      otdClientIsUploading : ATask := TOptixDownloadTask.Create(pData^.DestinationFilePath);
+      otdClientIsUploading: ATask := TOptixDownloadTask.Create(pData^.DestinationFilePath);
 
       // Server Req File Upload
-      otdClientIsDownloading : ATask := TOptixUploadTask.Create(pData^.SourceFilePath);
+      otdClientIsDownloading: ATask := TOptixUploadTask.Create(pData^.SourceFilePath);
     end;
   except
-    on E : EWindowsException do begin
+    on E: EWindowsException do begin
       if Assigned(ATask) then
         FreeAndNil(ATask);
       ///
       ///
 
-      VST.BeginUpdate();
+      VST.BeginUpdate;
       try
-        pData^.State       := tsError;
+        pData^.State := tsError;
         pData^.Description := E.Message;
       finally
-        VST.EndUpdate();
+        VST.EndUpdate;
       end;
     end;
   end;
 end;
 
-procedure TControlFormTransfers.OnTransferError(Sender : TObject; const ATransferId : TGUID; const AReason : String);
+procedure TControlFormTransfers.OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: string);
 begin
   ApplyTransferException(ATransferId, AReason);
 end;
 
-function TControlFormTransfers.RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath : String; const ADirection : TOptixTransferDirection; const AContext : String = '') : TGUID;
-var pNode : PVirtualNode;
-    pData : PTreeData;
+function TControlFormTransfers.RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: string = ''): TGUID;
+var pNode: PVirtualNode;
+    pData: PTreeData;
 begin
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     pNode := VST.AddChild(nil);
     pData := pNode.GetData;
 
     // Init
-    pData^.Id                  := TGUID.NewGuid;
-    pData^.State               := tsQueued;
-    pData^.FileSize            := 0;
-    pData^.WorkCount           := 0;
+    pData^.Id := TGUID.NewGuid;
+    pData^.State := tsQueued;
+    pData^.FileSize := 0;
+    pData^.WorkCount := 0;
 
     // Param
-    pData^.SourceFilePath      := ASourceFilePath.Trim();
-    pData^.DestinationFilePath := TFileSystemHelper.UniqueFileName(ADestinationFilePath.Trim());
-    pData^.Direction           := ADirection;
-    pData^.Context             := AContext;
-    pData^.ImageIndex          := TOptixHelper.SystemFileIcon(pData^.SourceFilePath, (ADirection = otdClientIsUploading));
+    pData^.SourceFilePath := ASourceFilePath.Trim;
+    pData^.DestinationFilePath := TFileSystemHelper.UniqueFileName(ADestinationFilePath.Trim);
+    pData^.Direction := ADirection;
+    pData^.Context := AContext;
+    pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.SourceFilePath, (ADirection = otdClientIsDownloading));
 
     ///
-    result := pData^.Id;
+    Result := pData^.Id;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 
   ///
 
   if Assigned(pData) then
     case ADirection of
-      otdClientIsUploading   : SendCommand(TOptixCommandDownloadFile.Create(pData^.SourceFilePath, pData^.Id));
-      otdClientIsDownloading : SendCommand(TOptixCommandUploadFile.Create(pData^.DestinationFilePath, pData^.Id));
+      otdClientIsUploading: SendCommand(TOptixCommandDownloadFile.Create(pData^.SourceFilePath, pData^.Id));
+      otdClientIsDownloading: SendCommand(TOptixCommandUploadFile.Create(pData^.DestinationFilePath, pData^.Id));
     end;
 
   ///
   TOptixHelper.ShowForm(self);
 end;
 
-function TControlFormTransfers.RequestFileDownload(ARemoteFilePath : String = ''; ALocalFilePath : String = ''; const AContext : String = '') : TGUID;
+function TControlFormTransfers.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
-  if String.IsNullOrWhiteSpace(ARemoteFilePath) then
+  if string.IsNullOrWhiteSpace(ARemoteFilePath) then
     if not InputQuery('Download File', 'Remote File Path', ARemoteFilePath) then
-      Exit();
+      Exit;
 
-  if String.IsNullOrWhiteSpace(ALocalFilePath) then begin
+  if string.IsNullOrWhiteSpace(ALocalFilePath) then begin
     var ADirectory := '';
 
     if not SelectDirectory('Select Destination', '', ADirectory) then
-      Exit();
+      Exit;
 
     ALocalFilePath := IncludeTrailingPathDelimiter(ADirectory) + TPath.GetFileName(ARemoteFilePath);
   end;
 
   ///
-  result := RegisterNewTransfer(ARemoteFilePath, ALocalFilePath, otdClientIsUploading, AContext);
+  Result := RegisterNewTransfer(ARemoteFilePath, ALocalFilePath, otdClientIsUploading, AContext);
 end;
 
-function TControlFormTransfers.RequestFileUpload(ALocalFilePath : String; ARemoteFilePath : String = ''; const AContext : String = '') : TGUID;
+function TControlFormTransfers.RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
-  if String.IsNullOrWhiteSpace(ALocalFilePath) then begin
-    if not OpenDialog.Execute() then
-      Exit();
+  if string.IsNullOrWhiteSpace(ALocalFilePath) then begin
+    if not OpenDialog.Execute then
+      Exit;
 
     ///
     ALocalFilePath := OpenDialog.FileName;
   end;
 
-  if String.IsNullOrWhiteSpace(ARemoteFilePath) then begin
+  if string.IsNullOrWhiteSpace(ARemoteFilePath) then begin
     if not InputQuery('Upload File', 'Remote Destination (File or Folder "\")', ARemoteFilePath) then
-      Exit();
+      Exit;
   end;
 
   if ARemoteFilePath.EndsWith('\') then
-    ARemoteFilePath := ARemoteFilePath.Trim() + TPath.GetFileName(OpenDialog.FileName);
+    ARemoteFilePath := ARemoteFilePath.Trim + TPath.GetFileName(OpenDialog.FileName);
 
   ///
-  result := RegisterNewTransfer(ALocalFilePath, ARemoteFilePath, otdClientIsDownloading, AContext);
+  Result := RegisterNewTransfer(ALocalFilePath, ARemoteFilePath, otdClientIsDownloading, AContext);
 end;
 
 procedure TControlFormTransfers.UploadaFile1Click(Sender: TObject);
@@ -450,12 +440,12 @@ begin
   var AColor := clNone;
 
   case pData^.State of
-    tsQueued        : AColor := COLOR_LIST_GRAY;
-    tsProgress      : AColor := COLOR_LIST_BLUE;
-    tsEnded         : AColor := COLOR_LIST_GREEN;
-    tsError         : AColor := COLOR_LIST_RED;
-    tsCancelRequest : AColor := COLOR_LIST_YELLOW;
-    tsCanceled      : AColor := COLOR_LIST_ORANGE;
+    tsQueued: AColor := COLOR_LIST_GRAY;
+    tsProgress: AColor := COLOR_LIST_BLUE;
+    tsEnded: AColor := COLOR_LIST_GREEN;
+    tsError: AColor := COLOR_LIST_RED;
+    tsCancelRequest: AColor := COLOR_LIST_YELLOW;
+    tsCanceled: AColor := COLOR_LIST_ORANGE;
   end;
 
   if AColor <> clNone then begin
@@ -471,14 +461,14 @@ procedure TControlFormTransfers.VSTCompareNodes(Sender: TBaseVirtualTree; Node1,
   function GetStateOrder(const AState: TTransferState): Integer;
   begin
     case AState of
-      tsProgress      : result := 0;
-      tsQueued        : result := 1;
-      tsEnded         : result := 2;
-      tsError         : result := 3;
-      tsCancelRequest : result := 4;
-      tsCanceled      : result := 5;
+      tsProgress: Result := 0;
+      tsQueued: Result := 1;
+      tsEnded: Result := 2;
+      tsError: Result := 3;
+      tsCancelRequest: Result := 4;
+      tsCanceled: Result := 5;
       else
-        result := 6;
+        Result := 6;
     end;
   end;
 
@@ -491,24 +481,31 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : CompareText(pData1^.SourceFilePath, pData2^.SourceFilePath);
-      1 : CompareText(pData1^.DestinationFilePath, pData2^.DestinationFilePath);
-      2 : CompareValue(Cardinal(pData1^.Direction), Cardinal(pData2^.Direction));
-      3 : CompareValue(pData1^.FileSize, pData2^.FileSize);
+      0: CompareText(pData1^.SourceFilePath, pData2^.SourceFilePath);
+      1: CompareText(pData1^.DestinationFilePath, pData2^.DestinationFilePath);
+      2: CompareValue(Cardinal(pData1^.Direction), Cardinal(pData2^.Direction));
+      3: CompareValue(pData1^.FileSize, pData2^.FileSize);
 
-      4 : begin
+      4: begin
         var AOrder1 := GetStateOrder(pData1^.State);
         var AOrder2 := GetStateOrder(pData2^.State);
         ///
 
-        result := AOrder1 - AOrder2;
+        Result := AOrder1 - AOrder2;
       end;
 
-      5 : CompareText(pData1^.Context, pData2^.Context);
-      6 : CompareText(pData1^.Description, pData2^.Description);
-      7 : CompareText(pData1^.Id.ToString, pData2^.Id.ToString);
+      5: CompareText(pData1^.Context, pData2^.Context);
+      6: CompareText(pData1^.Description, pData2^.Description);
+      7: CompareText(pData1^.Id.ToString, pData2^.Id.ToString);
     end;
   end;
+end;
+
+procedure TControlFormTransfers.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
 end;
 
 procedure TControlFormTransfers.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -516,15 +513,15 @@ procedure TControlFormTransfers.VSTGetImageIndex(Sender: TBaseVirtualTree; Node:
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   if Kind = TVTImageKind.ikState then begin
     case Column of
-      2 : begin
+      2: begin
         case pData^.Direction of
-          otdClientIsUploading   : ImageIndex := IMAGE_BLUE_ARROW_LEFT;
-          otdClientIsDownloading : ImageIndex := IMAGE_BLUE_ARROW_RIGHT;
+          otdClientIsUploading: ImageIndex := IMAGE_BLUE_ARROW_LEFT;
+          otdClientIsDownloading: ImageIndex := IMAGE_BLUE_ARROW_RIGHT;
         end;
       end;
     end;
@@ -546,28 +543,28 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := Format('%s (%s)', [
+      0: CellText := Format('%s (%s)', [
         TPath.GetFileName(pData^.SourceFilePath),
         TPath.GetDirectoryName(pData^.SourceFilePath)
       ]);
-      1 : CellText := Format('%s (%s)', [
+      1: CellText := Format('%s (%s)', [
         TPath.GetFileName(pData^.DestinationFilePath),
         TPath.GetDirectoryName(pData^.DestinationFilePath)
       ]);
-      2 : begin
+      2: begin
         case pData^.Direction of
-          otdClientIsUploading   : CellText := 'Download';
-          otdClientIsDownloading : CellText := 'Upload';
+          otdClientIsUploading: CellText := 'Download';
+          otdClientIsDownloading: CellText := 'Upload';
         end;
       end;
-      3 : begin
+      3: begin
         if pData^.FileSize > 0 then
           CellText := TOptixHelper.FormatFileSize(pData^.FileSize);
       end;
-      4 : begin
+      4: begin
         case pData^.State of
-          tsQueued : CellText := 'Queued';
-          tsProgress : begin
+          tsQueued: CellText := 'Queued';
+          tsProgress: begin
             if pData^.FileSize > 0 then
               CellText := Format('%d%% (%s/%s)', [
                 (pData^.WorkCount * 100) div pData^.FileSize,
@@ -575,15 +572,15 @@ begin
                 TOptixHelper.FormatFileSize(pData^.FileSize)
               ]);
           end;
-          tsEnded         : CellText := 'Ended';
-          tsError         : CellText := 'Error';
-          tsCancelRequest : CellText := 'Cancel Request';
-          tsCanceled      : CellText := 'Canceled';
+          tsEnded: CellText := 'Ended';
+          tsError: CellText := 'Error';
+          tsCancelRequest: CellText := 'Cancel Request';
+          tsCanceled: CellText := 'Canceled';
         end;
       end;
-      5 : CellText := pData^.Context;
-      6 : CellText := pData^.Description;
-      7 : CellText := pData^.Id.ToString();
+      5: CellText := pData^.Context;
+      6: CellText := pData^.Description;
+      7: CellText := pData^.Id.ToString;
     end;
   end;
 
@@ -594,38 +591,33 @@ end;
 procedure TControlFormTransfers.CancelTransfer1Click(Sender: TObject);
 begin
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
   if Application.MessageBox(
     'You are about to cancel a transfer. A canceled transfer cannot be resumed. Are you sure?',
     'Cancel Transfer',
     MB_ICONQUESTION + MB_YESNO
   ) = ID_NO then
-    Exit();
+    Exit;
 
   var pData := PTreeData(VST.FocusedNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     pData^.State := tsCancelRequest;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
 procedure TControlFormTransfers.DownloadaFile1Click(Sender: TObject);
 begin
-  RequestFileDownload();
+  RequestFileDownload;
 end;
 
 procedure TControlFormTransfers.FormDestroy(Sender: TObject);
 begin
-  VST.Clear();
-end;
-
-procedure TControlFormTransfers.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
+  VST.Clear;
 end;
 
 end.

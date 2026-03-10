@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Helper;
 
 interface
@@ -70,81 +68,81 @@ type
   TOptixHelper = class
   public
     { TPopupMenu Helpers }
-    class procedure UpdatePopupMenuRootItemsVisibility(const APopupMenu : TPopupMenu; const AVisible : Boolean); static;
-    class procedure HideAllPopupMenuRootItems(const APopupMenu : TPopupMenu); static;
-    class procedure ShowAllPopupMenuRootItems(const APopupMenu : TPopupMenu); static;
-    class procedure ShowForm(const AForm : TForm); static;
+    class procedure UpdatePopupMenuRootItemsVisibility(const APopupMenu: TPopupMenu; const AVisible: Boolean); static;
+    class procedure HideAllPopupMenuRootItems(const APopupMenu: TPopupMenu); static;
+    class procedure ShowAllPopupMenuRootItems(const APopupMenu: TPopupMenu); static;
+    class procedure ShowForm(const AForm: TForm); static;
 
     { Text / Format Helpers }
-    class function Pluralize(const AText, ASuffix : String; const ACount : Cardinal;
-      APluralForm : String = '') : String; static;
-    class function FormatInt(const AInteger : Integer) : String; static;
-    class function DefaultIfEmpty(const AValue : String; const ADefault : String = '-') : String; static;
-    class function FormatFileSize(const ASize : Int64) : string; static;
-    class function IsCertificateFingerprintValid(const AValue : String) : Boolean; static;
-    class procedure CheckCertificateFingerprint(const AValue : String); static;
+    class function Pluralize(const AText, ASuffix: string; const ACount: Cardinal;
+      APluralForm: string = '') : string; static;
+    class function FormatInt(const AInteger: Integer): string; static;
+    class function DefaultIfEmpty(const AValue: string; const ADefault: string = '-'): string; static;
+    class function FormatFileSize(const ASize: Int64): string; static;
+    class function IsCertificateFingerprintValid(const AValue: string): Boolean; static;
+    class procedure CheckCertificateFingerprint(const AValue: string); static;
 
     { Dialogs / Forms Helpers }
-    class function Error(const AHandle : THandle; const AMessage : String) : Integer; static;
+    class function Error(const AHandle: THandle; const AMessage: string): Integer; static;
 
     { Date Helpers }
-    class function ElapsedTime(const ADays, AHours, AMinutes, ASeconds : UInt64) : String; overload; static;
-    class function ElapsedTime(const AMilliseconds : UInt64) : String; overload; static;
-    class function ElapsedDateTime(const AFirstDateTime, ASecondDateTime : TDateTime) : String; static;
+    class function ElapsedTime(const ADays, AHours, AMinutes, ASeconds: UInt64): string; overload; static;
+    class function ElapsedTime(const AMilliseconds: UInt64): string; overload; static;
+    class function ElapsedDateTime(const AFirstDateTime, ASecondDateTime: TDateTime): string; static;
 
     { System / Windows / Shell Helpers }
-    class function ReadResourceString(const AResourceName : String) : String; static;
-    class function TryReadResourceString(const AResourceName : String) : String; static;
-    class procedure InitializeSystemIcons(var AImages : TImageList; var AFileInfo : TSHFileInfo;
-      const ALargeIcon : Boolean = False); static;
-    class function SystemFileIcon(const AFileName : string; AExtensionMode : Boolean = False) : Integer; static;
-    class function SystemFolderIcon(APath : String = '') : Integer; static;
-    class function GetWindowsDirectory() : string; static;
-    class procedure Open(const ACommand : String); static;
+    class function ReadResourceString(const AResourceName: string): string; static;
+    class function TryReadResourceString(const AResourceName: string): string; static;
+    class procedure InitializeSystemIcons(var AImages: TImageList; var AFileInfo: TSHFileInfo;
+      const ALargeIcon: Boolean = False); static;
+    class function SystemFileIcon(const AFilePath: string; AUseRealFile: Boolean = False): Integer; static;
+    class function SystemFolderIcon(): Integer; static;
+    class function GetWindowsDirectory: string; static;
+    class procedure Open(const ACommand: string); static;
 
     { Data Comparison Helpers }
-    class function CompareObjectAssignement(const AObject1, AObject2 : TObject) : Integer; static;
-    class function ComparePointerAssigmenet(const pPtr1, pPtr2 : Pointer) : Integer; static;
-    class function CompareDateTimeEx(const ADate1 : TDateTime; const ADate1IsSet : Boolean; const ADate2 : TDateTime;
-      const ADate2IsSet : Boolean) : Integer; static;
+    class function CompareObjectAssignement(const AObject1, AObject2: TObject): Integer; static;
+    class function ComparePointerAssigmenet(const pPtr1, pPtr2: Pointer): Integer; static;
+    class function CompareDateTimeEx(const ADate1: TDateTime; const ADate1IsSet: Boolean; const ADate2: TDateTime;
+      const ADate2IsSet: Boolean) : Integer; static;
   end;
 
   TOptixVirtualTreesHelper = class
   public
-    class function GetVisibleNodesCount(const AVST : TVirtualStringTree) : UInt64; static;
-    class function GetColumnIndexByName(const AVST : TVirtualStringTree; const AName : String) : Integer; static;
-    class procedure UpdateColumnVisibility(const AVST : TVirtualStringTree; const AName : String;
-      AVisible : Boolean); static;
-    class function GetRootParentNode(const AVST : TVirtualStringTree;
-      const pNode : PVirtualNode) : PVirtualNode; static;
-    class procedure SelectNode(const AVST : TVirtualStringTree; const pNode : PVirtualNode); static;
+    class function GetVisibleNodesCount(const AVST: TVirtualStringTree): UInt64; static;
+    class function GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: string): Integer; static;
+    class procedure UpdateColumnVisibility(const AVST: TVirtualStringTree; const AName: string;
+      AVisible: Boolean); static;
+    class function GetRootParentNode(const AVST: TVirtualStringTree;
+      const pNode: PVirtualNode) : PVirtualNode; static;
+    class procedure SelectNode(const AVST: TVirtualStringTree; const pNode: PVirtualNode); static;
   end;
 
   TOptixVirtualTreesFolderTreeHelper = class
   type
-    TCompareFolderNameCallback = reference to function(const pData : Pointer; const ACompareTo : String) : Boolean;
-    TGetFolderNameFromItemCallback<T> = reference to function(const AItem: T): String;
-    TGetFolderNameFromDataCallback = reference to function(const pData: Pointer): String;
-    TSetupNodeDataCallback<T> = reference to procedure(var pNode, pParentNode : PVirtualNode; const AItem : T);
+    TCompareFolderNameCallback = reference to function(const pData: Pointer; const ACompareTo: string) : Boolean;
+    TGetFolderNameFromItemCallback<T> = reference to function(const AItem: T): string;
+    TGetFolderNameFromDataCallback = reference to function(const pData: Pointer): string;
+    TSetupNodeDataCallback<T> = reference to procedure(var pNode, pParentNode: PVirtualNode; const AItem: T);
   public
-    class procedure UpdateTree<T>(const AVST : TVirtualStringTree; const AParentsItems: TEnumerable<T>;
-      ALevelItems: TEnumerable<T>; const AGetNameFromDataFunc : TGetFolderNameFromDataCallback;
-      const AGetNameFromItemFunc : TGetFolderNameFromItemCallback<T>;
-      const ASetupNodeDataFunc : TSetupNodeDataCallback<T>); static;
+    class procedure UpdateTree<T>(const AVST: TVirtualStringTree; const AParentsItems: TEnumerable<T>;
+      ALevelItems: TEnumerable<T>; const AGetNameFromDataFunc: TGetFolderNameFromDataCallback;
+      const AGetNameFromItemFunc: TGetFolderNameFromItemCallback<T>;
+      const ASetupNodeDataFunc: TSetupNodeDataCallback<T>); static;
   end;
 
   TOptixErrorDialog = class
   private
-    FOwnerForm : TForm;
-    FErrors    : TStringList;
+    FOwnerForm: TForm;
+    FErrors: TStringList;
   public
     {@C}
-    constructor Create(const AOwnerForm : TForm);
-    destructor Destroy(); override;
+    constructor Create(const AOwnerForm: TForm);
+    destructor Destroy; override;
 
     {@M}
-    procedure Add(const AError : String);
-    function ShowErrors() : Boolean;
+    procedure Add(const AError: string);
+    function ShowErrors: Boolean;
   end;
 
 implementation
@@ -158,21 +156,21 @@ uses
 
 (* TOptixVirtualTreesFolderTreeHelper *)
 
-class procedure TOptixVirtualTreesFolderTreeHelper.UpdateTree<T>(const AVST : TVirtualStringTree;
+class procedure TOptixVirtualTreesFolderTreeHelper.UpdateTree<T>(const AVST: TVirtualStringTree;
   const AParentsItems: TEnumerable<T>; ALevelItems: TEnumerable<T>;
-  const AGetNameFromDataFunc : TGetFolderNameFromDataCallback;
-  const AGetNameFromItemFunc : TGetFolderNameFromItemCallback<T>;
-  const ASetupNodeDataFunc : TSetupNodeDataCallback<T>);
+  const AGetNameFromDataFunc: TGetFolderNameFromDataCallback;
+  const AGetNameFromItemFunc: TGetFolderNameFromItemCallback<T>;
+  const ASetupNodeDataFunc: TSetupNodeDataCallback<T>);
 begin
   if not Assigned(AVST) then
-    Exit();
+    Exit;
   ///
 
   var pParentNode := PVirtualNode(nil);
   var pChildNode := PVirtualNode(nil);
   var pNode := PVirtualNode(nil);
 
-  AVST.BeginUpdate();
+  AVST.BeginUpdate;
   try
     // Generate or Update Parent Folder Tree
     if Assigned(AParentsItems) then begin
@@ -200,8 +198,8 @@ begin
 
     if Assigned(ALevelItems) then begin
       // Generate Or Update Level Folder
-      var ALevelNodesCache := TDictionary<String, PVirtualNode>.Create(); // For Optimization
-      var ALevelItemsCache := TList<String>.Create();
+      var ALevelNodesCache := TDictionary<String, PVirtualNode>.Create; // For Optimization
+      var ALevelItemsCache := TList<string>.Create;
       try
         // Fill Cache with Existing Nodes
         pNode := AVST.GetFirstChild(pParentNode);
@@ -214,8 +212,8 @@ begin
         end;
 
         // Insert or Update Nodes
-        var AItemName : String;
-        var ANewNode : Boolean;
+        var AItemName: string;
+        var ANewNode: Boolean;
 
         for var AItem in ALevelItems do begin
           pNode := nil;
@@ -240,11 +238,8 @@ begin
           if not ALevelItemsCache.Contains(APair.Key) then
             AVST.DeleteNode(APair.Value);
       finally
-        if Assigned(ALevelItemsCache) then
-          FreeAndNil(ALevelItemsCache);
-
-        if Assigned(ALevelNodesCache) then
-          FreeAndNil(ALevelNodesCache);
+        ALevelItemsCache.Free;
+        ALevelNodesCache.Free;
       end;
     end;
   finally
@@ -256,37 +251,37 @@ begin
 
     AVST.SortTree(0, TSortDirection.sdAscending);
 
-    AVST.EndUpdate();
+    AVST.EndUpdate;
   end;
 end;
 
 (* TOptixVirtualTreesHelper *)
 
-class function TOptixVirtualTreesHelper.GetVisibleNodesCount(const AVST : TVirtualStringTree) : UInt64;
+class function TOptixVirtualTreesHelper.GetVisibleNodesCount(const AVST: TVirtualStringTree): UInt64;
 begin
-  result := 0;
+  Result := 0;
   ///
 
   if not Assigned(AVST) then
-    Exit();
+    Exit;
 
   for var pNode in AVST.Nodes do begin
     if vsVisible in pNode.States then
-      Inc(result);
+      Inc(Result);
   end;
 end;
 
-class function TOptixVirtualTreesHelper.GetColumnIndexByName(const AVST : TVirtualStringTree; const AName : String) : Integer;
+class function TOptixVirtualTreesHelper.GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: string): Integer;
 begin
-  result := -1;
+  Result := -1;
   ///
 
   if not Assigned(AVST) then
-    Exit();
+    Exit;
 
   for var AIndex := 0 to AVST.Header.Columns.Count -1 do begin
-    if String.Compare(AName, AVST.Header.Columns.Items[AIndex].Text, True) = 0 then begin
-      result := AIndex;
+    if string.Compare(AName, AVST.Header.Columns.Items[AIndex].Text, True) = 0 then begin
+      Result := AIndex;
 
       ///
       break;
@@ -294,11 +289,11 @@ begin
   end;
 end;
 
-class procedure TOptixVirtualTreesHelper.UpdateColumnVisibility(const AVST : TVirtualStringTree; const AName : String; AVisible : Boolean);
+class procedure TOptixVirtualTreesHelper.UpdateColumnVisibility(const AVST: TVirtualStringTree; const AName: string; AVisible: Boolean);
 begin
   var AColumnIndex := GetColumnIndexByName(AVST, AName);
   if AColumnIndex = -1 then
-    Exit();
+    Exit;
   ///
 
   var AColumn := AVST.Header.Columns.Items[AColumnIndex];
@@ -309,28 +304,28 @@ begin
     AColumn.Options := AColumn.Options - [coVisible];
 end;
 
-class function TOptixVirtualTreesHelper.GetRootParentNode(const AVST : TVirtualStringTree;
-  const pNode : PVirtualNode) : PVirtualNode;
+class function TOptixVirtualTreesHelper.GetRootParentNode(const AVST: TVirtualStringTree;
+  const pNode: PVirtualNode) : PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(pNode) or not Assigned(AVST) then
-    Exit();
+    Exit;
 
-  result := pNode;
+  Result := pNode;
 
-  while Assigned(AVST.NodeParent[result]) do
-    result := AVST.NodeParent[result];
+  while Assigned(AVST.NodeParent[Result]) do
+    Result := AVST.NodeParent[Result];
 end;
 
-class procedure TOptixVirtualTreesHelper.SelectNode(const AVST : TVirtualStringTree; const pNode : PVirtualNode);
+class procedure TOptixVirtualTreesHelper.SelectNode(const AVST: TVirtualStringTree; const pNode: PVirtualNode);
 begin
   if not Assigned(AVST) or not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
-  AVST.ClearSelection();
+  AVST.ClearSelection;
   ///
 
   AVST.FocusedNode := pNode;
@@ -340,30 +335,30 @@ end;
 
 (* TOptixHelper *)
 
-class procedure TOptixHelper.UpdatePopupMenuRootItemsVisibility(const APopupMenu : TPopupMenu; const AVisible : Boolean);
+class procedure TOptixHelper.UpdatePopupMenuRootItemsVisibility(const APopupMenu: TPopupMenu; const AVisible: Boolean);
 begin
   if not Assigned(APopupMenu) then
-    Exit();
+    Exit;
   ///
 
   for var I := 0 to APopupMenu.Items.Count -1 do
     APopupMenu.Items[I].Visible := AVisible;
 end;
 
-class procedure TOptixHelper.HideAllPopupMenuRootItems(const APopupMenu : TPopupMenu);
+class procedure TOptixHelper.HideAllPopupMenuRootItems(const APopupMenu: TPopupMenu);
 begin
   UpdatePopupMenuRootItemsVisibility(APopupMenu, False);
 end;
 
-class procedure TOptixHelper.ShowAllPopupMenuRootItems(const APopupMenu : TPopupMenu);
+class procedure TOptixHelper.ShowAllPopupMenuRootItems(const APopupMenu: TPopupMenu);
 begin
   UpdatePopupMenuRootItemsVisibility(APopupMenu, True);
 end;
 
-class procedure TOptixHelper.ShowForm(const AForm : TForm);
+class procedure TOptixHelper.ShowForm(const AForm: TForm);
 begin
   if not Assigned(AForm) then
-    Exit();
+    Exit;
   ///
 
   if IsIconic(AForm.Handle) then begin
@@ -372,71 +367,71 @@ begin
     else
       ShowWindow(AForm.Handle, SW_RESTORE);
   end else
-    AForm.Show();
+    AForm.Show;
 end;
 
-class function TOptixHelper.Pluralize(const AText, ASuffix : String; const ACount : Cardinal;
-  APluralForm : String = '') : String;
+class function TOptixHelper.Pluralize(const AText, ASuffix: string; const ACount: Cardinal;
+  APluralForm: string = '') : string;
 begin
   if ACount <= 1 then
-    result := AText
+    Result := AText
   else if APluralForm <> '' then
-    result := APluralForm
+    Result := APluralForm
   else
-    result := AText + ASuffix;
+    Result := AText + ASuffix;
 end;
 
-class function TOptixHelper.FormatInt(const AInteger : Integer) : String;
+class function TOptixHelper.FormatInt(const AInteger: Integer): string;
 begin
-  result := Format('%d (0x%p)', [
+  Result := Format('%d (0x%p)', [
     AInteger,
     Pointer(AInteger)
   ]);
 end;
 
-class function TOptixHelper.Error(const AHandle : THandle; const AMessage : String) : Integer;
+class function TOptixHelper.Error(const AHandle: THandle; const AMessage: string): Integer;
 begin
-  result := MessageBoxW(AHandle, PWideChar(AMessage), 'Error', MB_ICONHAND);
+  Result := MessageBoxW(AHandle, PWideChar(AMessage), 'Error', MB_ICONHAND);
 end;
 
-class function TOptixHelper.CompareDateTimeEx(const ADate1 : TDateTime; const ADate1IsSet : Boolean; const ADate2 : TDateTime; const ADate2IsSet : Boolean) : Integer;
+class function TOptixHelper.CompareDateTimeEx(const ADate1: TDateTime; const ADate1IsSet: Boolean; const ADate2: TDateTime; const ADate2IsSet: Boolean): Integer;
 begin
   if not ADate1IsSet and not ADate2IsSet then
-    result := 0
+    Result := 0
   else if not ADate1IsSet and ADate2IsSet then
-    result := 1
+    Result := 1
   else if ADate1IsSet and not ADate2IsSet then
-    result := -1
+    Result := -1
   else
-    result := CompareDateTime(ADate1, ADate2);
+    Result := CompareDateTime(ADate1, ADate2);
 end;
 
-class function TOptixHelper.CompareObjectAssignement(const AObject1, AObject2 : TObject) : Integer;
+class function TOptixHelper.CompareObjectAssignement(const AObject1, AObject2: TObject): Integer;
 begin
   if not Assigned(AObject1) and not Assigned(AObject2) then
     Result := 0
   else if not Assigned(AObject1) then
     Result := 1
   else
-    Result := -1
+    Result := -1;
 end;
 
-class function TOptixHelper.ComparePointerAssigmenet(const pPtr1, pPtr2 : Pointer) : Integer;
+class function TOptixHelper.ComparePointerAssigmenet(const pPtr1, pPtr2: Pointer): Integer;
 begin
   if (pPtr1 = nil) and (pPtr2 = nil) then
     Result := 0
   else if pPtr1 <> nil then
     Result := 1
   else
-    Result := -1
+    Result := -1;
 end;
 
-class function TOptixHelper.IsCertificateFingerprintValid(const AValue : String) : Boolean;
+class function TOptixHelper.IsCertificateFingerprintValid(const AValue: string): Boolean;
 begin
-  result := TRegEx.IsMatch(AValue, '^([0-9A-Fa-f]{2}:){63}[0-9A-Fa-f]{2}$');
+  Result := TRegEx.IsMatch(AValue, '^([0-9A-Fa-f]{2}:){63}[0-9A-Fa-f]{2}$');
 end;
 
-class procedure TOptixHelper.CheckCertificateFingerprint(const AValue : String);
+class procedure TOptixHelper.CheckCertificateFingerprint(const AValue: string);
 begin
   if not IsCertificateFingerprintValid(AValue) then
     raise Exception.Create(
@@ -445,27 +440,27 @@ begin
     );
 end;
 
-class procedure TOptixHelper.Open(const ACommand : String);
+class procedure TOptixHelper.Open(const ACommand: string);
 begin
   ShellExecute(0, 'open', PWideChar(ACommand), nil, nil, SW_SHOW);
 end;
 
-class function TOptixHelper.GetWindowsDirectory() : string;
+class function TOptixHelper.GetWindowsDirectory: string;
 begin
-  SetLength(result, MAX_PATH);
+  SetLength(Result, MAX_PATH);
 
-  var ALen := WinAPI.Windows.GetWindowsDirectory(@result[1], MAX_PATH);
+  var ALen := WinAPI.Windows.GetWindowsDirectory(@Result[1], MAX_PATH);
 
-  SetLength(result, ALen);
+  SetLength(Result, ALen);
   if ALen > MAX_PATH then
-    WinAPI.Windows.GetWindowsDirectory(@result[1], ALen);
+    WinAPI.Windows.GetWindowsDirectory(@Result[1], ALen);
 
   ///
-  result := IncludeTrailingPathDelimiter(result);
+  Result := IncludeTrailingPathDelimiter(Result);
 end;
 
-class procedure TOptixHelper.InitializeSystemIcons(var AImages : TImageList; var AFileInfo : TSHFileInfo; const ALargeIcon : Boolean = False);
-var AFlags : Integer;
+class procedure TOptixHelper.InitializeSystemIcons(var AImages: TImageList; var AFileInfo: TSHFileInfo; const ALargeIcon: Boolean = False);
+var AFlags: Integer;
 begin
   ZeroMemory(@AFileInfo, SizeOf(TSHFileInfo));
   ///
@@ -476,7 +471,7 @@ begin
     AFlags := SHGFI_SMALLICON;
 
   AImages.Handle := SHGetFileInfo(
-                                    PChar(TPath.GetPathRoot(GetWindowsDirectory())),
+                                    PChar(TPath.GetPathRoot(GetWindowsDirectory)),
                                     0,
                                     AFileInfo,
                                     SizeOf(AFileInfo),
@@ -484,42 +479,46 @@ begin
   );
 end;
 
-class function TOptixHelper.SystemFileIcon(const AFileName : string; AExtensionMode : Boolean = False) : Integer;
-var AFileInfo : TSHFileInfo;
+class function TOptixHelper.SystemFileIcon(const AFilePath: string; AUseRealFile: Boolean = False): Integer;
 begin
+  var AFileInfo: TSHFileInfo;
   ZeroMemory(@AFileInfo, sizeof(AFileInfo));
   ///
 
-  if not AExtensionMode then
-    AExtensionMode := not FileExists(AFileName);
-
-  var AFlags := SHGFI_SMALLICON or SHGFI_SYSICONINDEX;
-  if AExtensionMode then
-    AFlags := AFlags or SHGFI_USEFILEATTRIBUTES;
-
-  SHGetFileInfo(PWideChar(AFileName), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
-
-  Result := AFileInfo.iIcon;
-end;
-
-class function TOptixHelper.SystemFolderIcon(APath : String = '') : Integer;
-var AFileInfo : TSHFileInfo;
-begin
-  ZeroMemory(@AFileInfo, sizeof(AFileInfo));
-  ///
-
-  if APath = '' then
-    APath := GetWindowsDirectory();
+  if AUseRealFile then
+    AUseRealFile := FileExists(AFilePath) and not DirectoryExists(AFilePath);
 
   var AFlags := SHGFI_SYSICONINDEX;
 
-  SHGetFileInfo(PChar(APath), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
+  var AAtributes := 0;
+  if not AUseRealFile then begin
+    AFlags := AFlags or SHGFI_USEFILEATTRIBUTES;
 
+    AAtributes := FILE_ATTRIBUTE_NORMAL;
+  end;
+
+  SHGetFileInfo(PWideChar(AFilePath), AAtributes, AFileInfo, SizeOf(TSHFileInfo), AFlags);
+
+  ///
   Result := AFileInfo.iIcon;
 end;
 
-class function TOptixHelper.FormatFileSize(const ASize : Int64) : string;
-const AByteDescription : array[0..9-1] of string = (
+class function TOptixHelper.SystemFolderIcon(): Integer;
+begin
+  var AFileInfo: TSHFileInfo;
+  ZeroMemory(@AFileInfo, sizeof(AFileInfo));
+  ///
+
+  var AFlags := SHGFI_SYSICONINDEX;
+
+  SHGetFileInfo(PWideChar(GetWindowsDirectory), 0, AFileInfo, SizeOf(AFileInfo), AFlags);
+
+  ///
+  Result := AFileInfo.iIcon;
+end;
+
+class function TOptixHelper.FormatFileSize(const ASize: Int64): string;
+const AByteDescription: array[0..9-1] of string = (
   'Bytes', 'KiB', 'MB', 'GiB', 'TB',
   'PB', 'EB', 'ZB', 'YB'
 );
@@ -530,70 +529,70 @@ begin
     Inc(ACount);
 
   ///
-  result := Format('%s %s', [
+  Result := Format('%s %s', [
     FormatFloat('###0.00', ASize / Power(1024, ACount)),
     AByteDescription[ACount]]
   );
 end;
 
-class function TOptixHelper.ReadResourceString(const AResourceName : String) : String;
+class function TOptixHelper.ReadResourceString(const AResourceName: string): string;
 begin
   var AResourceStream := TResourceStream.Create(hInstance, AResourceName, RT_RCDATA);
   try
-    SetString(result, PAnsiChar(AResourceStream.Memory), AResourceStream.Size);
+    SetString(Result, PAnsiChar(AResourceStream.Memory), AResourceStream.Size);
   finally
-    FreeAndNil(AResourceStream);
+    AResourceStream.Free;
   end;
 end;
 
-class function TOptixHelper.TryReadResourceString(const AResourceName : String) : String;
+class function TOptixHelper.TryReadResourceString(const AResourceName: string): string;
 begin
   try
-    result := ReadResourceString(AResourceName);
+    Result := ReadResourceString(AResourceName);
   except
-    result := '';
+    Result := '';
   end;
 end;
 
-class function TOptixHelper.DefaultIfEmpty(const AValue : String; const ADefault : String = '-') : String;
+class function TOptixHelper.DefaultIfEmpty(const AValue: string; const ADefault: string = '-'): string;
 begin
   if String.IsNullOrEmpty(AValue) then
-    result := ADefault
+    Result := ADefault
   else
-    result := AValue;
+    Result := AValue;
 end;
 
-class function TOptixHelper.ElapsedTime(const ADays, AHours, AMinutes, ASeconds : UInt64) : String;
+class function TOptixHelper.ElapsedTime(const ADays, AHours, AMinutes, ASeconds: UInt64): string;
 begin
   if ADays > 0 then
-    result := Format('%d days, %.2d:%.2d:%.2d', [
+    Result := Format('%d days, %.2d:%.2d:%.2d', [
       ADays,
       AHours,
       AMinutes,
       ASeconds
     ])
   else if AHours > 0 then
-    result := Format('%.2d:%.2d:%.2d', [
+    Result := Format('%.2d:%.2d:%.2d', [
       AHours,
       AMinutes,
       ASeconds
     ])
   else if AMinutes > 0 then
-    result := Format('%d minutes and %.2d seconds.', [
+    Result := Format('%d minutes and %.2d seconds.', [
       AMinutes,
       ASeconds
     ])
   else if ASeconds >= 0 then
-    result := Format('%d seconds ago.', [ASeconds]);
+    Result := Format('%d seconds ago.', [ASeconds]);
 end;
 
-class function TOptixHelper.ElapsedTime(const AMilliseconds : UInt64) : String;
-var ASpan : TTimeSpan;
+class function TOptixHelper.ElapsedTime(const AMilliseconds: UInt64): string;
+var ASpan: TTimeSpan;
 begin
   ASpan := TTimeSpan.FromMilliseconds(AMilliseconds);
   ///
 
-  result := ElapsedTime(
+  Result := ElapsedTime(
     ASpan.Days,
     ASpan.Hours,
     ASpan.Minutes,
@@ -601,13 +600,13 @@ begin
   );
 end;
 
-class function TOptixHelper.ElapsedDateTime(const AFirstDateTime, ASecondDateTime : TDateTime) : String;
-var AElaspedTime  : TDateTime;
-    ADays         : Integer;
-    AHours        : Word;
-    AMinutes      : Word;
-    ASeconds      : Word;
-    AMilliSeconds : Word;
+class function TOptixHelper.ElapsedDateTime(const AFirstDateTime, ASecondDateTime: TDateTime): string;
+var AElaspedTime: TDateTime;
+    ADays: Integer;
+    AHours: Word;
+    AMinutes: Word;
+    ASeconds: Word;
+    AMilliSeconds: Word;
 begin
   AElaspedTime := ASecondDateTime - AFirstDateTime;
   ///
@@ -617,21 +616,21 @@ begin
   DecodeTime(AElaspedTime, AHours, AMinutes, ASeconds, AMilliSeconds);
 
   ///
-  result := ElapsedTime(ADays, AHours, AMinutes, ASeconds);
+  Result := ElapsedTime(ADays, AHours, AMinutes, ASeconds);
 end;
 
 (* TOptixErrorDialog *)
 
-constructor TOptixErrorDialog.Create(const AOwnerForm : TForm);
+constructor TOptixErrorDialog.Create(const AOwnerForm: TForm);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FOwnerForm := AOwnerForm;
-  FErrors    := TStringList.Create();
+  FErrors := TStringList.Create;
 end;
 
-destructor TOptixErrorDialog.Destroy();
+destructor TOptixErrorDialog.Destroy;
 begin
   if Assigned(FErrors) then
     FreeAndNil(FErrors);
@@ -640,33 +639,33 @@ begin
   inherited;
 end;
 
-procedure TOptixErrorDialog.Add(const AError : String);
+procedure TOptixErrorDialog.Add(const AError: string);
 begin
   FErrors.Add(AError);
 end;
 
-function TOptixErrorDialog.ShowErrors() : Boolean;
+function TOptixErrorDialog.ShowErrors: Boolean;
 begin
   if FErrors.Count = 0 then
     Exit(False);
   ///
 
-  result := True;
+  Result := True;
 
-  var AMessageBuilder := TStringBuilder.Create();
+  var AMessageBuilder := TStringBuilder.Create;
   try
     AMessageBuilder.AppendLine(
       Format('The following %s occured:', [TOptixHelper.Pluralize('error', 's', FErrors.Count)])
     );
-    AMessageBuilder.AppendLine();
+    AMessageBuilder.AppendLine;
 
     for var AError in FErrors do
       AMessageBuilder.AppendLine(' - ' + AError);
 
     ///
-    MessageBoxW(FOwnerForm.Handle, PWideChar(AMessageBuilder.ToString()), 'Error', MB_ICONHAND);
+    MessageBoxW(FOwnerForm.Handle, PWideChar(AMessageBuilder.ToString), 'Error', MB_ICONHAND);
   finally
-    FreeAndNil(AMessageBuilder);
+    AMessageBuilder.Free;
   end;
 end;
 

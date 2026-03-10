@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.System.Process;
 
 interface
@@ -74,100 +72,100 @@ type
   TProcessHelper = class
   public
     {@M}
-    class function IsElevatedByProcessId(const AProcessId : Cardinal) : TElevatedStatus; static;
-    class function TryIsElevatedByProcessId(const AProcessId : Cardinal) : TElevatedStatus; static;
-    class function IsElevated(AProcessHandle : THandle = 0) : TElevatedStatus; static;
-    class function TryGetIsElevated(AProcessHandle : THandle = 0) : TElevatedStatus; static;
-    class procedure GetProcessUserInformation(const AProcessId : Cardinal; out AUserName, ADomain : String); static;
-    class function TryGetProcessUserInformation(const AProcessId : Cardinal; out AUsername, ADomain : String) : Boolean; static;
-    class function GetProcessImagePath(const AProcessID : Cardinal) : String; static;
-    class function TryGetProcessImagePath(const AProcessID : Cardinal; const ADefault : String = '') : String; static;
-    class function IsWow64Process(const AProcessId : Cardinal) : Boolean; static;
-    class function TryIsWow64Process(const AProcessId : Cardinal) : TBoolResult; static;
-    class function GetProcessCommandLine(const AProcessId : Cardinal) : String; static;
-    class function TryGetProcessCommandLine(const AProcessId : Cardinal) : String; static;
-    class function MiniDumpWriteDump(const ATargetProcessId : Cardinal; const ATypesValue : DWORD; AOutputFilePath : String = '') : String; static;
-    class procedure TerminateProcess(const AProcessId : Cardinal); static;
+    class function IsElevatedByProcessId(const AProcessId: Cardinal): TElevatedStatus; static;
+    class function TryIsElevatedByProcessId(const AProcessId: Cardinal): TElevatedStatus; static;
+    class function IsElevated(AProcessHandle: THandle = 0): TElevatedStatus; static;
+    class function TryGetIsElevated(AProcessHandle: THandle = 0): TElevatedStatus; static;
+    class procedure GetProcessUserInformation(const AProcessId: Cardinal; out AUserName, ADomain: string); static;
+    class function TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string): Boolean; static;
+    class function GetProcessImagePath(const AProcessID: Cardinal): string; static;
+    class function TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: string = ''): string; static;
+    class function IsWow64Process(const AProcessId: Cardinal): Boolean; static;
+    class function TryIsWow64Process(const AProcessId: Cardinal): TBoolResult; static;
+    class function GetProcessCommandLine(const AProcessId: Cardinal): string; static;
+    class function TryGetProcessCommandLine(const AProcessId: Cardinal): string; static;
+    class function MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: string = ''): string; static;
+    class procedure TerminateProcess(const AProcessId: Cardinal); static;
   end;
 
   TProcessInformation = class(TOptixSerializableObject)
   private
     [OptixSerializableAttribute]
-    FName : String;
+    FName: string;
 
     [OptixSerializableAttribute]
-    FImagePath : String;
+    FImagePath: string;
 
     [OptixSerializableAttribute]
-    FId : Cardinal;
+    FId: Cardinal;
 
     [OptixSerializableAttribute]
-    FParentId : Cardinal;
+    FParentId: Cardinal;
 
     [OptixSerializableAttribute]
-    FUsername : String;
+    FUsername: string;
 
     [OptixSerializableAttribute]
-    FDomain : String;
+    FDomain: string;
 
     [OptixSerializableAttribute]
-    FUserSid : String;
+    FUserSid: string;
 
     [OptixSerializableAttribute]
-    FElevated : TElevatedStatus;
+    FElevated: TElevatedStatus;
 
     [OptixSerializableAttribute]
-    FSessionId : Cardinal;
+    FSessionId: Cardinal;
 
     [OptixSerializableAttribute]
-    FThreadCount : Cardinal;
+    FThreadCount: Cardinal;
 
     [OptixSerializableAttribute]
-    FCreatedTime : TDateTime;
+    FCreatedTime: TDateTime;
 
     [OptixSerializableAttribute]
-    FCurrentProcessId : Cardinal;
+    FCurrentProcessId: Cardinal;
 
     [OptixSerializableAttribute]
-    FIsWow64Process : TBoolResult;
+    FIsWow64Process: TBoolResult;
 
     [OptixSerializableAttribute]
-    FCommandLine : String;
+    FCommandLine: string;
 
     {@}
-    function EvaluateIfCurrentProcess() : Boolean;
-    function CheckIfSystemUser() : Boolean;
+    function EvaluateIfCurrentProcess: Boolean;
+    function CheckIfSystemUser: Boolean;
   public
     {@M}
-    procedure Assign(ASource : TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
 
     {@C}
-    constructor Create(const pProcessInformation : PSystemProcessInformation); overload;
+    constructor Create(const pProcessInformation: PSystemProcessInformation); overload;
 
     {@G}
-    property Name             : String          read FName;
-    property ImagePath        : String          read FImagePath;
-    property Id               : Cardinal        read FId;
-    property ParentId         : Cardinal        read FParentId;
-    property Username         : String          read FUsername;
-    property Domain           : String          read FDomain;
-    property UserSid          : String          read FUserSid;
-    property Elevated         : TElevatedStatus read FElevated;
-    property SessionId        : Cardinal        read FSessionId;
-    property ThreadCount      : Cardinal        read FThreadCount;
-    property CreatedTime      : TDateTime       read FCreatedTime;
-    property IsCurrentProcess : Boolean         read EvaluateIfCurrentProcess;
-    property IsWow64Process   : TBoolResult     read FIsWow64Process;
-    property IsSystem         : Boolean         read CheckIfSystemUser;
-    property CommandLine      : String          read FCommandLine;
+    property Name: string read FName;
+    property ImagePath: string read FImagePath;
+    property Id: Cardinal read FId;
+    property ParentId: Cardinal read FParentId;
+    property Username: string read FUsername;
+    property Domain: string read FDomain;
+    property UserSid: string read FUserSid;
+    property Elevated: TElevatedStatus read FElevated;
+    property SessionId: Cardinal read FSessionId;
+    property ThreadCount: Cardinal read FThreadCount;
+    property CreatedTime: TDateTime read FCreatedTime;
+    property IsCurrentProcess: Boolean read EvaluateIfCurrentProcess;
+    property IsWow64Process: TBoolResult read FIsWow64Process;
+    property IsSystem: Boolean read CheckIfSystemUser;
+    property CommandLine: string read FCommandLine;
   end;
 
   TOptixEnumProcess = class
   public
-    class procedure Enum(var AList : TObjectList<TProcessInformation>); static;
+    class procedure Enum(var AList: TObjectList<TProcessInformation>); static;
   end;
 
-  function ElevatedStatusToString(const AValue : TElevatedStatus) : String;
+  function ElevatedStatusToString(const AValue: TElevatedStatus): string;
 
 implementation
 
@@ -180,26 +178,26 @@ uses
 
 (* Local *)
 
-function ElevatedStatusToString(const AValue : TElevatedStatus) : String;
+function ElevatedStatusToString(const AValue: TElevatedStatus): string;
 begin
-  result := 'Unknown';
+  Result := 'Unknown';
   ///
 
   case AValue of
-    esLimited  : result := 'Limited';
-    esElevated : result := 'Elevated';
+    esLimited: Result := 'Limited';
+    esElevated: Result := 'Elevated';
   end;
 end;
 
 (* TProcessHelper *)
 
-class function TProcessHelper.IsElevated(AProcessHandle : THandle = 0) : TElevatedStatus;
-var AToken        : THandle;
-    ATokenInfo    : TTokenElevation;
-    AReturnLength : DWORD;
+class function TProcessHelper.IsElevated(AProcessHandle: THandle = 0): TElevatedStatus;
+var AToken: THandle;
+    ATokenInfo: TTokenElevation;
+    AReturnLength: DWORD;
 begin
   if AProcessHandle = 0 then begin
-    AProcessHandle := GetCurrentProcess();
+    AProcessHandle := GetCurrentProcess;
     if AProcessHandle = 0 then
       raise EWindowsException.Create('GetCurrentProcess');
   end;
@@ -212,56 +210,56 @@ begin
 
   ///
   if ATokenInfo.TokenIsElevated <> 0 then
-    result := esElevated
+    Result := esElevated
   else
-    result := esLimited;
+    Result := esLimited;
 end;
 
-class function TProcessHelper.TryGetIsElevated(AProcessHandle : THandle = 0) : TElevatedStatus;
+class function TProcessHelper.TryGetIsElevated(AProcessHandle: THandle = 0): TElevatedStatus;
 begin
-  result := esUnknown;
+  Result := esUnknown;
   try
-    result := IsElevated(AProcessHandle);
+    Result := IsElevated(AProcessHandle);
   except
-    on E : EWindowsException do begin
+    on E: EWindowsException do begin
       // Ignore, we just try but we can log
     end;
   end;
 end;
 
-class function TProcessHelper.IsElevatedByProcessId(const AProcessId : Cardinal) : TElevatedStatus;
+class function TProcessHelper.IsElevatedByProcessId(const AProcessId: Cardinal): TElevatedStatus;
 begin
   var hProcess := OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, AProcessId);
   if hProcess = 0 then
     raise EWindowsException.Create('OpenProcess');
   try
-    result := IsElevated(hProcess);
+    Result := IsElevated(hProcess);
   finally
     CloseHandle(hProcess);
   end;
 end;
 
-class function TProcessHelper.TryIsElevatedByProcessId(const AProcessId : Cardinal) : TElevatedStatus;
+class function TProcessHelper.TryIsElevatedByProcessId(const AProcessId: Cardinal): TElevatedStatus;
 begin
   try
-    result := IsElevatedByProcessId(AProcessId);
+    Result := IsElevatedByProcessId(AProcessId);
   except
-    result := esUnknown;
+    Result := esUnknown;
   end;
 end;
 
-class procedure TProcessHelper.GetProcessUserInformation(const AProcessId : Cardinal; out AUsername, ADomain : String);
+class procedure TProcessHelper.GetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string);
 begin
-  var AFlags : Cardinal;
+  var AFlags: Cardinal;
 
   if TOSVersion.Major < 6 then
     AFlags := PROCESS_QUERY_INFORMATION
   else
     AFlags := PROCESS_QUERY_LIMITED_INFORMATION;
 
-  var ptrTokenUser : PTokenUser := nil;
-  var ATokenSize   : Cardinal := 0;
-  var hToken       : THandle := 0;
+  var ptrTokenUser: PTokenUser := nil;
+  var ATokenSize: Cardinal := 0;
+  var hToken: THandle := 0;
 
   var hProcess := OpenProcess(AFlags, False, AProcessId);
   if hProcess = 0 then
@@ -271,7 +269,7 @@ begin
       raise EWindowsException.Create('OpenProcessToken');
     ///
 
-    var AReturnedLength : Cardinal;
+    var AReturnedLength: Cardinal;
 
     if not GetTokenInformation(hToken, TokenUser, nil, 0, AReturnedLength) then
       if GetLastError <> ERROR_INSUFFICIENT_BUFFER then
@@ -284,11 +282,11 @@ begin
     if not GetTokenInformation(hToken, TokenUser, ptrTokenUser, AReturnedLength, AReturnedLength) then
       raise EWindowsException.Create('GetTokenInformation(2)');
 
-    var AUserLength   := DWORD(0);
+    var AUserLength := DWORD(0);
     var ADomainLength := DWORD(0);
     ///
 
-    var ASidNameUser : SID_NAME_USE;
+    var ASidNameUser: SID_NAME_USE;
     
     if not LookupAccountSid(
                             nil,
@@ -304,8 +302,8 @@ begin
     ///
     
     if (AUserLength > 0) and (ADomainLength > 0) then begin
-      var pUserBuffer : PWideChar;
-      var pDomainBuffer : PWideChar;
+      var pUserBuffer: PWideChar;
+      var pDomainBuffer: PWideChar;
 
       AUserLength := AUserLength * SizeOf(WideChar);
       ADomainLength := ADomainLength * SizeOf(WideChar);
@@ -343,21 +341,21 @@ begin
   end;
 end;
 
-class function TProcessHelper.TryGetProcessUserInformation(const AProcessId : Cardinal; out AUsername, ADomain : String) : Boolean;
+class function TProcessHelper.TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string): Boolean;
 begin
   try
     GetProcessUserInformation(AProcessId, AUsername, ADomain);
 
     ///
-    result := True;
+    Result := True;
   except
-    result := False;
+    Result := False;
   end;
 end;
 
-class function TProcessHelper.GetProcessImagePath(const AProcessID : Cardinal) : String;
+class function TProcessHelper.GetProcessImagePath(const AProcessID: Cardinal): string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if (TOSVersion.Major < 6) then
@@ -372,61 +370,61 @@ begin
     var ALength := DWORD(MAX_PATH * 2);
 
     // Alternative to GetMem
-    SetLength(result, ALength);
+    SetLength(Result, ALength);
 
-    if NOT QueryFullProcessImageNameW(hProc, 0, @result[1], ALength) then
+    if NOT QueryFullProcessImageNameW(hProc, 0, @Result[1], ALength) then
       raise EWindowsException.Create('QueryFullProcessImageNameW');
 
-    SetLength(result, ALength);
+    SetLength(Result, ALength);
   finally
     CloseHandle(hProc);
   end;
 end;
 
-class function TProcessHelper.TryGetProcessImagePath(const AProcessID : Cardinal; const ADefault : String = '') : String;
+class function TProcessHelper.TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: string = ''): string;
 begin
   try
-    result := GetProcessImagePath(AProcessId);
+    Result := GetProcessImagePath(AProcessId);
   except
-    result := ADefault;
+    Result := ADefault;
   end;
 end;
 
-class function TProcessHelper.IsWow64Process(const AProcessId : Cardinal) : Boolean;
+class function TProcessHelper.IsWow64Process(const AProcessId: Cardinal): Boolean;
 begin
   var hProcess := OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, AProcessId);
   if hProcess = 0 then
     raise EWindowsException.Create('OpenProcess');
   try
-    // TODO: Support IsWow64Process2() for >= Windows 10
-    var AWow64Process : BOOL;
+    // TODO: Support IsWow64Process2 for >= Windows 10
+    var AWow64Process: BOOL;
     if not Winapi.Windows.IsWow64Process(hProcess, AWow64Process) then
       raise EWindowsException.Create('IsWow64Process');
     ///
 
-    result := AWow64Process;
+    Result := AWow64Process;
   finally
     CloseHandle(hProcess);
   end;
 end;
 
-class function TProcessHelper.TryIsWow64Process(const AProcessId : Cardinal) : TBoolResult;
+class function TProcessHelper.TryIsWow64Process(const AProcessId: Cardinal): TBoolResult;
 begin
   try
-    result := CastResult(IsWow64Process(AProcessId))
+    Result := CastResult(IsWow64Process(AProcessId))
   except
-    result := brError;
+    Result := brError;
   end;
 end;
 
-class function TProcessHelper.GetProcessCommandLine(const AProcessId : Cardinal) : String;
+class function TProcessHelper.GetProcessCommandLine(const AProcessId: Cardinal): string;
 begin
   var hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, AProcessId);
   if hProcess = 0 then
     raise EWindowsException.Create('OpenProcess');
   try
-    var AProcessBasicInformation : TProcessBasicInformation;
-    var AReturnLength : Cardinal;
+    var AProcessBasicInformation: TProcessBasicInformation;
+    var AReturnLength: Cardinal;
 
     var ARet := NtQueryInformationProcess(
       hProcess,
@@ -442,17 +440,17 @@ begin
 
     var pPEBOffset := Pointer(NativeUInt(AProcessBasicInformation.PebBaseAddress));
 
-    var APEB : TPEB;
-    var ABytesRead : SIZE_T;
+    var APEB: TPEB;
+    var ABytesRead: SIZE_T;
 
     if not ReadProcessMemory(hProcess, pPEBOffset, @APEB, SizeOf(TPEB), ABytesRead) then
       raise EWindowsException.Create('ReadProcessMemory(1)');
 
-    var ARTLUserProcessParameters : TRTLUserProcessParameters;
+    var ARTLUserProcessParameters: TRTLUserProcessParameters;
     if not ReadProcessMemory(hProcess, APEB.ProcessParameters, @ARTLUserProcessParameters, SizeOf(TRTLUserProcessParameters), ABytesRead) then
       raise EWindowsException.Create('ReadProcessMemory(2)');
 
-    var pCommandLine : PWideChar;
+    var pCommandLine: PWideChar;
     var pCommandLineSize := ARTLUserProcessParameters.CommandLine.Length * SizeOf(WideChar);
 
     GetMem(pCommandLine, pCommandLineSize);
@@ -461,7 +459,7 @@ begin
         raise EWindowsException.Create('ReadProcessMemory(3)');
 
       ///
-      result := string(pCommandLine);
+      Result := string(pCommandLine);
     finally
       FreeMem(pCommandLine, pCommandLineSize);
     end;
@@ -470,19 +468,19 @@ begin
   end;
 end;
 
-class function TProcessHelper.TryGetProcessCommandLine(const AProcessId : Cardinal) : String;
+class function TProcessHelper.TryGetProcessCommandLine(const AProcessId: Cardinal): string;
 begin
   try
-    result := GetProcessCommandLine(AProcessId);
+    Result := GetProcessCommandLine(AProcessId);
   except
-    result := '';
+    Result := '';
   end;
 end;
 
-class function TProcessHelper.MiniDumpWriteDump(const ATargetProcessId : Cardinal; const ATypesValue : DWORD; AOutputFilePath : String = '') : String;
+class function TProcessHelper.MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: string = ''): string;
 begin
-  if String.IsNullOrWhiteSpace(AOutputFilePath) then
-    AOutputFilePath := TPath.GetTempFileName();
+  if string.IsNullOrWhiteSpace(AOutputFilePath) then
+    AOutputFilePath := TPath.GetTempFileName;
   ///
 
   var hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, ATargetProcessId);
@@ -494,10 +492,10 @@ begin
       raise EWindowsException.Create('CreateFileW');
     try
       if not OptixCore.WinApiEx.MiniDumpWriteDump(hProcess, ATargetProcessId, hFile, ATypesValue, nil, nil, nil) then
-        raise EWindowsException.Create('MiniDumpWriteDump', GetLastError() and $FFFF (* HRESULT *));
+        raise EWindowsException.Create('MiniDumpWriteDump', GetLastError and $FFFF (* HRESULT *));
 
       ///
-      result := AOutputFilePath;
+      Result := AOutputFilePath;
     finally
       CloseHandle(hFile);
     end;
@@ -506,7 +504,7 @@ begin
   end;
 end;
 
-class procedure TProcessHelper.TerminateProcess(const AProcessId : Cardinal);
+class procedure TProcessHelper.TerminateProcess(const AProcessId: Cardinal);
 begin
   var hProcess := OpenProcess(PROCESS_TERMINATE, False, AProcessId);
   if hProcess = 0 then
@@ -521,40 +519,40 @@ end;
 
 (* TProcessInformation *)
 
-function TProcessInformation.CheckIfSystemUser() : Boolean;
+function TProcessInformation.CheckIfSystemUser: Boolean;
 begin
-  result := String.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := string.Compare(FUserSid, 'S-1-5-18', True) =  0;
 end;
 
-procedure TProcessInformation.Assign(ASource : TPersistent);
+procedure TProcessInformation.Assign(ASource: TPersistent);
 begin
   if ASource is TProcessInformation then begin
-    FName             := TProcessInformation(ASource).FName;
-    FImagePath        := TProcessInformation(ASource).FImagePath;
-    FId               := TProcessInformation(ASource).FId;
-    FParentId         := TProcessInformation(ASource).FParentId;
-    FUsername         := TProcessInformation(ASource).FUsername;
-    FDomain           := TProcessInformation(ASource).FDomain;
-    FUserSid          := TProcessInformation(ASource).FUserSid;
-    FElevated         := TProcessInformation(ASource).FElevated;
-    FSessionId        := TProcessInformation(ASource).FSessionId;
-    FThreadCount      := TProcessInformation(ASource).FThreadCount;
-    FCreatedTime      := TProcessInformation(ASource).FCreatedTime;
+    FName := TProcessInformation(ASource).FName;
+    FImagePath := TProcessInformation(ASource).FImagePath;
+    FId := TProcessInformation(ASource).FId;
+    FParentId := TProcessInformation(ASource).FParentId;
+    FUsername := TProcessInformation(ASource).FUsername;
+    FDomain := TProcessInformation(ASource).FDomain;
+    FUserSid := TProcessInformation(ASource).FUserSid;
+    FElevated := TProcessInformation(ASource).FElevated;
+    FSessionId := TProcessInformation(ASource).FSessionId;
+    FThreadCount := TProcessInformation(ASource).FThreadCount;
+    FCreatedTime := TProcessInformation(ASource).FCreatedTime;
     FCurrentProcessId := TProcessInformation(ASource).FCurrentProcessId;
-    FIsWow64Process   := TProcessInformation(ASource).FIsWow64Process;
-    FCommandLine      := TProcessInformation(ASource).FCommandLine;
+    FIsWow64Process := TProcessInformation(ASource).FIsWow64Process;
+    FCommandLine := TProcessInformation(ASource).FCommandLine;
   end else
     inherited;
 end;
 
-function TProcessInformation.EvaluateIfCurrentProcess() : Boolean;
+function TProcessInformation.EvaluateIfCurrentProcess: Boolean;
 begin
-  result := FCurrentProcessId = FId;
+  Result := FCurrentProcessId = FId;
 end;
 
-constructor TProcessInformation.Create(const pProcessInformation : PSystemProcessInformation);
+constructor TProcessInformation.Create(const pProcessInformation: PSystemProcessInformation);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   if not Assigned(pProcessInformation) then
@@ -566,22 +564,22 @@ begin
   FName := String(pProcessInformation^.ModuleName.Buffer);
 
   FImagePath := TProcessHelper.TryGetProcessImagePath(FId);
-  FParentId   := pProcessInformation^.InheritedFromProcessId;
-  FElevated   := TProcessHelper.TryIsElevatedByProcessId(FId);
+  FParentId := pProcessInformation^.InheritedFromProcessId;
+  FElevated := TProcessHelper.TryIsElevatedByProcessId(FId);
 
   FUsername := '';
-  FDomain   := '';
-  FUserSid  := '';
+  FDomain := '';
+  FUserSid := '';
 
   if TProcessHelper.TryGetProcessUserInformation(FId, FUsername, FDomain) then begin
     FUserSid := TOptixInformationGathering.GetUserSidByType(FUsername);
   end;
 
-  FSessionId   := pProcessInformation^.SessionId;
+  FSessionId := pProcessInformation^.SessionId;
   FThreadCount := pProcessInformation^.NumberOfThreads;
   FCreatedTime := TSystemHelper.TryFileTimeToDateTime(pProcessInformation^.CreateTime);
 
-  FCurrentProcessId := GetCurrentProcessId();
+  FCurrentProcessId := GetCurrentProcessId;
 
   FIsWow64Process := TProcessHelper.TryIsWow64Process(FId);
 
@@ -590,21 +588,21 @@ end;
 
 (* TOptixEnumProcess *)
 
-class procedure TOptixEnumProcess.Enum(var AList : TObjectList<TProcessInformation>);
+class procedure TOptixEnumProcess.Enum(var AList: TObjectList<TProcessInformation>);
 begin
   if not Assigned(AList) then
     AList := TObjectList<TProcessInformation>.Create(True)
   else
-    AList.Clear();
+    AList.Clear;
   ///
 
-  var AReturnLength : DWORD;
+  var AReturnLength: DWORD;
 
   var ARet := NtQuerySystemInformation(SYSTEM_PROCESS_INFORMATION_CLASS, nil, 0, AReturnLength);
   if (ARet <> 0) and (ARet <> $C0000004) (* STATUS_INFO_LENGTH_MISMATCH *) then
     raise EWindowsException.Create('NtQuerySystemInformation(1)');
 
-  var pFirstRow : PSystemProcessInformation;
+  var pFirstRow: PSystemProcessInformation;
 
   GetMem(pFirstRow, AReturnLength);
   try

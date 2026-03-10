@@ -12,7 +12,6 @@ object ControlFormTransfers: TControlFormTransfers
   Font.Style = []
   Position = poMainFormCenter
   OnDestroy = FormDestroy
-  OnMouseDown = FormMouseDown
   TextHeight = 15
   object VST: TVirtualStringTree
     Left = 0
@@ -42,13 +41,14 @@ object ControlFormTransfers: TControlFormTransfers
     TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect, toSelectNextNodeOnRemoval]
     OnBeforeCellPaint = VSTBeforeCellPaint
     OnCompareNodes = VSTCompareNodes
+    OnFreeNode = VSTFreeNode
     OnGetText = VSTGetText
     OnGetImageIndex = VSTGetImageIndex
     OnGetNodeDataSize = VSTGetNodeDataSize
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-    ExplicitWidth = 694
-    ExplicitHeight = 269
+    ExplicitWidth = 570
+    ExplicitHeight = 170
     Columns = <
       item
         Position = 0

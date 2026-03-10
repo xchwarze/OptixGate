@@ -63,33 +63,33 @@ type
 
   TOptixTrustedFingerprintEnumerator = record
   private
-    FTarget : TOptixConfigTrustedCertificateStore;
-    FIndex  : Integer;
+    FTarget: TOptixConfigTrustedCertificateStore;
+    FIndex: Integer;
 
     {@M}
-    function GetCurrent() : String;
+    function GetCurrent: string;
   public
     {@C}
     constructor Create(ATarget: TOptixConfigTrustedCertificateStore);
 
     {@M}
-    function MoveNext() : Boolean;
+    function MoveNext: Boolean;
 
     {@G}
-    property Current: String read GetCurrent;
+    property Current: string read GetCurrent;
   end;
 
   TOptixConfigTrustedCertificateStore = class(TOptixConfigEnumBase)
   private
     {@M}
-    function GetItem(const AIndex: Integer) : String;
+    function GetItem(const AIndex: Integer): string;
   public
     {@M}
-    procedure Add(const ATrustedFingerprint : String);
-    function GetEnumerator() : TOptixTrustedFingerprintEnumerator;
+    procedure Add(const ATrustedFingerprint: string);
+    function GetEnumerator: TOptixTrustedFingerprintEnumerator;
 
     {@G}
-    property Count : Integer read GetCount;
+    property Count: Integer read GetCount;
   end;
 
 implementation
@@ -105,29 +105,29 @@ uses
 
 (* TOptixTrustedFingerprintEnumerator *)
 
-constructor TOptixTrustedFingerprintEnumerator.Create(ATarget : TOptixConfigTrustedCertificateStore);
+constructor TOptixTrustedFingerprintEnumerator.Create(ATarget: TOptixConfigTrustedCertificateStore);
 begin
   FTarget := ATarget;
-  FIndex  := -1;
+  FIndex := -1;
 end;
 
-function TOptixTrustedFingerprintEnumerator.MoveNext() : Boolean;
+function TOptixTrustedFingerprintEnumerator.MoveNext: Boolean;
 begin
   Inc(FIndex);
 
-  result := FIndex < FTarget.Count;
+  Result := FIndex < FTarget.Count;
 end;
 
-function TOptixTrustedFingerprintEnumerator.GetCurrent() : String;
+function TOptixTrustedFingerprintEnumerator.GetCurrent: string;
 begin
-  result := FTarget.GetItem(FIndex);
+  Result := FTarget.GetItem(FIndex);
 end;
 
 (* TOptixConfigTrustedCertificateStore *)
 
-function TOptixConfigTrustedCertificateStore.GetItem(const AIndex : Integer) : String;
+function TOptixConfigTrustedCertificateStore.GetItem(const AIndex: Integer): string;
 begin
-  result := '';
+  Result := '';
   if not Assigned(FItems) then
     Exit;
   ///
@@ -137,33 +137,34 @@ begin
 
   var ARow := FItems.Items[AIndex];
 
-  var AFingerprint : String;
+  var AFingerprint: string;
   if not ARow.TryGetValue('Fingerprint', AFingerprint) then
     Exit;
   ///
 
-  result := AFingerprint;
+  Result := AFingerprint;
 end;
 
-procedure TOptixConfigTrustedCertificateStore.Add(const ATrustedFingerprint : String);
+procedure TOptixConfigTrustedCertificateStore.Add(const ATrustedFingerprint: string);
 begin
   if not Assigned(FItems) then
     Exit;
   ///
 
-  var AItem := TJsonObject.Create();
+  var AItem := TJsonObject.Create;
   try
     AItem.AddPair('Fingerprint', ATrustedFingerprint);
+	
+	///
+	FItems.AddElement(AItem);
   except
-    FreeAndNil(AItem);
-  end;
-
-  FItems.AddElement(AItem);
+    AItem.Free;
+  end;  
 end;
 
-function TOptixConfigTrustedCertificateStore.GetEnumerator() : TOptixTrustedFingerprintEnumerator;
+function TOptixConfigTrustedCertificateStore.GetEnumerator: TOptixTrustedFingerprintEnumerator;
 begin
-  result := TOptixTrustedFingerprintEnumerator.Create(Self);
+  Result := TOptixTrustedFingerprintEnumerator.Create(Self);
 end;
 
 end.

@@ -55,135 +55,135 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOnHandleSystemButton = procedure(Sender : TObject; var AHandled : Boolean) of object;
+  TOnHandleSystemButton = procedure(Sender: TObject; var AHandled: Boolean) of object;
 
   TFlatWindow = class;
 
   TFlatCaptionButton = class
   private
-    FRect        : TRect;
-    FVisible     : Boolean;
-    FOwner       : TFlatWindow;
-    FState       : TFlatControlState;
+    FRect: TRect;
+    FVisible: Boolean;
+    FOwner: TFlatWindow;
+    FState: TFlatControlState;
 
     {@M}
-    procedure SetState(AValue : TFlatControlState);
+    procedure SetState(AValue: TFlatControlState);
   public
     {@C}
-    constructor Create(AOwner : TFlatWindow);
+    constructor Create(AOwner: TFlatWindow);
 
     {@G/S}
-    property Rect    : TRect             read FRect    write FRect;
-    property Visible : Boolean           read FVisible write FVisible;
-    property State   : TFlatControlState read FState   write SetState;
+    property Rect: TRect read FRect write FRect;
+    property Visible: Boolean read FVisible write FVisible;
+    property State: TFlatControlState read FState write SetState;
   end;
 
-  TFlatCloseButton     = class(TFlatCaptionButton);
-  TFlatMaximizeButton  = class(TFlatCaptionButton);
-  TFlatMinimizeButton  = class(TFlatCaptionButton);
+  TFlatCloseButton = class(TFlatCaptionButton);
+  TFlatMaximizeButton = class(TFlatCaptionButton);
+  TFlatMinimizeButton = class(TFlatCaptionButton);
   TFlatHamburgerButton = class(TFlatCaptionButton);
 
   TFlatWindow = class(TComponent)
   private
-    FOldWindowProc   : TWndMethod;
-    FOwnerForm       : TForm;
+    FOldWindowProc: TWndMethod;
+    FOwnerForm: TForm;
 
-    FNonClientCanvas : TCanvas;
-    FCanvas          : TCanvas;
+    FNonClientCanvas: TCanvas;
+    FCanvas: TCanvas;
 
-    FBorder          : TColor;
-    FCaption         : TColor;
-    FBackground      : TColor;
+    FBorder: TColor;
+    FCaption: TColor;
+    FBackground: TColor;
 
-    FBorderWidth     : Integer;
-    FCaptionHeight   : Integer;
+    FBorderWidth: Integer;
+    FCaptionHeight: Integer;
 
-    FShowBorder      : Boolean;
+    FShowBorder: Boolean;
 
-    FCaptionBarRect  : TRect;
-    FCaptionRect     : TRect;
+    FCaptionBarRect: TRect;
+    FCaptionRect: TRect;
 
-    FMaximized       : Boolean;
+    FMaximized: Boolean;
 
-    FFont            : TFont;
-    FCaptionAlign    : TAlignment;
+    FFont: TFont;
+    FCaptionAlign: TAlignment;
 
-    FBorderStyle     : TFormBorderStyle;
+    FBorderStyle: TFormBorderStyle;
 
-    FCloseButton     : TFlatCloseButton;
-    FMaximizeButton  : TFlatMaximizeButton;
-    FMinimizeButton  : TFlatMinimizeButton;
-    FHamburgerButton : TFlatHamburgerButton;
+    FCloseButton: TFlatCloseButton;
+    FMaximizeButton: TFlatMaximizeButton;
+    FMinimizeButton: TFlatMinimizeButton;
+    FHamburgerButton: TFlatHamburgerButton;
 
-    FButtonDown      : TFlatCaptionButton;
-    FButtonHover     : TFlatCaptionButton;
+    FButtonDown: TFlatCaptionButton;
+    FButtonHover: TFlatCaptionButton;
 
-    FMenuDropdown    : TPopupMenu;
+    FMenuDropdown: TPopupMenu;
 
-    FOnMaximize      : TOnHandleSystemButton;
-    FOnMinimize      : TOnHandleSystemButton;
-    FOnRestore       : TOnHandleSystemButton;
-    FOnClose         : TOnHandleSystemButton;
+    FOnMaximize: TOnHandleSystemButton;
+    FOnMinimize: TOnHandleSystemButton;
+    FOnRestore: TOnHandleSystemButton;
+    FOnClose: TOnHandleSystemButton;
 
-    FOldWindowRect   : TRect;
+    FOldWindowRect: TRect;
 
     {@M}
-    procedure OnCustomWindowProc(var AMessage : TMessage);
+    procedure OnCustomWindowProc(var AMessage: TMessage);
     procedure HandleNCCalcSize(var AMessage: TMessage);
 
     procedure NCPaint;
-    procedure DrawCaptionBar(const ACanvas : TCanvas);
-    function DrawCaptionButton(const ACanvas : TCanvas;  const AButton : TFlatCaptionButton;
-      const AGlyphMatrix : TMatrixGlyph) : TRect;
+    procedure DrawCaptionBar(const ACanvas: TCanvas);
+    function DrawCaptionButton(const ACanvas: TCanvas;  const AButton: TFlatCaptionButton;
+      const AGlyphMatrix: TMatrixGlyph) : TRect;
 
-    function GetCaptionButtonFromCoord(const X, Y : Integer) : TFlatCaptionButton;
+    function GetCaptionButtonFromCoord(const X, Y: Integer): TFlatCaptionButton;
 
-    procedure doRestore();
-    procedure doMaximize();
-    procedure doMinimize();
-    procedure doMaximizeRestore();
-    procedure doClose();
-    procedure DisplayMenuDropDown();
+    procedure doRestore;
+    procedure doMaximize;
+    procedure doMinimize;
+    procedure doMaximizeRestore;
+    procedure doClose;
+    procedure DisplayMenuDropDown;
 
-    procedure SetupCaptionBar();
+    procedure SetupCaptionBar;
 
-    procedure UpdateForm();
-    procedure SetBorderWidth(const AValue : Integer);
-    procedure SetCaptionHeight(const AValue : Integer);
-    procedure SetColor(const AIndex : Integer; const AValue : TColor);
-    procedure SetFont(const AFont : TFont);
-    procedure SetCaptionAlign(const AValue : TAlignment);
-    procedure SetMenuDropDown(const AValue : TPopupMenu);
-    procedure SetShowBorder(const AValue : Boolean);
-    procedure SetBorderStyle(const AValue : TFormBorderStyle);
+    procedure UpdateForm;
+    procedure SetBorderWidth(const AValue: Integer);
+    procedure SetCaptionHeight(const AValue: Integer);
+    procedure SetColor(const AIndex: Integer; const AValue: TColor);
+    procedure SetFont(const AFont: TFont);
+    procedure SetCaptionAlign(const AValue: TAlignment);
+    procedure SetMenuDropDown(const AValue: TPopupMenu);
+    procedure SetShowBorder(const AValue: Boolean);
+    procedure SetBorderStyle(const AValue: TFormBorderStyle);
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     {@M}
-    procedure Invalidate();
+    procedure Invalidate;
   published
     {@G/S}
-    property BorderWidth   : Integer          read FBorderWidth   write SetBorderWidth;
-    property CaptionHeight : Integer          read FCaptionHeight write SetCaptionHeight;
-    property Font          : TFont            read FFOnt          write SetFont;
-    property CaptionAlign  : TAlignment       read FCaptionAlign  write SetCaptionAlign;
-    property MenuDropDown  : TPopupMenu       read FMenuDropDown  write SetMenuDropDown;
-    property ShowBorder    : Boolean          read FShowBorder    write SetShowBorder;
-    property BorderStyle   : TFormBorderStyle read FBorderStyle   write SetBorderStyle;
+    property BorderWidth: Integer read FBorderWidth write SetBorderWidth;
+    property CaptionHeight: Integer read FCaptionHeight write SetCaptionHeight;
+    property Font: TFont read FFOnt write SetFont;
+    property CaptionAlign: TAlignment read FCaptionAlign write SetCaptionAlign;
+    property MenuDropDown: TPopupMenu read FMenuDropDown write SetMenuDropDown;
+    property ShowBorder: Boolean read FShowBorder write SetShowBorder;
+    property BorderStyle: TFormBorderStyle read FBorderStyle write SetBorderStyle;
 
-    property OnMaximize : TOnHandleSystemButton read FOnMaximize write FOnMaximize;
-    property OnMinimize : TOnHandleSystemButton read FOnMinimize write FOnMinimize;
-    property OnRestore  : TOnHandleSystemButton read FOnRestore  write FOnRestore;
-    property OnClose    : TOnHandleSystemButton read FOnClose    write FOnClose;
+    property OnMaximize: TOnHandleSystemButton read FOnMaximize write FOnMaximize;
+    property OnMinimize: TOnHandleSystemButton read FOnMinimize write FOnMinimize;
+    property OnRestore: TOnHandleSystemButton read FOnRestore write FOnRestore;
+    property OnClose: TOnHandleSystemButton read FOnClose write FOnClose;
 
-    property Background : TColor index 0 read FBackground write SetColor;
-    property Border     : TColor index 1 read FBorder     write SetColor;
-    property Caption    : TColor index 2 read FCaption    write SetColor;
+    property Background: TColor index 0 read FBackground write SetColor;
+    property Border: TColor index 1 read FBorder write SetColor;
+    property Caption: TColor index 2 read FCaption write SetColor;
   end;
 
-  const CLOSE_GLYPH : TMatrixGlyph = [
+  const CLOSE_GLYPH: TMatrixGlyph = [
                                         [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                         [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                         [$0, $1, $0, $0, $0, $0, $0, $0, $1, $0],
@@ -199,7 +199,7 @@ type
                                         [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0]
   ];
 
-  const MINIMIZE_GLYPH : TMatrixGlyph = [
+  const MINIMIZE_GLYPH: TMatrixGlyph = [
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
@@ -215,7 +215,7 @@ type
                                             [$1, $1, $1, $1, $1, $1, $1, $1, $1, $1]
 ];
 
-  const RESTORE_GLYPH : TMatrixGlyph = [
+  const RESTORE_GLYPH: TMatrixGlyph = [
                                           [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                           [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                           [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
@@ -232,7 +232,7 @@ type
   ];
 
 
-  const MAXIMIZE_GLYPH : TMatrixGlyph = [
+  const MAXIMIZE_GLYPH: TMatrixGlyph = [
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                             [$0, $1, $1, $1, $1, $1, $1, $1, $1, $1],
@@ -248,7 +248,7 @@ type
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0]
   ];
 
-  const HAMBURGER_GLYPH : TMatrixGlyph = [
+  const HAMBURGER_GLYPH: TMatrixGlyph = [
                                             [$0, $0, $0, $0, $0, $0, $0, $0, $0, $0],
                                             [$1, $1, $1, $1, $1, $1, $1, $1, $1, $1],
                                             [$1, $1, $1, $1, $1, $1, $1, $1, $1, $1],
@@ -275,19 +275,19 @@ uses
 
 (* TFlatCaptionButton *)
 
-constructor TFlatCaptionButton.Create(AOwner : TFlatWindow);
+constructor TFlatCaptionButton.Create(AOwner: TFlatWindow);
 begin
-  inherited Create();
+  inherited Create;
 
   if Assigned(AOwner) then
     FOwner := AOwner;
 
-  FRect        := TRect.Empty;
-  FVisible     := True;
-  FState       := csNormal;
+  FRect := TRect.Empty;
+  FVisible := True;
+  FState := csNormal;
 end;
 
-procedure TFlatCaptionButton.SetState(AValue : TFlatControlState);
+procedure TFlatCaptionButton.SetState(AValue: TFlatControlState);
 begin
   if AValue = FState then
     Exit;
@@ -303,7 +303,7 @@ end;
 
 (* TFlatWindow *)
 
-procedure TFlatWindow.doRestore();
+procedure TFlatWindow.doRestore;
 begin
   if not FMaximized then
     Exit;
@@ -331,10 +331,10 @@ begin
   );
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.doMaximize();
+procedure TFlatWindow.doMaximize;
 begin
   if FMaximized then
     Exit;
@@ -357,10 +357,10 @@ begin
   FMaximized := True;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.doMinimize();
+procedure TFlatWindow.doMinimize;
 begin
   var AHandled := False;
   if Assigned(FOnMinimize) then
@@ -375,7 +375,7 @@ begin
     ShowWindow(FOwnerForm.Handle, SW_MINIMIZE);
 end;
 
-procedure TFlatWindow.doClose();
+procedure TFlatWindow.doClose;
 begin
   var AHandled := False;
   if Assigned(FOnClose) then
@@ -385,12 +385,12 @@ begin
     Exit;
 
   ///
-  FOwnerForm.Close();
+  FOwnerForm.Close;
 end;
 
-function TFlatWindow.GetCaptionButtonFromCoord(const X, Y : Integer) : TFlatCaptionButton;
+function TFlatWindow.GetCaptionButtonFromCoord(const X, Y: Integer): TFlatCaptionButton;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   var APoint := Point(X, Y);
@@ -399,24 +399,24 @@ begin
   Dec(APoint.Y, FOwnerForm.BoundsRect.Top);
 
   if ptinrect(FCloseButton.Rect, APoint) then
-    result := FCloseButton
+    Result := FCloseButton
   else if ptinrect(FMaximizeButton.Rect, APoint) then
-    result := FMaximizeButton
+    Result := FMaximizeButton
   else if ptinrect(FMinimizeButton.Rect, APoint) then
-    result := FMinimizeButton
+    Result := FMinimizeButton
   else if ptinrect(FHamburgerButton.Rect, APoint) then
-    result := FHamburgerButton;
+    Result := FHamburgerButton;
 end;
 
-procedure TFlatWindow.doMaximizeRestore();
+procedure TFlatWindow.doMaximizeRestore;
 begin
   if FMaximized then
-    doRestore()
+    doRestore
   else
-    doMaximize();
+    doMaximize;
 end;
 
-procedure TFlatWindow.DisplayMenuDropDown();
+procedure TFlatWindow.DisplayMenuDropDown;
 begin
   if not Assigned(FMenuDropDown) then
     Exit;
@@ -429,7 +429,7 @@ begin
   FMenuDropDown.Popup(APoint.X, APoint.Y);
 end;
 
-procedure TFlatWindow.SetupCaptionBar();
+procedure TFlatWindow.SetupCaptionBar;
 begin
   var AClientRect := TRect.Empty;
   GetClientRect(FOwnerForm.Handle, AClientRect);
@@ -441,18 +441,18 @@ begin
   FMinimizeButton.Visible := (biMinimize in FOwnerForm.BorderIcons) and (FBorderStyle <> bsDialog) and
     (FBorderStyle <> bsToolWindow);
 
-  FMaximizeButton.Visible  := (biMaximize in FOwnerForm.BorderIcons) and (FBorderStyle <> bsDialog) and
+  FMaximizeButton.Visible := (biMaximize in FOwnerForm.BorderIcons) and (FBorderStyle <> bsDialog) and
     (FBorderStyle <> bsToolWindow);
 
-  var ABorderWidth : Integer;
+  var ABorderWidth: Integer;
   if FShowBorder then
     ABorderWidth := FOwnerForm.ScaleValue(FBorderWidth)
   else
     ABorderWidth := 0;
 
-  FCaptionBarRect.Left   := AClientRect.Left + ABorderWidth;
-  FCaptionBarRect.TOp    := AClientRect.Top + ABorderWidth;
-  FCaptionBarRect.Width  := AClientRect.Width;
+  FCaptionBarRect.Left := AClientRect.Left + ABorderWidth;
+  FCaptionBarRect.TOp := AClientRect.Top + ABorderWidth;
+  FCaptionBarRect.Width := AClientRect.Width;
   FCaptionBarRect.Height := FOwnerForm.ScaleValue(FCaptionHeight);
 
   FCaptionRect := FCaptionBarRect;
@@ -462,17 +462,17 @@ begin
   var AButtonWidth := (FCaptionBarRect.Height - FOwnerForm.ScaleValue(8));
   var AButtonY := FCaptionBarRect.Top + ((FCaptionBarRect.Height div 2) - (AButtonWidth div 2));
 
-  var ARect : TRect;
+  var ARect: TRect;
 
-  ARect.Left   := 0;
-  ARect.Top    := AButtonY;
-  ARect.Width  := 0;
+  ARect.Left := 0;
+  ARect.Top := AButtonY;
+  ARect.Width := 0;
   ARect.Height := AButtonWidth;
   ///
 
   // Hamburger Button
   if FHamburgerButton.Visible then begin
-    ARect.Left  := FOwnerForm.ScaleValue(4);
+    ARect.Left := FOwnerForm.ScaleValue(4);
     ARect.Width := AButtonWidth;
 
     FHamburgerButton.Rect := ARect;
@@ -483,7 +483,7 @@ begin
 
   // Close Button
   if FCloseButton.Visible then begin
-    ARect.Left  := (FCaptionBarRect.Right - FOwnerForm.ScaleValue(4) - AButtonWidth);
+    ARect.Left := (FCaptionBarRect.Right - FOwnerForm.ScaleValue(4) - AButtonWidth);
     ARect.Width := AButtonWidth;
 
     FCloseButton.Rect := ARect;
@@ -491,7 +491,7 @@ begin
 
   // Maximize Restore
   if FMaximizeButton.Visible then begin
-    ARect.Left  := (ARect.Left - FOwnerForm.ScaleValue(1)) - AButtonWidth;
+    ARect.Left := (ARect.Left - FOwnerForm.ScaleValue(1)) - AButtonWidth;
     ARect.Width := AButtonWidth;
 
     FMaximizeButton.Rect := ARect;
@@ -499,7 +499,7 @@ begin
 
   // Minimize
   if FMinimizeButton.Visible then begin
-    ARect.Left  := (ARect.Left - FOwnerForm.ScaleValue(1)) - AButtonWidth;
+    ARect.Left := (ARect.Left - FOwnerForm.ScaleValue(1)) - AButtonWidth;
     ARect.Width := AButtonWidth;
 
     FMinimizeButton.Rect := ARect;
@@ -513,10 +513,10 @@ begin
     Inc(FCaptionRect.Left, AButtonWidth + FOwnerForm.ScaleValue(4));
 end;
 
-function TFlatWindow.DrawCaptionButton(const ACanvas : TCanvas; const AButton : TFlatCaptionButton;
-  const AGlyphMatrix : TMatrixGlyph) : TRect;
+function TFlatWindow.DrawCaptionButton(const ACanvas: TCanvas; const AButton: TFlatCaptionButton;
+  const AGlyphMatrix: TMatrixGlyph) : TRect;
 begin
-  result := TRect.Empty();
+  Result := TRect.Empty;
   ///
 
   if not Assigned(AButton) or not IsValidMatrixGlyph(AGlyphMatrix) then
@@ -525,7 +525,7 @@ begin
 
   var ADrawBorder := False;
   case AButton.State of
-    csHover, csActive :
+    csHover, csActive: 
       ADrawBorder := True;
   end;
 
@@ -544,10 +544,10 @@ begin
   DrawMatrixGlyph(ACanvas, AGlyphMatrix, X, Y, GLYPH_COLOR);
 end;
 
-procedure TFlatWindow.DrawCaptionBar(const ACanvas : TCanvas);
+procedure TFlatWindow.DrawCaptionBar(const ACanvas: TCanvas);
 begin
   if not Assigned(ACanvas) then
-    Exit();
+    Exit;
   ///
 
   // Background
@@ -562,7 +562,7 @@ begin
     if FMaximized then
       DrawCaptionButton(ACanvas, FMaximizeButton, RESTORE_GLYPH)
     else
-      DrawCaptionButton(ACanvas, FMaximizeButton, MAXIMIZE_GLYPH)
+      DrawCaptionButton(ACanvas, FMaximizeButton, MAXIMIZE_GLYPH);
   end;
 
   if FMinimizeButton.Visible then
@@ -576,13 +576,13 @@ begin
   ACanvas.Font.Assign(FFont);
   ACanvas.Font.Height := FOwnerForm.ScaleValue(FFont.Height);
 
-  var ACaption : String := FOwnerForm.Caption;
+  var ACaption: string := FOwnerForm.Caption;
 
-  var ATextFormat : TTextFormat := [tfVerticalCenter, tfEndEllipsis, tfSingleLine];
+  var ATextFormat: TTextFormat := [tfVerticalCenter, tfEndEllipsis, tfSingleLine];
   case FCaptionAlign of
-    taLeftJustify  : Include(ATextFormat, tfLeft);
-    taRightJustify : Include(ATextFormat, tfRight);
-    taCenter       : Include(ATextFormat, tfCenter);
+    taLeftJustify: Include(ATextFormat, tfLeft);
+    taRightJustify: Include(ATextFormat, tfRight);
+    taCenter: Include(ATextFormat, tfCenter);
   end;
 
   ///
@@ -595,7 +595,7 @@ begin
     Exit;
   ///
 
-  var ABorderWidth : Integer;
+  var ABorderWidth: Integer;
   if FShowBorder then
     ABorderWidth := FOwnerForm.ScaleValue(FBorderWidth)
   else
@@ -617,28 +617,28 @@ begin
       // Draw Borders (using FillRect(<>) instead of FrameRect(<>) because of HDPI glitchs)
 
       // L
-      var ARect    := TRect.Empty;
-      ARect.Width  := ABorderWidth;
+      var ARect := TRect.Empty;
+      ARect.Width := ABorderWidth;
       ARect.Height := AClientRect.height;
       FNonClientCanvas.FillRect(ARect);
 
       // T
       ARect := TRect.Empty;
       ARect.Height := ABorderWidth;
-      ARect.Width  := AClientRect.Width;
+      ARect.Width := AClientRect.Width;
       FNonClientCanvas.FillRect(ARect);
 
       // R
       ARect := TRect.Empty;
-      ARect.Left   := AClientRect.Width - ABorderWidth;
-      ARect.Width  := ABorderWidth;
+      ARect.Left := AClientRect.Width - ABorderWidth;
+      ARect.Width := ABorderWidth;
       ARect.Height := AClientRect.Height;
       FNonClientCanvas.FillRect(ARect);
 
       // B
       ARect := TRect.Empty;
-      ARect.Top    := AClientRect.Height - ABorderWidth;
-      ARect.Width  := AClientRect.Width;
+      ARect.Top := AClientRect.Height - ABorderWidth;
+      ARect.Width := AClientRect.Width;
       ARect.Height := ABorderWidth;
       FNonClientCanvas.FillRect(ARect);
     end;
@@ -654,7 +654,7 @@ end;
 
 procedure TFlatWindow.HandleNCCalcSize(var AMessage: TMessage);
 begin
-  var ABorderWidth : Integer;
+  var ABorderWidth: Integer;
   if not FShowBorder then
     ABorderWidth := 0
   else
@@ -672,13 +672,13 @@ begin
     Dec(PRect(AMessage.LParam)^.Bottom, ABorderWidth);
   end;
 
-  SetupCaptionBar();
+  SetupCaptionBar;
 
   ///
   AMessage.Result := 0;
 end;
 
-procedure TFlatWindow.OnCustomWindowProc(var AMessage : TMessage);
+procedure TFlatWindow.OnCustomWindowProc(var AMessage: TMessage);
 begin
   var ADoCallBase := True;
   try
@@ -692,7 +692,7 @@ begin
 
       WM_ERASEBKGND: begin
         var ADC := TWMEraseBkgnd(AMessage).DC;
-        var ARect : TRect;
+        var ARect: TRect;
         GetClipBox(ADC, ARect);
 
         var ABrush := CreateSolidBrush(ColorToRGB(FBackground));
@@ -710,7 +710,7 @@ begin
 
       WM_WINDOWPOSCHANGED: begin
         if (PWindowPos(AMessage.LParam)^.flags and SWP_NOSIZE) = 0 then
-          Invalidate();
+          Invalidate;
       end;
 
       WM_NCCALCSIZE: begin
@@ -720,7 +720,7 @@ begin
       end;
 
       WM_SETTEXT, CM_TEXTCHANGED, CM_STYLECHANGED, WM_DPICHANGED, WM_NCACTIVATE, WM_SETTINGCHANGE, WM_THEMECHANGED:
-        Invalidate();
+        Invalidate;
     end;
 
     ///
@@ -728,14 +728,14 @@ begin
       Exit;
     ///
 
-    var AButton : TFlatCaptionButton;
+    var AButton: TFlatCaptionButton;
 
     case AMessage.Msg of
       WM_NCLBUTTONDBLCLK:
         if FMaximizeButton.Visible then
-          doMaximizeRestore();
+          doMaximizeRestore;
 
-      WM_LBUTTONDOWN : begin
+      WM_LBUTTONDOWN: begin
         AButton := GetCaptionButtonFromCoord(TWMLButtonDown(AMessage).XPos, TWMLButtonDown(AMessage).YPos);
         if Assigned(AButton) and AButton.Visible then begin
           AButton.State := csActive;
@@ -745,20 +745,20 @@ begin
         end;
       end;
 
-       WM_LBUTTONUP : begin
+       WM_LBUTTONUP: begin
         AButton := GetCaptionButtonFromCoord(TWMLButtonUp(AMessage).XPos, TWMLButtonUp(AMessage).YPos);
         if Assigned(AButton) and AButton.Visible then begin
           AButton.State := csHover;
 
           if (AButton = FButtonDown) then begin
             if AButton is TFlatCloseButton then
-              DoClose()
+              DoClose
             else if AButton is TFlatMaximizeButton then
-              doMaximizeRestore()
+              doMaximizeRestore
             else if AButton is TFlatMinimizeButton then
-              DoMinimize()
+              DoMinimize
             else if AButton is TFlatHamburgerButton then
-              DisplayMenuDropDown();
+              DisplayMenuDropDown;
           end;
         end;
 
@@ -769,7 +769,7 @@ begin
         end;
       end;
 
-      WM_MOUSEMOVE : begin
+      WM_MOUSEMOVE: begin
         if Assigned(FButtonDown) then
           Exit;
         ///
@@ -795,7 +795,7 @@ begin
         end;
       end;
 
-      WM_NCMOUSELEAVE, {VCL ->} CM_MOUSELEAVE : begin
+      WM_NCMOUSELEAVE, {VCL ->} CM_MOUSELEAVE: begin
         if Assigned(FButtonDown) then
           Exit;
         ///
@@ -806,7 +806,7 @@ begin
         end;
       end;
 
-      WM_NCHITTEST : begin
+      WM_NCHITTEST: begin
         var APoint := Point(TWMNCHitTest(AMessage).XPos, TWMNCHitTest(AMessage).YPos);
 
         var AWindowRect := TRect.Empty;
@@ -855,22 +855,22 @@ begin
   end;
 end;
 
-constructor TFlatWindow.Create(AOwner : TComponent);
+constructor TFlatWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
 
-  FNonClientCanvas := TCanvas.Create();
-  FCanvas          := TCanvas.Create();
+  FNonClientCanvas := TCanvas.Create;
+  FCanvas := TCanvas.Create;
 
-  FCloseButton     := TFlatCloseButton.Create(self);
-  FMaximizeButton  := TFlatMaximizeButton.Create(self);
-  FMinimizeButton  := TFlatMinimizeButton.Create(self);
+  FCloseButton := TFlatCloseButton.Create(self);
+  FMaximizeButton := TFlatMaximizeButton.Create(self);
+  FMinimizeButton := TFlatMinimizeButton.Create(self);
   FHamburgerButton := TFlatHamburgerButton.Create(self);
   FHamburgerButton.Visible := False;
 
   FCaptionBarRect := TRect.Empty;
-  FCaptionRect    := TRect.Empty;
+  FCaptionRect := TRect.Empty;
 
   FMaximized := False;
 
@@ -878,10 +878,10 @@ begin
 
   FOnMaximize := nil;
   FOnMinimize := nil;
-  FOnRestore  := nil;
-  FOnClose    := nil;
+  FOnRestore := nil;
+  FOnClose := nil;
 
-  FButtonDown  := nil;
+  FButtonDown := nil;
   FButtonHover := nil;
 
   if NOT Assigned(AOwner) then
@@ -897,31 +897,31 @@ begin
 //  SetClassLong(FOwnerForm.Handle, GCL_STYLE, GetClassLong(FOwnerForm.Handle, GCL_STYLE) or CS_HREDRAW or CS_VREDRAW);
 //  SetWindowLong(FOwnerForm.Handle, GWL_STYLE, GetWindowLong(FOwnerForm.Handle, GWL_STYLE) or WS_CLIPCHILDREN);
 
-  FBorderWidth   := 2;
-  FShowBorder    := True;
-  FBackground    := MAIN_GRAY;
-  FBorder        := MAIN_ACCENT;
-  FCaption       := FBorder;
+  FBorderWidth := 2;
+  FShowBorder := True;
+  FBackground := MAIN_GRAY;
+  FBorder := MAIN_ACCENT;
+  FCaption := FBorder;
   FCaptionHeight := 25;
-  FBorderStyle   := bsSizeable;
+  FBorderStyle := bsSizeable;
 
-  FFont        := TFont.Create();
-  FFont.Name   := FONT_1;
+  FFont := TFont.Create;
+  FFont.Name := FONT_1;
   FFont.Height := -11;
-  FFont.Color  := clWhite;
+  FFont.Color := clWhite;
 
   FOwnerForm.DoubleBuffered := True;
-  FOwnerForm.BorderStyle    := bsNone;
-  FOwnerForm.Font.Name      := FONT_1;
+  FOwnerForm.BorderStyle := bsNone;
+  FOwnerForm.Font.Name := FONT_1;
 
   FOldWindowProc := FOwnerForm.WindowProc;
   FOwnerForm.WindowProc := OnCustomWindowProc;
 
   if not (csLoading in ComponentState) then
-    UpdateForm();
+    UpdateForm;
 end;
 
-destructor TFlatWindow.Destroy();
+destructor TFlatWindow.Destroy;
 begin
   if Assigned(FOldWindowProc) then
     FOwnerForm.WindowProc := FOldWindowProc;
@@ -948,16 +948,16 @@ begin
     FreeAndNil(FCanvas);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TFlatWindow.UpdateForm();
+procedure TFlatWindow.UpdateForm;
 begin
   if not Assigned(FOwnerForm) or not FOwnerForm.HandleAllocated then
-    Exit();
+    Exit;
   ///
 
-  SetupCaptionBar();
+  SetupCaptionBar;
 
   SetWindowPos(FOwnerForm.Handle, 0, 0, 0, 0, 0,
     SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
@@ -971,12 +971,12 @@ begin
     Exit;
   ///
 
-  SetupCaptionBar();
+  SetupCaptionBar;
 
   RedrawWindow(FOwnerForm.Handle, nil, 0, RDW_FRAME or RDW_INVALIDATE);
 end;
 
-procedure TFlatWindow.SetBorderWidth(const AValue : Integer);
+procedure TFlatWindow.SetBorderWidth(const AValue: Integer);
 begin
   if AValue = FBorderWidth then
     Exit;
@@ -984,34 +984,34 @@ begin
 
   FBorderWidth := AValue;
 
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetColor(const AIndex : Integer; const AValue : TColor);
+procedure TFlatWindow.SetColor(const AIndex: Integer; const AValue: TColor);
 begin
   if not Assigned(FOwnerForm) then
     Exit;
   ///
 
   case AIndex of
-    0 : FBackground := AValue;
-    1 : FBorder     := AValue;
-    2 : FCaption    := AValue;
+    0: FBackground := AValue;
+    1: FBorder := AValue;
+    2: FCaption := AValue;
   end;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetFont(const AFont : TFont);
+procedure TFlatWindow.SetFont(const AFont: TFont);
 begin
   FFont.Assign(AFont);
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetCaptionAlign(const AValue : TAlignment);
+procedure TFlatWindow.SetCaptionAlign(const AValue: TAlignment);
 begin
   if AValue = FCaptionAlign then
     Exit;
@@ -1019,18 +1019,18 @@ begin
   FCaptionAlign := AValue;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetMenuDropDown(const AValue : TPopupMenu);
+procedure TFlatWindow.SetMenuDropDown(const AValue: TPopupMenu);
 begin
   FMenuDropDown := AValue;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetShowBorder(const AValue : Boolean);
+procedure TFlatWindow.SetShowBorder(const AValue: Boolean);
 begin
   if AValue = FShowBorder then
     Exit;
@@ -1039,10 +1039,10 @@ begin
   FShowBorder := AValue;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetBorderStyle(const AValue : TFormBorderStyle);
+procedure TFlatWindow.SetBorderStyle(const AValue: TFormBorderStyle);
 begin
   if AValue = FBorderStyle then
     Exit;
@@ -1051,10 +1051,10 @@ begin
   FBorderStyle := AValue;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
-procedure TFlatWindow.SetCaptionHeight(const AValue : Integer);
+procedure TFlatWindow.SetCaptionHeight(const AValue: Integer);
 begin
   if AValue = FCaptionHeight then
     Exit;
@@ -1063,7 +1063,7 @@ begin
   FCaptionHeight := AValue;
 
   ///
-  UpdateForm();
+  UpdateForm;
 end;
 
 end.

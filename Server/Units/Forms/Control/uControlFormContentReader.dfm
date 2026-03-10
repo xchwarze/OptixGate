@@ -35,8 +35,8 @@ object ControlFormContentReader: TControlFormContentReader
     BorderBottom = 0
     Color = 13554645
     BorderColor = clBlack
-    ExplicitWidth = 814
-    ExplicitHeight = 568
+    ExplicitWidth = 658
+    ExplicitHeight = 441
     object MultiPanel: TOMultiPanel
       Left = 0
       Top = 30
@@ -60,8 +60,8 @@ object ControlFormContentReader: TControlFormContentReader
       SplitterHoverColor = clHighlight
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 814
-      ExplicitHeight = 538
+      ExplicitWidth = 658
+      ExplicitHeight = 411
       DesignSize = (
         668
         443)
@@ -103,8 +103,8 @@ object ControlFormContentReader: TControlFormContentReader
           ReadOnly = True
           ScrollBars = ssBoth
           TabOrder = 0
-          ExplicitWidth = 824
-          ExplicitHeight = 16
+          ExplicitWidth = 658
+          ExplicitHeight = 202
         end
       end
     end
@@ -136,7 +136,7 @@ object ControlFormContentReader: TControlFormContentReader
       BorderBottom = 2
       Color = 13554645
       BorderColor = clBlack
-      ExplicitWidth = 814
+      ExplicitWidth = 658
       object ButtonBack: TFlatButton
         Left = 4
         Top = 4
@@ -344,8 +344,8 @@ object ControlFormContentReader: TControlFormContentReader
         Width = 50
         Alignment = taRightJustify
       end>
-    ExplicitTop = 568
-    ExplicitWidth = 814
+    ExplicitTop = 441
+    ExplicitWidth = 658
   end
   object PopupRichStrings: TFlatPopupMenu
     OwnerDraw = True

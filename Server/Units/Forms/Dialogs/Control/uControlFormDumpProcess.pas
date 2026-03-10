@@ -115,17 +115,17 @@ type
     procedure RadioCutomFileNameStateChanged(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    FProcessId : Cardinal;
+    FProcessId: Cardinal;
 
     {@M}
-    procedure DoResize();
-    function GetMiniDumpTypesValue() : DWORD;
-    procedure SetProcessId(const AValue : Cardinal);
-    procedure SetProcessName(const AValue : String);
+    procedure DoResize;
+    function GetMiniDumpTypesValue: DWORD;
+    procedure SetProcessId(const AValue: Cardinal);
+    procedure SetProcessName(const AValue: string);
   public
     {@S}
-    property ProcessId  : Cardinal write SetProcessId;
-    property ProcessName : String  write SetProcessName;
+    property ProcessId: Cardinal write SetProcessId;
+    property ProcessName: string write SetProcessName;
   end;
 
 var
@@ -142,100 +142,100 @@ uses
 
 {$R *.dfm}
 
-procedure TControlFormDumpProcess.SetProcessId(const AValue : Cardinal);
+procedure TControlFormDumpProcess.SetProcessId(const AValue: Cardinal);
 begin
   FProcessId := AValue;
 
   labelProcessId.Caption := Format('%d (0x%x)', [FProcessId, FProcessId]);
 end;
 
-procedure TControlFormDumpProcess.SetProcessName(const AValue : String);
+procedure TControlFormDumpProcess.SetProcessName(const AValue: string);
 begin
   LabelProcessName.Caption := AValue;
 end;
 
-function TControlFormDumpProcess.GetMiniDumpTypesValue() : DWORD;
+function TControlFormDumpProcess.GetMiniDumpTypesValue: DWORD;
 begin
-  result := 0;
+  Result := 0;
   ///
 
   if CheckBoxMiniDumpNormal.Checked then
-    result := result or MiniDumpNormal;
+    Result := Result or MiniDumpNormal;
 
   if CheckBoxMiniDumpWithDataSegs.Checked then
-    result := result or MiniDumpWithDataSegs;
+    Result := Result or MiniDumpWithDataSegs;
 
   if CheckBoxMiniDumpWithFullMemory.Checked then
-    result := result or MiniDumpWithFullMemory;
+    Result := Result or MiniDumpWithFullMemory;
 
   if CheckBoxMiniDumpWithHandleData.Checked then
-    result := result or MiniDumpWithHandleData;
+    Result := Result or MiniDumpWithHandleData;
 
   if CheckBoxMiniDumpFilterMemory.Checked then
-    result := result or MiniDumpFilterMemory;
+    Result := Result or MiniDumpFilterMemory;
 
   if CheckBoxMiniDumpScanMemory.Checked then
-    result := result or MiniDumpScanMemory;
+    Result := Result or MiniDumpScanMemory;
 
   if CheckBoxMiniDumpWithUnloadedModules.Checked then
-    result := result or MiniDumpWithUnloadedModules;
+    Result := Result or MiniDumpWithUnloadedModules;
 
   if CheckBoxMiniDumpWithIndirectlyReferencedMemory.Checked then
-    result := result or MiniDumpWithIndirectlyReferencedMemory;
+    Result := Result or MiniDumpWithIndirectlyReferencedMemory;
 
   if CheckBoxMiniDumpFilterModulePaths.Checked then
-    result := result or MiniDumpFilterModulePaths;
+    Result := Result or MiniDumpFilterModulePaths;
 
   if CheckBoxMiniDumpWithProcessThreadData.Checked then
-    result := result or MiniDumpWithProcessThreadData;
+    Result := Result or MiniDumpWithProcessThreadData;
 
   if CheckBoxMiniDumpWithPrivateReadWriteMemory.Checked then
-    result := result or MiniDumpWithPrivateReadWriteMemory;
+    Result := Result or MiniDumpWithPrivateReadWriteMemory;
 
   if CheckBoxMiniDumpWithoutOptionalData.Checked then
-    result := result or MiniDumpWithoutOptionalData;
+    Result := Result or MiniDumpWithoutOptionalData;
 
   if CheckBoxMiniDumpWithFullMemoryInfo.Checked then
-    result := result or MiniDumpWithFullMemoryInfo;
+    Result := Result or MiniDumpWithFullMemoryInfo;
 
   if CheckBoxMiniDumpWithThreadInfo.Checked then
-    result := result or MiniDumpWithThreadInfo;
+    Result := Result or MiniDumpWithThreadInfo;
 
   if CheckBoxMiniDumpWithCodeSegs.Checked then
-    result := result or MiniDumpWithCodeSegs;
+    Result := Result or MiniDumpWithCodeSegs;
 
   if CheckBoxMiniDumpWithoutAuxiliaryState.Checked then
-    result := result or MiniDumpWithoutAuxiliaryState;
+    Result := Result or MiniDumpWithoutAuxiliaryState;
 
   if CheckBoxMiniDumpWithFullAuxiliaryState.Checked then
-    result := result or MiniDumpWithFullAuxiliaryState;
+    Result := Result or MiniDumpWithFullAuxiliaryState;
 
   if CheckBoxMiniDumpWithPrivateWriteCopyMemory.Checked then
-    result := result or MiniDumpWithPrivateWriteCopyMemory;
+    Result := Result or MiniDumpWithPrivateWriteCopyMemory;
 
   if CheckBoxMiniDumpIgnoreInaccessibleMemory.Checked then
-    result := result or MiniDumpIgnoreInaccessibleMemory;
+    Result := Result or MiniDumpIgnoreInaccessibleMemory;
 
   if CheckBoxMiniDumpWithTokenInformation.Checked then
-    result := result or MiniDumpWithTokenInformation;
+    Result := Result or MiniDumpWithTokenInformation;
 
   if CheckBoxMiniDumpWithModuleHeaders.Checked then
-    result := result or MiniDumpWithModuleHeaders;
+    Result := Result or MiniDumpWithModuleHeaders;
 
   if CheckBoxMiniDumpFilterTriage.Checked then
-    result := result or MiniDumpFilterTriage;
+    Result := Result or MiniDumpFilterTriage;
 
   if CheckBoxMiniDumpWithAvxXStateContext.Checked then
-    result := result or MiniDumpWithAvxXStateContext;
+    Result := Result or MiniDumpWithAvxXStateContext;
 
   if CheckBoxMiniDumpWithIptTrace.Checked then
-    result := result or MiniDumpWithIptTrace;
+    Result := Result or MiniDumpWithIptTrace;
 
   if CheckBoxMiniDumpScanInaccessiblePartialPages.Checked then
-    result := result or MiniDumpScanInaccessiblePartialPages;
+    Result := Result or MiniDumpScanInaccessiblePartialPages;
 
   if CheckBoxMiniDumpValidTypeFlags.Checked then
-    result := result or MiniDumpValidTypeFlags;
+    Result := Result or MiniDumpValidTypeFlags;
 end;
 
 procedure TControlFormDumpProcess.RadioCutomFileNameStateChanged(Sender: TObject);
@@ -250,17 +250,17 @@ end;
 
 procedure TControlFormDumpProcess.ButtonCancelClick(Sender: TObject);
 begin
-  Close();
+  Close;
 end;
 
 procedure TControlFormDumpProcess.ButtonValidateClick(Sender: TObject);
 begin
-  var ATypesValue := GetMiniDumpTypesValue();
+  var ATypesValue := GetMiniDumpTypesValue;
 
   if ATypesValue = 0 then begin
     Application.MessageBox('You must select at least one mini dump type!', 'Process Dump', MB_ICONHAND);
 
-    Exit();
+    Exit;
   end;
 
   var ADestFilePath := '';
@@ -270,16 +270,16 @@ begin
 
   SendCommand(TOptixCommandDumpProcess.Create(FProcessId, ADestFilePath, ATypesValue));
 
-  Close();
+  Close;
 end;
 
-procedure TControlFormDumpProcess.DoResize();
+procedure TControlFormDumpProcess.DoResize;
 begin
   LabelProcessName.Left := Image.left + Image.Width + ScaleValue(16);
-  LabelProcessId.Left   := LabelProcessName.Left;
+  LabelProcessId.Left := LabelProcessName.Left;
 
   LabelProcessName.Top := (PanelHeaderInfo.Height div 2) - (LabelProcessName.Height + ScaleValue(4));
-  LabelProcessId.Top   := LabelProcessName.Top + LabelProcessName.Height + ScaleValue(4);
+  LabelProcessId.Top := LabelProcessName.Top + LabelProcessName.Height + ScaleValue(4);
 
   ButtonCancel.Top := GroupBoxOutputPath.Top + GroupBoxOutputPath.Height + ScaleValue(8);
   ButtonValidate.Top := ButtonCancel.Top;
@@ -298,19 +298,19 @@ end;
 procedure TControlFormDumpProcess.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case key of
-    13 : ButtonValidateClick(ButtonValidate);
-    27 : ButtonCancelClick(ButtonCancel);
+    13: ButtonValidateClick(ButtonValidate);
+    27: ButtonCancelClick(ButtonCancel);
   end;
 end;
 
 procedure TControlFormDumpProcess.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TControlFormDumpProcess.FormShow(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 end.

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Protocol.Client.Handler;
 
 interface
@@ -68,27 +66,27 @@ type
   TOptixClientHandlerThread = class(TOptixClientThread)
   private
     {$IFDEF SERVER}
-    FHandlerId : TGUID;
+    FHandlerId: TGUID;
     {$ENDIF}
 
-    FPacketQueue : TThreadedQueue<TOptixPacket>;
+    FPacketQueue: TThreadedQueue<TOptixPacket>;
   protected
     {@M}
-    procedure Initialize(); override;
-    procedure Finalize(); override;
-    procedure ClientExecute(); override;
-    procedure PollActions(); virtual;
-    procedure PacketReceived(const AOptixPacket : TOptixPacket; var ACallHandleMemory : Boolean); virtual; abstract;
+    procedure Initialize; override;
+    procedure Finalize; override;
+    procedure ClientExecute; override;
+    procedure PollActions; virtual;
+    procedure PacketReceived(const AOptixPacket: TOptixPacket; var ACallHandleMemory: Boolean); virtual; abstract;
   public
     {@M}
-    procedure AddPacket(const APacket : TOptixPacket);
+    procedure AddPacket(const APacket: TOptixPacket);
 
     {$IFDEF SERVER}
     {@C}
-    constructor Create(const AClient : TClientSocket; const AHandlerId : TGUID); overload;
+    constructor Create(const AClient: TClientSocket; const AHandlerId: TGUID); overload;
 
     {@G}
-    property HandlerId : TGUID read FHandlerId;
+    property HandlerId: TGUID read FHandlerId;
     {$ENDIF}
   end;
 
@@ -101,16 +99,16 @@ uses
   OptixCore.Sockets.Exceptions{$IFDEF USETLS}, OptixCore.OpenSSL.Exceptions{$ENDIF};
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixClientHandlerThread.PollActions();
+procedure TOptixClientHandlerThread.PollActions;
 begin
   ///
 end;
 
-procedure TOptixClientHandlerThread.ClientExecute();
-var APacket : TOptixPacket;
+procedure TOptixClientHandlerThread.ClientExecute;
+var APacket: TOptixPacket;
 begin
   if not Assigned(FPacketQueue) then
-    Exit();
+    Exit;
   ///
 
   while not Terminated do begin
@@ -131,7 +129,7 @@ begin
           if Assigned(APacket) then
             FClient.SendPacket(APacket);
         except
-          on E : Exception do begin
+          on E: Exception do begin
             if (E is ESocketException) {$IFDEF USETLS}or (E is EOpenSSLBaseException){$ENDIF} then
               raise;
 
@@ -159,7 +157,7 @@ begin
         end;
       end;
     except
-      on E : Exception do begin
+      on E: Exception do begin
         if (E is ESocketException) {$IFDEF USETLS}or (E is EOpenSSLBaseException){$ENDIF} then
           raise;
 
@@ -170,11 +168,11 @@ begin
     // -----------------------------------------------------------------------------------------------------------------
     // Perform additional actions after each iterations
     // -----------------------------------------------------------------------------------------------------------------
-    PollActions();
+    PollActions;
   end; // while not Terminated do begin
 end;
 
-procedure TOptixClientHandlerThread.Initialize();
+procedure TOptixClientHandlerThread.Initialize;
 begin
   inherited;
   ///
@@ -182,15 +180,15 @@ begin
   FPacketQueue := TThreadedQueue<TOptixPacket>.Create(1024, INFINITE, 500);
 end;
 
-procedure TOptixClientHandlerThread.Finalize();
+procedure TOptixClientHandlerThread.Finalize;
 begin
   inherited;
   ///
 
   if Assigned(FPacketQueue) then begin
-    FPacketQueue.DoShutDown();
+    FPacketQueue.DoShutDown;
 
-    var APacket : TOptixPacket;
+    var APacket: TOptixPacket;
     while True do begin
       APacket := FPacketQueue.PopItem;
       if not Assigned(APacket) then
@@ -205,17 +203,17 @@ begin
   end;
 end;
 
-procedure TOptixClientHandlerThread.AddPacket(const APacket : TOptixPacket);
+procedure TOptixClientHandlerThread.AddPacket(const APacket: TOptixPacket);
 begin
   if not Assigned(APacket) then
-    Exit();
+    Exit;
   ///
 
   FPacketQueue.PushItem(APacket);
 end;
 
 {$IFDEF SERVER}
-constructor TOptixClientHandlerThread.Create(const AClient : TClientSocket; const AHandlerId : TGUID);
+constructor TOptixClientHandlerThread.Create(const AClient: TClientSocket; const AHandlerId: TGUID);
 begin
   inherited Create(AClient);
   ///

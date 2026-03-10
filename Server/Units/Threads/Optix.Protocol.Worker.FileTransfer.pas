@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Protocol.Worker.FileTransfer;
 
 interface
@@ -63,33 +61,33 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOnRequestTransferTask = procedure(Sender : TObject; const ATransferId : TGUID; var ATask : TOptixTransferTask) of object;
-  TOnTransferError       = procedure(Sender : TObject; const ATransferId : TGUID; const AReason : String) of object;
-  TOnTransferBegins      = procedure(Sender : TObject; const ATransferId : TGUID; const AFileSize : Int64) of object;
-  TOnTransferUpdate      = procedure(Sender : TObject; const ATransferId : TGUID; const AWorkCount : Int64; var ACanceled : Boolean) of object;
-  TOnTransferEnds        = procedure(Sender : TObject; const ATransferId : TGUID) of object;
+  TOnRequestTransferTask = procedure(Sender: TObject; const ATransferId: TGUID; var ATask: TOptixTransferTask) of object;
+  TOnTransferError = procedure(Sender: TObject; const ATransferId: TGUID; const AReason: string) of object;
+  TOnTransferBegins = procedure(Sender: TObject; const ATransferId: TGUID; const AFileSize: Int64) of object;
+  TOnTransferUpdate = procedure(Sender: TObject; const ATransferId: TGUID; const AWorkCount: Int64; var ACanceled: Boolean) of object;
+  TOnTransferEnds = procedure(Sender: TObject; const ATransferId: TGUID) of object;
 
   TOptixFileTransferWorker = class(TOptixClientThread)
   private
-    FOnRequestTransferTask : TOnRequestTransferTask;
-    FOnTransferError       : TOnTransferError;
-    FOnTransferBegins      : TOnTransferBegins;
-    FOnTransferUpdate      : TOnTransferUpdate;
-    FOnTransferEnds        : TOnTransferEnds;
+    FOnRequestTransferTask: TOnRequestTransferTask;
+    FOnTransferError: TOnTransferError;
+    FOnTransferBegins: TOnTransferBegins;
+    FOnTransferUpdate: TOnTransferUpdate;
+    FOnTransferEnds: TOnTransferEnds;
 
     {@M}
-    procedure UpdateAllTasks(const ATasks : TObjectDictionary<TGUID, TOptixTransferTask>);
+    procedure UpdateAllTasks(const ATasks: TObjectDictionary<TGUID, TOptixTransferTask>);
   protected
     {@M}
-    procedure ClientExecute(); override;
-    procedure Initialize(); override;
+    procedure ClientExecute; override;
+    procedure Initialize; override;
   public
     {@G/S}
-    property OnRequestTransferTask : TOnRequestTransferTask read FOnRequestTransferTask write FOnRequestTransferTask;
-    property OnTransferError       : TOnTransferError       read FOnTransferError       write FOnTransferError;
-    property OnTransferBegins      : TOnTransferBegins      read FOnTransferBegins      write FOnTransferBegins;
-    property OnTransferUpdate      : TOnTransferUpdate      read FOnTransferUpdate      write FOnTransferUpdate;
-    property OnTransferEnds        : TOnTransferEnds        read FOnTransferEnds        write FOnTransferEnds;
+    property OnRequestTransferTask: TOnRequestTransferTask read FOnRequestTransferTask write FOnRequestTransferTask;
+    property OnTransferError: TOnTransferError read FOnTransferError write FOnTransferError;
+    property OnTransferBegins: TOnTransferBegins read FOnTransferBegins write FOnTransferBegins;
+    property OnTransferUpdate: TOnTransferUpdate read FOnTransferUpdate write FOnTransferUpdate;
+    property OnTransferEnds: TOnTransferEnds read FOnTransferEnds write FOnTransferEnds;
   end;
 
 implementation
@@ -103,26 +101,26 @@ uses
   OptixCore.Exceptions, OptixCore.Sockets.Exceptions{$IFDEF USETLS}, OptixCore.OpenSSL.Exceptions{$ENDIF};
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixFileTransferWorker.Initialize();
+procedure TOptixFileTransferWorker.Initialize;
 begin
   inherited;
   ///
 
   FOnRequestTransferTask := nil;
-  FOnTransferError       := nil;
-  FOnTransferBegins      := nil;
-  FOnTransferUpdate      := nil;
-  FOnTransferEnds        := nil;
+  FOnTransferError := nil;
+  FOnTransferBegins := nil;
+  FOnTransferUpdate := nil;
+  FOnTransferEnds := nil;
 end;
 
-procedure TOptixFileTransferWorker.UpdateAllTasks(const ATasks : TObjectDictionary<TGUID, TOptixTransferTask>);
+procedure TOptixFileTransferWorker.UpdateAllTasks(const ATasks: TObjectDictionary<TGUID, TOptixTransferTask>);
 begin
   if not Assigned(ATasks) or not Assigned(FOnTransferUpdate) then
-    Exit();
+    Exit;
   ///
 
-  var ATask : TOptixTransferTask;
-  var ACanceled : Boolean;
+  var ATask: TOptixTransferTask;
+  var ACanceled: Boolean;
 
   for var ATransferId in ATasks.Keys do begin
     if not ATasks.TryGetValue(ATransferId, ATask) then
@@ -137,9 +135,9 @@ begin
   end;
 end;
 
-procedure TOptixFileTransferWorker.ClientExecute();
+procedure TOptixFileTransferWorker.ClientExecute;
 
-  procedure SendAcknowledgement(const AValue : Boolean);
+  procedure SendAcknowledgement(const AValue: Boolean);
   begin
     if Assigned(FClient) then
       FClient.Send(AValue, SizeOf(Boolean));
@@ -147,7 +145,7 @@ procedure TOptixFileTransferWorker.ClientExecute();
 
 begin
   var ATasks := TObjectDictionary<TGUID, TOptixTransferTask>.Create([doOwnsValues]);
-  var ATask : TOptixTransferTask;
+  var ATask: TOptixTransferTask;
   var AStopWatch := TStopwatch.StartNew;
   try
     if not Assigned(FOnRequestTransferTask) or
@@ -155,13 +153,13 @@ begin
        not Assigned(FOnTransferBegins) or
        not Assigned(FOnTransferUpdate) or
        not Assigned(FOnTransferEnds) then
-      Exit();
+      Exit;
 
     while not Terminated do begin
       ATask := nil;
       ///
 
-      var ATransferId : TGUID;
+      var ATransferId: TGUID;
       FClient.Recv(ATransferId, SizeOf(TGUID));
       ///
 
@@ -187,7 +185,7 @@ begin
       // Step 1) Synchronize File Sizes
       if ATask.State = otsBegin then begin
         if ATask is TOptixDownloadTask then begin
-          var AFileSize : Int64;
+          var AFileSize: Int64;
 
           FClient.Recv(AFileSize, SizeOf(Int64));
 
@@ -210,7 +208,7 @@ begin
         else if ATask is TOptixUploadTask then
           TOptixUploadTask(ATask).UploadChunk(FClient);
       except
-        on E : Exception do begin
+        on E: Exception do begin
           if (E is ESocketException) {$IFDEF USETLS}or (E is EOpenSSLBaseException){$ENDIF} then
             raise
           else begin
@@ -229,8 +227,8 @@ begin
         UpdateAllTasks(ATasks);
 
         ///
-        AStopwatch.Reset();
-        AStopwatch.Start();
+        AStopwatch.Reset;
+        AStopwatch.Start;
       end;
 
       ///

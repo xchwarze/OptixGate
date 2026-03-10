@@ -67,12 +67,12 @@ uses
 
 type
   TClientConfiguration = record
-    Address   : String;
-    Port      : Word;
-    Version   : TIpVersion;
+    Address: string;
+    Port: Word;
+    Version: TIpVersion;
 
     {$IFDEF USETLS}
-    CertificateFingerprint : String;
+    CertificateFingerprint: string;
     {$ENDIF}
   end;
 
@@ -100,15 +100,15 @@ type
     procedure ButtonCancelClick(Sender: TObject);
   private
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     {$IFDEF USETLS}
     {@C}
-    constructor Create(AOwner : TComponent; const ACertificatesFingerprints : TList<String>); reintroduce;
+    constructor Create(AOwner: TComponent; const ACertificatesFingerprints: TList<string>); reintroduce;
     {$ENDIF}
 
     {@M}
-    function GetClientConfiguration() : TClientConfiguration;
+    function GetClientConfiguration: TClientConfiguration;
   end;
 
 var
@@ -125,7 +125,7 @@ uses
 
 {$R *.dfm}
 
-function TFormConnectToServer.GetClientConfiguration() : TClientConfiguration;
+function TFormConnectToServer.GetClientConfiguration: TClientConfiguration;
 begin
   var APort := StrToInt(EditPort.Text);
   if APort < 0 then
@@ -134,12 +134,12 @@ begin
     APort := High(Word);
   ///
 
-  result.Address := EditServerAddress.Text;
-  result.Port    := APort;
-  result.Version := TIpVersion(ComboIpVersion.ItemIndex);
+  Result.Address := EditServerAddress.Text;
+  Result.Port := APort;
+  Result.Version := TIpVersion(ComboIpVersion.ItemIndex);
 
   {$IFDEF USETLS}
-  result.CertificateFingerprint := ComboCertificate.Text;
+  Result.CertificateFingerprint := ComboCertificate.Text;
   {$ENDIF}
 end;
 
@@ -152,10 +152,10 @@ procedure TFormConnectToServer.ButtonConnectClick(Sender: TObject);
 begin
   var AErrorDialog := TOptixErrorDialog.Create(self);
   try
-    if String.IsNullOrWhiteSpace(EditServerAddress.Text) or
+    if string.IsNullOrWhiteSpace(EditServerAddress.Text) or
        not TOptixSocketHelper.IsValidHost(EditServerAddress.Text, TIPVersion(ComboIpVersion.ItemIndex))
     then begin
-      EditServerAddress.SetFocus();
+      EditServerAddress.SetFocus;
 
       AErrorDialog.Add(
         'You must specify a valid server address. For IPv4, use an address such as "127.0.0.1" for localhost or any ' +
@@ -170,10 +170,10 @@ begin
         'You must select an existing certificate (via its fingerprint) for the server to start listening.'
       );
 
-    if AErrorDialog.ShowErrors() then
-      Exit();
+    if AErrorDialog.ShowErrors then
+      Exit;
   finally
-    FreeAndNil(AErrorDialog);
+    AErrorDialog.Free;
   end;
 
   {$IFNDEF DEBUG}
@@ -182,22 +182,22 @@ begin
     AForm.ShowModal;
 
     if not AForm.Validated then
-      Exit();
+      Exit;
   finally
-    FreeAndNil(AForm);
+    AForm.Free;
   end;
   {$ENDIF}
 
   ModalResult := mrOk;
 end;
 
-procedure TFormConnectToServer.DoResize();
+procedure TFormConnectToServer.DoResize;
 begin
   ButtonConnect.Top := (PanelBottom.Height div 2) - (ButtonConnect.Height div 2);
-  ButtonCancel.Top  := ButtonConnect.Top;
+  ButtonCancel.Top := ButtonConnect.Top;
 
   ButtonConnect.Left := PanelBottom.Width - ButtonConnect.Width - ScaleValue(8);
-  ButtonCancel.Left  := ButtonConnect.Left - ButtonConnect.Width - ScaleValue(8);
+  ButtonCancel.Left := ButtonConnect.Left - ButtonConnect.Width - ScaleValue(8);
 
   var ANewHeight := PanelBottom.Height;
 
@@ -220,19 +220,19 @@ end;
 procedure TFormConnectToServer.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : ButtonConnectClick(ButtonConnect);
-    27 : ModalResult := mrCancel;
+    13: ButtonConnectClick(ButtonConnect);
+    27: ModalResult := mrCancel;
   end;
 end;
 
 procedure TFormConnectToServer.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormConnectToServer.FormShow(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 
   {$IFDEF USETLS}
   ComboCertificate.ItemIndex := 0;
@@ -250,27 +250,27 @@ end;
 procedure TFormConnectToServer.ComboIpVersionChange(Sender: TObject);
 begin
   case TComboBox(Sender).ItemIndex of
-    0 : begin
+    0: begin
       if Trim(EditServerAddress.Text) = '::1' then
         EditServerAddress.Text := '127.0.0.1';
     end;
 
-    1 : begin
+    1: begin
       if Trim(EditServerAddress.Text) = '127.0.0.1' then
         EditServerAddress.Text := '::1';
     end;
   end;
 end;
 
-{$IFDEF USETLS}constructor TFormConnectToServer.Create(AOwner : TComponent; const ACertificatesFingerprints : TList<String>);
+{$IFDEF USETLS}constructor TFormConnectToServer.Create(AOwner: TComponent; const ACertificatesFingerprints: TList<string>);
 begin
   inherited Create(AOwner);
   ///
 
-  ComboCertificate.Clear();
+  ComboCertificate.Clear;
 
   if not Assigned(ACertificatesFingerprints) then
-    Exit();
+    Exit;
 
   for var AFingerprint in ACertificatesFingerprints do
     ComboCertificate.Items.Add(AFingerprint);

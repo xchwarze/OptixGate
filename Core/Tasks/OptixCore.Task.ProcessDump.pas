@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Task.ProcessDump;
 
 interface
@@ -62,34 +60,34 @@ type
   TOptixProcessDumpTask = class(TOptixTask)
   protected
     {@M}
-    function TaskCode() : TOptixTaskResult; override;
+    function TaskCode: TOptixTaskResult; override;
   end;
 
   TOptixTaskGetProcessDumpResult = class(TOptixTaskResult)
   private
     [OptixSerializableAttribute]
-    FOutputFilePath : String;
+    FOutputFilePath: string;
 
     [OptixSerializableAttribute]
-    FDumpedProcessId : Cardinal;
+    FDumpedProcessId: Cardinal;
 
     [OptixSerializableAttribute]
-    FDumpedProcessName : String;
+    FDumpedProcessName: string;
 
     {@M}
-    function GetProcessDisplayName() : String;
+    function GetProcessDisplayName: string;
   protected
     {@M}
-    function GetExtendedDescription() : String; override;
+    function GetExtendedDescription: string; override;
   public
     {@C}
-    constructor Create(const AOutputFileName : String; const ADumpedProcessId : Cardinal); overload;
+    constructor Create(const AOutputFileName: string; const ADumpedProcessId: Cardinal); overload;
 
     {@G}
-    property OutputFilePath    : String   read FOutputFilePath;
-    property DumpedProcessId   : Cardinal read FDumpedProcessId;
-    property DumpedProcessName : String   read FDumpedProcessName;
-    property Displayname       : String   read GetProcessDisplayName;
+    property OutputFilePath: string read FOutputFilePath;
+    property DumpedProcessId: Cardinal read FDumpedProcessId;
+    property DumpedProcessName: string read FDumpedProcessName;
+    property Displayname: string read GetProcessDisplayName;
   end;
 
 implementation
@@ -105,13 +103,13 @@ uses
 
 (* TOptixProcessDumpTask *)
 
-function TOptixProcessDumpTask.TaskCode() : TOptixTaskResult;
+function TOptixProcessDumpTask.TaskCode: TOptixTaskResult;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(FCommand) or (not (FCommand is TOptixCommandDumpProcess)) then
-    Exit();
+    Exit;
 
   var AOutputFilePath := TProcessHelper.MiniDumpWriteDump(
     TOptixCommandDumpProcess(FCommand).ProcessId,
@@ -120,36 +118,36 @@ begin
   );
 
   ///
-  result := TOptixTaskGetProcessDumpResult.Create(AOutputFilePath, TOptixCommandDumpProcess(FCommand).ProcessId);
+  Result := TOptixTaskGetProcessDumpResult.Create(AOutputFilePath, TOptixCommandDumpProcess(FCommand).ProcessId);
 end;
 
 (* TOptixTaskGetProcessDumpResult *)
 
-constructor TOptixTaskGetProcessDumpResult.Create(const AOutputFileName : String; const ADumpedProcessId : Cardinal);
+constructor TOptixTaskGetProcessDumpResult.Create(const AOutputFileName: string; const ADumpedProcessId: Cardinal);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FOutputFilePath    := AOutputFileName;
-  FDumpedProcessId   := ADumpedProcessId;
+  FOutputFilePath := AOutputFileName;
+  FDumpedProcessId := ADumpedProcessId;
   FDumpedProcessName := TPath.GetFileName(TProcessHelper.TryGetProcessImagePath(FDumpedProcessId));
 end;
 
-function TOptixTaskGetProcessDumpResult.GetProcessDisplayName() : String;
+function TOptixTaskGetProcessDumpResult.GetProcessDisplayName: string;
 begin
-  if String.IsNullOrWhiteSpace(FDumpedProcessName) then
-    result := IntToStr(FDumpedProcessId)
+  if string.IsNullOrWhiteSpace(FDumpedProcessName) then
+    Result := IntToStr(FDumpedProcessId)
   else
-    result := Format('%d (%s)', [
+    Result := Format('%d (%s)', [
       FDumpedProcessId,
       FDumpedProcessName
     ]);
 end;
 
-function TOptixTaskGetProcessDumpResult.GetExtendedDescription() : String;
+function TOptixTaskGetProcessDumpResult.GetExtendedDescription: string;
 begin
-  result := Format('%s successfully dumped to "%s"', [
-    GetProcessDisplayName(),
+  Result := Format('%s successfully dumped to "%s"', [
+    GetProcessDisplayName,
     FOutputFilePath
   ]);
 end;

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Protocol.SessionHandler;
 
 interface
@@ -74,59 +72,59 @@ type
   {$IFDEF CLIENT_GUI}
   TOptixSessionHandlerThread = class;
 
-  TOnSessionHandlerEvent = procedure(Sender : TOptixSessionHandlerThread) of object;
+  TOnSessionHandlerEvent = procedure(Sender: TOptixSessionHandlerThread) of object;
 
-  TOnConnectedToServer         = TOnSessionHandlerEvent;
-  TOnDisconnectedFromServer    = TOnSessionHandlerEvent;
-  TOnSessionHandlerDestroyed   = TOnSessionHandlerEvent;
+  TOnConnectedToServer = TOnSessionHandlerEvent;
+  TOnDisconnectedFromServer = TOnSessionHandlerEvent;
+  TOnSessionHandlerDestroyed = TOnSessionHandlerEvent;
   {$ENDIF}
 
   TOptixSessionHandlerThread = class(TOptixClientHandlerThread)
   private
-    FTasks                    : TObjectList<TOptixTask>;
-    FShellInstances           : TObjectList<TProcessHandler>;
-    FFileTransferOrchestrator : TOptixFileTransferOrchestratorThread;
-    FContentReaders           : TObjectDictionary<TGUID, TContentReader>;
+    FTasks: TObjectList<TOptixTask>;
+    FShellInstances: TObjectList<TProcessHandler>;
+    FFileTransferOrchestrator: TOptixFileTransferOrchestratorThread;
+    FContentReaders: TObjectDictionary<TGUID, TContentReader>;
 
     {$IFDEF CLIENT_GUI}
-    FOnConnectedToServer         : TOnConnectedToServer;
-    FOnDisconnectedFromServer    : TOnDisconnectedFromServer;
-    FOnSessionHandlerDestroyed   : TOnSessionHandlerDestroyed;
+    FOnConnectedToServer: TOnConnectedToServer;
+    FOnDisconnectedFromServer: TOnDisconnectedFromServer;
+    FOnSessionHandlerDestroyed: TOnSessionHandlerDestroyed;
     {$ENDIF}
 
     {@M}
-    procedure InitializeFileTransferOrchestratorThread();
+    procedure InitializeFileTransferOrchestratorThread;
   protected
     {@M}
-    function InitializePreflightRequest() : TOptixPreflightRequest; override;
-    procedure Initialize(); override;
-    procedure Finalize(); override;
+    function InitializePreflightRequest: TOptixPreflightRequest; override;
+    procedure Initialize; override;
+    procedure Finalize; override;
 
-    procedure PollShellInstances();
-    procedure PollActions(); override;
-    procedure PollTasks();
+    procedure PollShellInstances;
+    procedure PollActions; override;
+    procedure PollTasks;
 
-    procedure RegisterNewFileTransfer(const ATransfer : TOptixCommandTransfer);
-    procedure RegisterAndStartNewTask(const AOptixTask : TOptixTask);
+    procedure RegisterNewFileTransfer(const ATransfer: TOptixCommandTransfer);
+    procedure RegisterAndStartNewTask(const AOptixTask: TOptixTask);
 
-    procedure RegisterAndStartNewShellInstance(const ACommand : TOptixCommandCreateShellInstance);
-    procedure PerformActionOnShellInstance(const AInstanceId : TGUID; const AShellAction : TShellAction);
-    procedure TerminateShellInstance(const ACommand : TOptixCommandDeleteShellInstance);
-    procedure BreakShellInstance(const ACommand : TOptixCommandSigIntShellInstance);
-    procedure StdinToShellInstance(const ACommand : TOptixCommandWriteShellInstance);
+    procedure RegisterAndStartNewShellInstance(const ACommand: TOptixCommandCreateShellInstance);
+    procedure PerformActionOnShellInstance(const AInstanceId: TGUID; const AShellAction: TShellAction);
+    procedure TerminateShellInstance(const ACommand: TOptixCommandDeleteShellInstance);
+    procedure BreakShellInstance(const ACommand: TOptixCommandSigIntShellInstance);
+    procedure StdinToShellInstance(const ACommand: TOptixCommandWriteShellInstance);
 
-    procedure BrowseContentReaderPage(const AReaderId : TGUID; const APageNumber : Int64;
-      const ANewPageSize : UInt64 = 0; const AFirstPage : Boolean = False);
-    procedure CreateAndRegisterNewContentReader(const ACommand : TOptixCommandCreateFileContentReader);
+    procedure BrowseContentReaderPage(const AReaderId: TGUID; const APageNumber: Int64;
+      const ANewPageSize: UInt64 = 0; const AFirstPage: Boolean = False);
+    procedure CreateAndRegisterNewContentReader(const ACommand: TOptixCommandCreateFileContentReader);
 
-    procedure Connected(); override;
-    procedure Disconnected(); override;
-    procedure PacketReceived(const AOptixPacket : TOptixPacket; var ACallHandleMemory : Boolean); override;
+    procedure Connected; override;
+    procedure Disconnected; override;
+    procedure PacketReceived(const AOptixPacket: TOptixPacket; var ACallHandleMemory: Boolean); override;
   {$IFDEF CLIENT_GUI}
   public
-    property OnConnectedToServer       : TOnConnectedToServer         write FOnConnectedToServer;
-    property OnDisconnectedFromServer  : TOnDisconnectedFromServer    write FOnDisconnectedFromServer;
-    property OnSessionHandlerDestroyed : TOnSessionHandlerDestroyed   write FOnSessionHandlerDestroyed;
+    property OnConnectedToServer: TOnConnectedToServer write FOnConnectedToServer;
+    property OnDisconnectedFromServer: TOnDisconnectedFromServer write FOnDisconnectedFromServer;
+    property OnSessionHandlerDestroyed: TOnSessionHandlerDestroyed write FOnSessionHandlerDestroyed;
     {$ENDIF}
   end;
 
@@ -141,7 +139,7 @@ uses
   OptixCore.SessionInformation, OptixCore.LogNotifier, OptixCore.Thread, OptixCore.ClassesRegistry;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixSessionHandlerThread.Initialize();
+procedure TOptixSessionHandlerThread.Initialize;
 begin
   inherited;
   ///
@@ -152,13 +150,13 @@ begin
   FContentReaders := TObjectDictionary<TGUID, TContentReader>.Create([doOwnsValues]);
 
   {$IFDEF CLIENT_GUI}
-  FOnConnectedToServer         := nil;
-  FOnDisconnectedFromServer    := nil;
+  FOnConnectedToServer := nil;
+  FOnDisconnectedFromServer := nil;
   FOnSessionHandlerDestroyed := nil;
   {$ENDIF}
 end;
 
-procedure TOptixSessionHandlerThread.Finalize();
+procedure TOptixSessionHandlerThread.Finalize;
 begin
   inherited;
   ///
@@ -180,18 +178,18 @@ begin
     FreeAndNil(FContentReaders);
 end;
 
-function TOptixSessionHandlerThread.InitializePreflightRequest() : TOptixPreflightRequest;
+function TOptixSessionHandlerThread.InitializePreflightRequest: TOptixPreflightRequest;
 begin
-  result.ClientKind := ckHandler;
+  Result.ClientKind := ckHandler;
 end;
 
-procedure TOptixSessionHandlerThread.PollTasks();
+procedure TOptixSessionHandlerThread.PollTasks;
 begin
   if not Assigned(FTasks) or (FTasks.Count = 0) then
-    Exit();
+    Exit;
   ///
 
-  var ATasksToDelete := TList<TOptixTask>.Create();
+  var ATasksToDelete := TList<TOptixTask>.Create;
   try
     for var ATask in FTasks do begin
       if ATask.Completed then begin
@@ -210,31 +208,31 @@ begin
     for var ATask in ATasksToDelete do
       FTasks.Remove(ATask);
   finally
-    FreeAndNil(ATasksToDelete);
+    ATasksToDelete.Free;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.RegisterAndStartNewTask(const AOptixTask : TOptixTask);
+procedure TOptixSessionHandlerThread.RegisterAndStartNewTask(const AOptixTask: TOptixTask);
 begin
   if not Assigned(AOptixTask) or not Assigned(FTasks) then
-    Exit();
+    Exit;
   ///
 
-  var ATaskId := TGUID.NewGuid();
+  var ATaskId := TGUID.NewGuid;
 
   AOptixTask.SetTaskId(ATaskId);
 
   AddPacket(TOptixTaskCallback.Create(AOptixTask));
 
-  AOptixTask.Start();
+  AOptixTask.Start;
 
   ///
   FTasks.Add(AOptixTask);
 end;
 
-procedure TOptixSessionHandlerThread.PollShellInstances();
+procedure TOptixSessionHandlerThread.PollShellInstances;
 begin
-  var AShellInstancesToDelete := TList<TProcessHandler>.Create();
+  var AShellInstancesToDelete := TList<TProcessHandler>.Create;
   try
     for var AShellInstance in FShellInstances do begin
       if not AShellInstance.Active then begin
@@ -245,13 +243,13 @@ begin
       end;
 
       try
-        var ARetrievedOutput := AShellInstance.ReadAvailableOutput();
+        var ARetrievedOutput := AShellInstance.ReadAvailableOutput;
         ///
 
-        if not String.IsNullOrWhiteSpace(ARetrievedOutput) then
+        if not string.IsNullOrWhiteSpace(ARetrievedOutput) then
           AddPacket(TOptixCommandReadShellInstance.Create(AShellInstance.GroupId, ARetrievedOutput, AShellInstance.InstanceId));
       except
-        AShellInstance.Close();
+        AShellInstance.Close;
       end;
     end;
 
@@ -265,11 +263,11 @@ begin
       FShellInstances.Remove(AShellInstance);
     end;
   finally
-    FreeAndNil(AShellInstancesToDelete);
+    AShellInstancesToDelete.Free;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.PerformActionOnShellInstance(const AInstanceId : TGUID; const AShellAction : TShellAction);
+procedure TOptixSessionHandlerThread.PerformActionOnShellInstance(const AInstanceId: TGUID; const AShellAction: TShellAction);
 begin
   for var AShellInstance in FShellInstances do begin
     if AShellInstance.InstanceId <> AInstanceId then
@@ -277,18 +275,18 @@ begin
     ///
 
     case AShellAction of
-      saBreak : begin
+      saBreak: begin
         if AShellInstance.Active then
           AShellInstance.TryCtrlC;
       end;
 
-      saTerminate :
-        AShellInstance.TryClose();
+      saTerminate: 
+        AShellInstance.TryClose;
     end;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.StdinToShellInstance(const ACommand : TOptixCommandWriteShellInstance);
+procedure TOptixSessionHandlerThread.StdinToShellInstance(const ACommand: TOptixCommandWriteShellInstance);
 begin
   for var AShellInstance in FShellInstances do begin
     if AShellInstance.InstanceId <> ACommand.InstanceId then
@@ -296,22 +294,22 @@ begin
     try
       AShellInstance.WriteLn(AnsiString(ACommand.CommandLine));
     except
-      AShellInstance.Close();
+      AShellInstance.Close;
     end;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.TerminateShellInstance(const ACommand : TOptixCommandDeleteShellInstance);
+procedure TOptixSessionHandlerThread.TerminateShellInstance(const ACommand: TOptixCommandDeleteShellInstance);
 begin
   PerformActionOnShellInstance(ACommand.InstanceId, saTerminate);
 end;
 
-procedure TOptixSessionHandlerThread.BreakShellInstance(const ACommand : TOptixCommandSigIntShellInstance);
+procedure TOptixSessionHandlerThread.BreakShellInstance(const ACommand: TOptixCommandSigIntShellInstance);
 begin
   PerformActionOnShellInstance(ACommand.InstanceId, saBreak);
 end;
 
-procedure TOptixSessionHandlerThread.RegisterAndStartNewShellInstance(const ACommand : TOptixCommandCreateShellInstance);
+procedure TOptixSessionHandlerThread.RegisterAndStartNewShellInstance(const ACommand: TOptixCommandCreateShellInstance);
 begin
   var AProcessHandler := TProcessHandler.Create('powershell.exe', ACommand.WindowGUID);
 
@@ -322,16 +320,16 @@ begin
   FShellInstances.Add(AProcessHandler);
 end;
 
-procedure TOptixSessionHandlerThread.PollActions();
+procedure TOptixSessionHandlerThread.PollActions;
 begin
   // Tasks -------------------------------------------------------------------------------------------------------------
-  PollTasks();
+  PollTasks;
   // Shell Instances ---------------------------------------------------------------------------------------------------
-  PollShellInstances();
+  PollShellInstances;
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TOptixSessionHandlerThread.InitializeFileTransferOrchestratorThread();
+procedure TOptixSessionHandlerThread.InitializeFileTransferOrchestratorThread;
 begin
   if not TOptixThread.HasRunningInstance(FFileTransferOrchestrator) then begin
     FFileTransferOrchestrator := TOptixFileTransferOrchestratorThread.Create(
@@ -339,30 +337,30 @@ begin
     );
 
     ///
-    FFileTransferOrchestrator.Start();
+    FFileTransferOrchestrator.Start;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.RegisterNewFileTransfer(const ATransfer : TOptixCommandTransfer);
+procedure TOptixSessionHandlerThread.RegisterNewFileTransfer(const ATransfer: TOptixCommandTransfer);
 begin
-  InitializeFileTransferOrchestratorThread();
+  InitializeFileTransferOrchestratorThread;
   ///
 
   FFileTransferOrchestrator.AddTransfer(ATransfer);
 end;
 
-procedure TOptixSessionHandlerThread.BrowseContentReaderPage(const AReaderId : TGUID; const APageNumber : Int64;
-  const ANewPageSize : UInt64 = 0; const AFirstPage : Boolean = False);
+procedure TOptixSessionHandlerThread.BrowseContentReaderPage(const AReaderId: TGUID; const APageNumber: Int64;
+  const ANewPageSize: UInt64 = 0; const AFirstPage: Boolean = False);
 begin
   var AReader := TContentReader(nil);
   if not FContentReaders.TryGetValue(AReaderId, AReader) then
-    Exit();
+    Exit;
   ///
 
   if ANewPageSize > 0 then
     AReader.PageSize := ANewPageSize;
 
-  var ACommandClass : TOptixCommandReadContentReaderPageClass;
+  var ACommandClass: TOptixCommandReadContentReaderPageClass;
 
   if AFirstPage then
     ACommandClass := TOptixCommandReadContentReaderPageFirstPage
@@ -378,7 +376,7 @@ begin
 end;
 
 procedure TOptixSessionHandlerThread.CreateAndRegisterNewContentReader(
-  const ACommand : TOptixCommandCreateFileContentReader);
+  const ACommand: TOptixCommandCreateFileContentReader);
 begin
   var AReader := TContentReader.Create(ACommand.FilePath, ACommand.PageSize);
 
@@ -389,7 +387,7 @@ begin
   BrowseContentReaderPage(AReaderId, 0, 0, True);
 end;
 
-procedure TOptixSessionHandlerThread.Connected();
+procedure TOptixSessionHandlerThread.Connected;
 begin
   inherited;
   ///
@@ -401,19 +399,19 @@ begin
     end);
   {$ENDIF}
 
-  var ASessionInformation := TOptixCommandReceiveSessionInformation.Create();
+  var ASessionInformation := TOptixCommandReceiveSessionInformation.Create;
   try
-    ASessionInformation.DoAction();
+    ASessionInformation.DoAction;
 
     ///
     AddPacket(ASessionInformation);
   except
     if Assigned(ASessionInformation) then
-      FreeAndNil(ASessionInformation);
+      ASessionInformation.Free;
   end;
 end;
 
-procedure TOptixSessionHandlerThread.Disconnected();
+procedure TOptixSessionHandlerThread.Disconnected;
 begin
   inherited;
   ///
@@ -433,20 +431,26 @@ begin
   end;
 
   if Assigned(FShellInstances) then
-    FShellInstances.Clear();
+    FShellInstances.Clear;
 end;
 
-procedure TOptixSessionHandlerThread.PacketReceived(const AOptixPacket : TOptixPacket; var ACallHandleMemory : Boolean);
+procedure TOptixSessionHandlerThread.PacketReceived(const AOptixPacket: TOptixPacket; var ACallHandleMemory: Boolean);
 begin
   if not Assigned(AOptixPacket) then
     Exit;
   try
-    ACallHandleMemory := True;
+    ACallHandleMemory := True; // TODO: Improve
     ///
 
     // Optix Action Command (& Response) -------------------------------------------------------------------------------
     if AOptixPacket is TOptixCommandAction then begin
-      TOptixCommandActionResponse(AOptixPacket).DoAction();
+      try
+        TOptixCommandActionResponse(AOptixPacket).DoAction
+      except
+        ACallHandleMemory := False;
+
+        raise;
+      end;
 
       // For Action & Response
       if AOptixPacket is TOptixCommandActionResponse then begin
@@ -456,7 +460,14 @@ begin
       end;
     // Optix Task Command ----------------------------------------------------------------------------------------------
     end else if AOptixPacket is TOptixCommandTask then begin
-      var ATask := TOptixCommandTask(AOptixPacket).CreateTask(TOptixCommand(AOptixPacket));
+      var ATask: TOptixTask;
+      try
+        ATask := TOptixCommandTask(AOptixPacket).CreateTask(TOptixCommand(AOptixPacket));
+      except
+        ACallHandleMemory := False;
+
+        raise;
+      end;
 
       ///
       RegisterAndStartNewTask(ATask);
@@ -505,7 +516,7 @@ begin
       // ---------------------------------------------------------------------------------------------------------------
     end;
   except
-    on E : Exception do
+    on E: Exception do
       AddPacket(TOptixCommandReceiveLogMessage.Create(E.Message, AOptixPacket.ClassName, lkException));
   end;
 end;

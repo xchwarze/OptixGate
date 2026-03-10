@@ -64,49 +64,49 @@ type
   TContentFormater = class
   public
     type
-      TStringKind  = (skAnsi, skUnicode);
+      TStringKind = (skAnsi, skUnicode);
       TStringKinds = set of TStringKind;
 
       TStringInformation = record
-        Offset : Pointer;
-        Size   : UInt64;  // In Bytes
-        Kind   : TStringKind;
+        Offset: Pointer;
+        Size: UInt64;  // In Bytes
+        Kind: TStringKind;
 
         {@M}
-        function ToString() : String;
-        function Length() : UInt64;
+        function ToString: string;
+        function Length: UInt64;
       end;
   public
-    class function ProbeForStrings(const pBuffer : Pointer;
-      const ABufferSize : UInt64; const AMinLength : Cardinal = 0) : TList<TStringInformation>; static;
-    class function ExtractStrings(const pBuffer : Pointer; const ABufferSize : UInt64;
-      const AMinLength : Cardinal = 0; AStringKinds : TStringKinds = []) : String; static;
-    class function OutputPrintableChar(const AByte : Byte) : Char; overload; static;
-    class function OutputPrintableChar(const pBuffer : Pointer; const ABufferSize : UInt64) : String; overload; static;
-    class function ToHexTable(const pBuffer : Pointer; const ABufferSize : UInt64;
-      const AStartOffset : UInt64 = 0; const AColumnLength : Cardinal = 16) : String; static;
+    class function ProbeForStrings(const pBuffer: Pointer;
+      const ABufferSize: UInt64; const AMinLength: Cardinal = 0) : TList<TStringInformation>; static;
+    class function ExtractStrings(const pBuffer: Pointer; const ABufferSize: UInt64;
+      const AMinLength: Cardinal = 0; AStringKinds: TStringKinds = []) : string; static;
+    class function OutputPrintableChar(const AByte: Byte): Char; overload; static;
+    class function OutputPrintableChar(const pBuffer: Pointer; const ABufferSize: UInt64): string; overload; static;
+    class function ToHexTable(const pBuffer: Pointer; const ABufferSize: UInt64;
+      const AStartOffset: UInt64 = 0; const AColumnLength: Cardinal = 16) : string; static;
   end;
 
   TMemoryUtils = class
   public
-    class procedure StringToMemory(const AValue : String; out pData : Pointer; out ADataSize : UInt64); static;
-    class procedure DwordToMemory(const AValue : DWORD; out pData : Pointer; out ADataSize : UInt64); static;
-    class procedure QwordToMemory(const AValue : UInt64; out pData : Pointer; out ADataSize : UInt64); static;
+    class procedure StringToMemory(const AValue: string; out pData: Pointer; out ADataSize: UInt64); static;
+    class procedure DwordToMemory(const AValue: DWORD; out pData: Pointer; out ADataSize: UInt64); static;
+    class procedure QwordToMemory(const AValue: UInt64; out pData: Pointer; out ADataSize: UInt64); static;
 
-    class function MemoryMultiStringToString(const pBuffer : Pointer; const ABufferSize : UInt64) : String; static;
-    class function MemoryToString(const pBuffer : Pointer; const ABufferSize : UInt64) : String; static;
+    class function MemoryMultiStringToString(const pBuffer: Pointer; const ABufferSize: UInt64): string; static;
+    class function MemoryToString(const pBuffer: Pointer; const ABufferSize: UInt64): string; static;
   end;
 
 implementation
 
 (* TContentFormater *)
 
-function TContentFormater.TStringInformation.ToString() : String;
+function TContentFormater.TStringInformation.ToString: string;
 begin
   if Kind = skUnicode then
     SetString(Result, PWideChar(Offset), Size div SizeOf(WideChar))
   else begin
-    var ATemp : AnsiString;
+    var ATemp: AnsiString;
 
     SetString(ATemp, PAnsiChar(Offset), Size div SizeOf(AnsiChar));
 
@@ -115,53 +115,53 @@ begin
   end;
 end;
 
-function TContentFormater.TStringInformation.Length() : UInt64;
+function TContentFormater.TStringInformation.Length: UInt64;
 begin
-  // TODO : Delphi CE >= 13 use Ternary
+  // TODO: Delphi CE >= 13 use Ternary
   if Kind = skUnicode then
-    result := Size div SizeOf(WideChar)
+    Result := Size div SizeOf(WideChar)
   else
-    result := Size;
+    Result := Size;
 end;
 
-class function TContentFormater.ProbeForStrings(const pBuffer : Pointer; const ABufferSize : UInt64;
-  const AMinLength : Cardinal = 0) : TList<TStringInformation>;
+class function TContentFormater.ProbeForStrings(const pBuffer: Pointer; const ABufferSize: UInt64;
+  const AMinLength: Cardinal = 0) : TList<TStringInformation>;
 
   var
-    pCurByte, pLastByte : PByte;
-    AStringInformation : TStringInformation;
+    pCurByte, pLastByte: PByte;
+    AStringInformation: TStringInformation;
 
-  function IsPrintable(const AByte : Byte) : Boolean;
+  function IsPrintable(const AByte: Byte): Boolean;
   begin
     Result := AByte in [9, 32..126];
   end;
 
-  procedure RegisterStringInformation();
+  procedure RegisterStringInformation;
   begin
     if (AStringInformation.Offset <> nil) then begin
-      AStringInformation.Size   := NativeUInt(pCurByte) - NativeUInt(AStringInformation.Offset);
+      AStringInformation.Size := NativeUInt(pCurByte) - NativeUInt(AStringInformation.Offset);
 
       if (AMinLength = 0) or (AStringInformation.Size >= AMinLength)  then
-        result.Add(AStringInformation);
+        Result.Add(AStringInformation);
 
       ///
       AStringInformation.Offset := nil;
-      AStringInformation.Size   := 0;
+      AStringInformation.Size := 0;
     end;
   end;
 
 begin
-  result := TList<TStringInformation>.Create();
+  Result := TList<TStringInformation>.Create;
   ///
 
   if not Assigned(pBuffer) then
-    Exit();
+    Exit;
 
   pCurByte := pBuffer;
   pLastByte := pCurByte + ABufferSize;
 
   AStringInformation.Offset := nil;
-  AStringInformation.Size   := 0;
+  AStringInformation.Size := 0;
 
   while pCurByte < pLastByte do begin
     // Unicode Strings -------------------------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ begin
       ///
       Inc(pCurByte);
     end else begin
-      RegisterStringInformation();
+      RegisterStringInformation;
 
       ///
       Inc(pCurByte);
@@ -195,13 +195,13 @@ begin
   end;
 
   ///
-  RegisterStringInformation();
+  RegisterStringInformation;
 end;
 
-class function TContentFormater.ExtractStrings(const pBuffer : Pointer; const ABufferSize : UInt64;
-  const AMinLength : Cardinal = 0; AStringKinds : TStringKinds = []) : String;
+class function TContentFormater.ExtractStrings(const pBuffer: Pointer; const ABufferSize: UInt64;
+  const AMinLength: Cardinal = 0; AStringKinds: TStringKinds = []) : string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if AStringKinds = [] then
@@ -226,46 +226,46 @@ begin
         AStringBuilder.AppendLine(AStringInformation.ToString);
       end;
     finally
-      result := AStringBuilder.ToString();
+      Result := AStringBuilder.ToString;
 
-      FreeAndNil(AStringBuilder);
+      AStringBuilder.Free;
     end;
   finally
     if Assigned(AStringInformations) then
-      FreeAndNil(AStringInformations);
+      AStringInformations.Free;
   end;
 end;
 
-class function TContentFormater.OutputPrintableChar(const AByte : Byte) : Char;
+class function TContentFormater.OutputPrintableChar(const AByte: Byte): Char;
 begin
   if AByte in [32..126] then
-    result := Chr(AByte)
+    Result := Chr(AByte)
   else
-    result := '.';
+    Result := '.';
 end;
 
-class function TContentFormater.OutputPrintableChar(const pBuffer : Pointer; const ABufferSize : UInt64) : String;
+class function TContentFormater.OutputPrintableChar(const pBuffer: Pointer; const ABufferSize: UInt64): string;
 begin
-  SetLength(result, ABufferSize);
+  SetLength(Result, ABufferSize);
   ///
 
   for var I := 0 to ABufferSize -1 do
-    result[I +1] := OutputPrintableChar(PByte(NativeUInt(pBuffer) + I)^);
+    Result[I +1] := OutputPrintableChar(PByte(NativeUInt(pBuffer) + I)^);
 end;
 
-class function TContentFormater.ToHexTable(const pBuffer : Pointer; const ABufferSize : UInt64;
-  const AStartOffset : UInt64 = 0; const AColumnLength : Cardinal = 16) : String;
+class function TContentFormater.ToHexTable(const pBuffer: Pointer; const ABufferSize: UInt64;
+  const AStartOffset: UInt64 = 0; const AColumnLength: Cardinal = 16) : string;
 begin
-  result := '';
+  Result := '';
   ///
 
   if (ABufferSize = 0) or not Assigned(pBuffer) then
-    Exit();
+    Exit;
 
   var AOutputBuilder := TStringBuilder.Create(SizeOf(NativeUInt) + (AColumnLength * 3) + (AColumnLength -1) + 16);
   try
-    var ARowHex   : array of String;
-    var ARowAscii : array of String;
+    var ARowHex: array of String;
+    var ARowAscii: array of String;
     ///
 
     SetLength(ARowHex, AColumnLength);
@@ -281,13 +281,13 @@ begin
         var ptrByte := PByte(NativeUInt(pBuffer) + ATotalBytesRead + I);
         ///
 
-        ARowHex[I]   := IntToHex(ptrByte^);
+        ARowHex[I] := IntToHex(ptrByte^);
         ARowAscii[I] := OutputPrintableChar(ptrByte^);
       end;
 
       if ABytesToRead < AColumnLength then
         for var I := ABytesToRead to AColumnLength -1 do begin
-          ARowHex[I]   := '';
+          ARowHex[I] := '';
           ARowAscii[I] := '';
         end;
 
@@ -303,16 +303,16 @@ begin
     until ATotalBytesRead = ABufferSize;
 
     ///
-    result := AOutputBuilder.ToString;
+    Result := AOutputBuilder.ToString;
   finally
     if Assigned(AOutputBuilder) then
-      FreeAndNil(AOutputBuilder);
+      AOutputBuilder.Free;
   end;
 end;
 
 (* TMemoryUtils *)
 
-class procedure TMemoryUtils.StringToMemory(const AValue : String; out pData : Pointer; out ADataSize : UInt64);
+class procedure TMemoryUtils.StringToMemory(const AValue: string; out pData: Pointer; out ADataSize: UInt64);
 begin
   ADataSize := Length(AValue) * SizeOf(WideChar);
 
@@ -321,7 +321,7 @@ begin
   CopyMemory(pData, PWideChar(AValue), ADataSize);
 end;
 
-class procedure TMemoryUtils.DwordToMemory(const AValue : DWORD; out pData : Pointer; out ADataSize : UInt64);
+class procedure TMemoryUtils.DwordToMemory(const AValue: DWORD; out pData: Pointer; out ADataSize: UInt64);
 begin
   ADataSize := SizeOf(DWORD);
 
@@ -330,7 +330,7 @@ begin
   CopyMemory(pData, @AValue, ADataSize);
 end;
 
-class procedure TMemoryUtils.QwordToMemory(const AValue : UInt64; out pData : Pointer; out ADataSize : UInt64);
+class procedure TMemoryUtils.QwordToMemory(const AValue: UInt64; out pData: Pointer; out ADataSize: UInt64);
 begin
   ADataSize := SizeOf(UInt64);
 
@@ -339,13 +339,13 @@ begin
   CopyMemory(pData, @AValue, ADataSize);
 end;
 
-class function TMemoryUtils.MemoryMultiStringToString(const pBuffer : Pointer; const ABufferSize : UInt64) : String;
+class function TMemoryUtils.MemoryMultiStringToString(const pBuffer: Pointer; const ABufferSize: UInt64): string;
 begin
   if not Assigned(pBuffer) or (ABufferSize < 2) then
     Exit('');
   ///
 
-  var AStringList := TStringList.Create();
+  var AStringList := TStringList.Create;
   try
     var p := PWideChar(pBuffer);
     var pEnd := PWideChar(NativeUInt(pBuffer) + ABufferSize);
@@ -361,7 +361,7 @@ begin
         Inc(pCandidate);
       end;
 
-      var ACandidate : String;
+      var ACandidate: string;
       var ACandidateLength := (NativeUInt(pCandidate) - NativeUInt(p)) div SizeOf(WideChar);
 
       SetString(ACandidate, p, ACandidateLength);
@@ -375,20 +375,19 @@ begin
     end;
 
     ///
-    result := AStringList.Text;
+    Result := AStringList.Text;
   finally
-    if Assigned(AStringList) then
-      FreeAndNil(AStringList);
+    AStringList.Free;     
   end;
 end;
 
-class function TMemoryUtils.MemoryToString(const pBuffer : Pointer; const ABufferSize : UInt64) : String;
+class function TMemoryUtils.MemoryToString(const pBuffer: Pointer; const ABufferSize: UInt64): string;
 begin
   if not Assigned(pBuffer) or (ABufferSize = 0) then
     Exit('');
 
   ///
-  SetString(result, PWideChar(pBuffer), ABufferSize div 2);
+  SetString(Result, PWideChar(pBuffer), ABufferSize div 2);
 end;
 
 end.

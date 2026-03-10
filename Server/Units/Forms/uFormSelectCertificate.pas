@@ -72,13 +72,13 @@ type
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
   private
-    FDefaultIndex : Integer;
+    FDefaultIndex: Integer;
 
     {@M}
-    procedure DoResize();
+    procedure DoResize;
   public
     {@C}
-    constructor Create(AOwner : TComponent; const APreSelectCertificate : String = ''); reintroduce;
+    constructor Create(AOwner: TComponent; const APreSelectCertificate: string = ''); reintroduce;
   end;
 
 var
@@ -92,76 +92,76 @@ uses Optix.Helper,
 
 {$R *.dfm}
 
-procedure TFormSelectCertificate.DoResize();
+procedure TFormSelectCertificate.DoResize;
 begin
   ButtonValidate.Top := (PanelBottom.Height div 2) - (ButtonValidate.Height div 2);
-  ButtonCancel.Top  := ButtonValidate.Top;
+  ButtonCancel.Top := ButtonValidate.Top;
 
   ButtonValidate.Left := PanelBottom.Width - ButtonValidate.Width - 8;
-  ButtonCancel.Left  := ButtonValidate.Left - ButtonValidate.Width - 8;
+  ButtonCancel.Left := ButtonValidate.Left - ButtonValidate.Width - 8;
 end;
 
 procedure TFormSelectCertificate.FormCreate(Sender: TObject);
 begin
   {$IFDEF CLIENT_GUI}
-  FlatWindow1.Caption    := clRed;
+  FlatWindow1.Caption := clRed;
   FlatWindow1.Background := clWhite;
-  PanelMain.Color        := FlatWindow1.Background;
-  PanelBottom.Color      := FlatWindow1.Background;
+  PanelMain.Color := FlatWindow1.Background;
+  PanelBottom.Color := FlatWindow1.Background;
   {$ENDIF}
 end;
 
 procedure TFormSelectCertificate.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    13 : ButtonValidateClick(ButtonValidate);
-    27 : ModalResult := mrCancel;
+    13: ButtonValidateClick(ButtonValidate);
+    27: ModalResult := mrCancel;
   end;
 end;
 
 procedure TFormSelectCertificate.FormResize(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormSelectCertificate.FormShow(Sender: TObject);
 begin
-  DoResize();
+  DoResize;
 end;
 
 procedure TFormSelectCertificate.ButtonCancelClick(Sender: TObject);
 begin
-  ModalResult := mrCancel
+  ModalResult := mrCancel;
 end;
 
 procedure TFormSelectCertificate.ButtonValidateClick(Sender: TObject);
 begin
   if ComboCertificate.ItemIndex = -1 then
-    TOptixHelper.Error(self.Handle, 'You must select an existing certificate (via its fingerprint).')
+    TOptixHelper.Error(Handle, 'You must select an existing certificate (via its fingerprint).')
   else if ComboCertificate.ItemIndex = FDefaultIndex then
     ModalResult := mrCancel // Nothing changed
   else
     ModalResult := mrOk;
 end;
 
-constructor TFormSelectCertificate.Create(AOwner : TComponent; const APreSelectCertificate : String = '');
+constructor TFormSelectCertificate.Create(AOwner: TComponent; const APreSelectCertificate: string = '');
 begin
   inherited Create(AOwner);
   ///
 
   FDefaultIndex := -1;
 
-  ComboCertificate.Clear();
+  ComboCertificate.Clear;
 
-  var AFingerprints := FormCertificatesStore.GetCertificatesFingerprints();
+  var AFingerprints := FormCertificatesStore.GetCertificatesFingerprints;
   try
     for var AFingerprint in AFingerprints do begin
       var AIndex := ComboCertificate.Items.Add(AFingerprint);
-      if (APreSelectCertificate <> '') and (String.Compare(APreSelectCertificate, AFingerprint, True) = 0) then
+      if (APreSelectCertificate <> '') and (string.Compare(APreSelectCertificate, AFingerprint, True) = 0) then
         FDefaultIndex := AIndex;
     end;
   finally
-    FreeAndNil(AFingerprints);
+    AFingerprints.Free;
   end;
 
   ///

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.ClassesRegistry;
 
 interface
@@ -63,16 +61,16 @@ uses
 type
   TClassesRegistry = class
   private
-    class var FRegisteredClasses : TDictionary<String, TClass>;
+    class var FRegisteredClasses: TDictionary<String, TClass>;
   public
     {@C}
-    class constructor Create();
-    class destructor Destroy();
+    class constructor Create;
+    class destructor Destroy;
 
     {@M}
-    class function CreateInstance(const AClassName: String; const AParams: array of TValue) : TObject; static;
-    class procedure RegisterClass(const AClass : TClass); static;
-    class procedure RegisterClasses(const AClasses : array of TClass); static;
+    class function CreateInstance(const AClassName: string; const AParams: array of TValue): TObject; static;
+    class procedure RegisterClass(const AClass: TClass); static;
+    class procedure RegisterClasses(const AClasses: array of TClass); static;
   end;
 
 implementation
@@ -81,66 +79,66 @@ implementation
 uses
   OptixCore.Commands.FileSystem, OptixCore.Commands.Process, OptixCore.Commands, OptixCore.Commands.Shell,
   OptixCore.Task.ProcessDump, OptixCore.Commands.Base, OptixCore.SessionInformation, OptixCore.LogNotifier,
-  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader;
+  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader, OptixCore.Task.FileOperations;
 // ---------------------------------------------------------------------------------------------------------------------
 
-class constructor TClassesRegistry.Create();
+class constructor TClassesRegistry.Create;
 begin
-  FRegisteredClasses := TDictionary<String, TClass>.Create();
+  FRegisteredClasses := TDictionary<String, TClass>.Create;
 end;
 
-class destructor TClassesRegistry.Destroy();
+class destructor TClassesRegistry.Destroy;
 begin
   if Assigned(FRegisteredClasses) then
     FreeAndNil(FRegisteredClasses);
 end;
 
-class function TClassesRegistry.CreateInstance(const AClassName: String; const AParams: array of TValue) : TObject;
+class function TClassesRegistry.CreateInstance(const AClassName: string; const AParams: array of TValue): TObject;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(FRegisteredClasses) or (FRegisteredClasses.Count = 0) then
-    Exit();
+    Exit;
   ///
 
-  var AClass : TClass;
+  var AClass: TClass;
   if not FRegisteredClasses.TryGetValue(AClassName, AClass) then
-    Exit();
+    Exit;
   ///
 
-  var AContext := TRttiContext.Create();
+  var AContext := TRttiContext.Create;
 
   var AType := AContext.GetType(AClass);
 
-  for var AMethod in AType.GetMethods() do begin
+  for var AMethod in AType.GetMethods do begin
     if not AMethod.IsConstructor then
       continue;
     ///
 
-    var AParameters := AMethod.GetParameters();
+    var AParameters := AMethod.GetParameters;
     if Length(AParameters) = Length(AParams) then begin
       for var I := Low(AParameters) to High(AParameters) do begin
         if AParams[I].IsType(AParameters[I].ParamType.Handle) then begin
-          result := AMethod.Invoke(AClass, AParams).AsObject();
+          Result := AMethod.Invoke(AClass, AParams).AsObject;
 
           break;
         end;
       end;
 
-      if Assigned(result) then
+      if Assigned(Result) then
         break;
     end;
   end;
 end;
 
-class procedure TClassesRegistry.RegisterClass(const AClass : TClass);
+class procedure TClassesRegistry.RegisterClass(const AClass: TClass);
 begin
   if Assigned(FRegisteredClasses) and not FRegisteredClasses.ContainsKey(AClass.ClassName) then
     FRegisteredClasses.Add(AClass.ClassName, AClass);
 end;
 
-class procedure TClassesRegistry.RegisterClasses(const AClasses : array of TClass);
+class procedure TClassesRegistry.RegisterClasses(const AClasses: array of TClass);
 begin
   for var AClass in AClasses do
     RegisterClass(AClass);
@@ -148,18 +146,23 @@ end;
 
 initialization
   (* Commands *)
+
   TClassesRegistry.RegisterClasses([
     // General
     TOptixCommandTerminateCurrentProcess,
     TOptixCommandReceiveSessionInformation,
 
     // File System Commands
-    TOptixCommandReceiveFileInformation,
+    TOptixCommandFileInformation,
     TOptixCommandGetUploadedFileInformation,
     TOptixCommandEnumDrives,
     TOptixCommandEnumDirectoryFiles,
     TOptixCommandDownloadFile,
     TOptixCommandUploadFile,
+    TOptixCommandCreateDirectory,
+    TOptixCommandCopyFileOrDirectory,
+    TOptixCommandDeleteFileOrDirectory,
+    TOptixCommandRenameFileOrDirectory,
 
     // System & Process Commands
     TOptixCommandTerminateProcess,
@@ -198,7 +201,9 @@ initialization
 
     TOptixTaskResult,
     TOptixTaskCallback,
-    TOptixTaskGetProcessDumpResult
+    TOptixTaskGetProcessDumpResult,
+    TOptixTaskGetCopyFileOrDirectoryResult,
+    TOptixTaskGetDeleteFileOrDirectoryResult
   ]);
 
 end.

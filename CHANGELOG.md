@@ -1,5 +1,16 @@
 # Changelogs
 
+## 2.0.2 (March 2026)
+
+- Updated NeoFlat Hint Component and implemented it on the user list. When hovering over a user, a summary of remote peer information is displayed.
+- Implemented Copy/Move file or directory task in File Manager (Copy > Paste, Cut > Paste). The feature is reactive, with a virtual clipboard shared between File Manager windows (same user). Copy and Cut actions are indicated with special icons and font color, and shared across multiple File Manager windows.
+- Implemented Delete file or directory task in File Manager. The feature is reactive and shared between File Manager windows (same user).
+- Implemented Rename file or directory task in File Manager. The feature is also reactive.
+- Implemented Create new directory task in File Manager. The feature is also reactive.
+- Centralized application version information into a single manifest file, shared between different parts for easier modification (no need to edit version info for each project flavor and architecture in Delphi IDE).
+- Code improvements, addressing a few minor, rarely occurring bugs and fixing some minor memory leaks.
+- Began implementing Delphi syntax best practices across the full codebase to comply with recommended standards.
+
 ## 2.0.1 (Feb 2026)
 
 Version 2.0.1 is a significant quality update. The primary focus is to further enhance its already outstanding stability and simplify the build process for users with limited experience.

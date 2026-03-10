@@ -74,30 +74,30 @@ type
   TServerConfiguration = record
   private
     {@M}
-    procedure SetVersionAsInt(const AValue : Integer);
-    function GetVersionAsInt() : Integer;
+    procedure SetVersionAsInt(const AValue: Integer);
+    function GetVersionAsInt: Integer;
   public
-    Address   : String;
-    Port      : Word;
-    Version   : TIpVersion;
-    AutoStart : Boolean;
-    Debug     : Boolean;
+    Address: string;
+    Port: Word;
+    Version: TIpVersion;
+    AutoStart: Boolean;
+    Debug: Boolean;
 
     {$IFDEF USETLS}
-    CertificateFingerprint : String;
+    CertificateFingerprint: string;
     {$ENDIF}
 
     {@S}
-    property VersionAsInt : Integer read GetVersionAsInt write SetVersionAsInt;
+    property VersionAsInt: Integer read GetVersionAsInt write SetVersionAsInt;
   end;
 
   TTreeData = record
-    ServerConfiguration : TServerConfiguration;
+    ServerConfiguration: TServerConfiguration;
 
-    Status              : TServerStatus;
-    StatusMessage       : String;
-    StartDateTime       : TDateTime;
-    Server              : TOptixServerThread;
+    Status: TServerStatus;
+    StatusMessage: string;
+    StartDateTime: TDateTime;
+    Server: TOptixServerThread;
   end;
   PTreeData = ^TTreeData;
 
@@ -136,31 +136,32 @@ type
     procedure Certificate1Click(Sender: TObject);
     procedure Certificates1Click(Sender: TObject);
     procedure NewServer1Click(Sender: TObject);
+    procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    function GetNodeByPort(const APort : Word; const AVersion : TIPVersion) : PVirtualNode;
-    function GetNodeByServer(const AServer : TOptixServerThread) : PVirtualNode;
+    function GetNodeByPort(const APort: Word; const AVersion: TIPVersion): PVirtualNode;
+    function GetNodeByServer(const AServer: TOptixServerThread): PVirtualNode;
     {$IFDEF USETLS}
-    function GetNodeByServerFingerprint(const AFingerprint : String) : PVirtualNode;
+    function GetNodeByServerFingerprint(const AFingerprint: string): PVirtualNode;
     {$ENDIF}
-    procedure UpdateStatus(const pNode : PVirtualNode; const AStatus : TServerStatus; const AStatusMessage : String = ''); overload;
-    procedure UpdateStatus(const AServer : TOptixServerThread; const AStatus : TServerStatus; const AStatusMessage : String = ''); overload;
+    procedure UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: string = ''); overload;
+    procedure UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: string = ''); overload;
 
-    procedure OnServerStart(Sender : TOptixServerThread; const ASocketFd : TSocket);
-    procedure OnServerStop(Sender : TOptixServerThread);
-    procedure OnServerError(Sender : TOptixServerThread; const AErrorMessage : String);
+    procedure OnServerStart(Sender: TOptixServerThread; const ASocketFd: TSocket);
+    procedure OnServerStop(Sender: TOptixServerThread);
+    procedure OnServerError(Sender: TOptixServerThread; const AErrorMessage: string);
 
-    procedure Save();
-    procedure Load();
+    procedure Save;
+    procedure Load;
   public
     {@M}
-    function RegisterServer(const AServerConfiguration : TServerConfiguration) : PVirtualNode;
-    procedure TryRegisterServer(const AServerConfiguration : TServerConfiguration;
-      const ADeleteServerNodeOnException : Boolean);
-    procedure StartServer(const pNode : PVirtualNode);
-    function ServerPortExists(const APort : Word; const AIpVersion : TIpVersion) : Boolean;
+    function RegisterServer(const AServerConfiguration: TServerConfiguration): PVirtualNode;
+    procedure TryRegisterServer(const AServerConfiguration: TServerConfiguration;
+      const ADeleteServerNodeOnException: Boolean);
+    procedure StartServer(const pNode: PVirtualNode);
+    function ServerPortExists(const APort: Word; const AIpVersion: TIpVersion): Boolean;
     {$IFDEF USETLS}
-    function ServerCertificateIsInUse(const AFingerprint : String) : Boolean;
+    function ServerCertificateIsInUse(const AFingerprint: string): Boolean;
     {$ENDIF}
   end;
 
@@ -187,7 +188,7 @@ uses
 
 (* TServerConfiguration *)
 
-procedure TServerConfiguration.SetVersionAsInt(const AValue : Integer);
+procedure TServerConfiguration.SetVersionAsInt(const AValue: Integer);
 begin
   if AValue < Ord(Low(TIpVersion)) then
     Version := Low(TIpVersion)
@@ -197,17 +198,17 @@ begin
     Version := TIpVersion(AValue);
 end;
 
-function TServerConfiguration.GetVersionAsInt() : Integer;
+function TServerConfiguration.GetVersionAsInt: Integer;
 begin
-  result := Integer(Version);
+  Result := Integer(Version);
 end;
 
 (* TFormServers *)
 
-procedure TFormServers.Save();
+procedure TFormServers.Save;
 begin
   try
-    var AConfig := TOptixConfigServers.Create();
+    var AConfig := TOptixConfigServers.Create;
     try
       for var pNode in VST.Nodes do begin
         var pData := PTreeData(pNode.GetData);
@@ -221,22 +222,22 @@ begin
       CONFIG_HELPER.Write('Servers'{$IFDEF USETLS}+ '+OpenSSL'{$ENDIF}, AConfig);
 
       ///
-      FreeAndNil(AConfig);
+      AConfig.Free;
     end;
   except
   end;
 end;
 
-procedure TFormServers.Load();
+procedure TFormServers.Load;
 begin
-  VST.Clear();
+  VST.Clear;
   ///
 
   var AConfig := TOptixConfigServers(CONFIG_HELPER.Read('Servers'{$IFDEF USETLS}+ '+OpenSSL'{$ENDIF}));
   if not Assigned(AConfig) then
-    Exit();
+    Exit;
   try
-    VST.BeginUpdate();
+    VST.BeginUpdate;
     try
       for var AServerConfiguration in AConfig do begin
         if String.IsNullOrWhitespace(AServerConfiguration.Address) then
@@ -246,30 +247,30 @@ begin
         TryRegisterServer(AServerConfiguration, False);
       end;
     finally
-      VST.EndUpdate();
+      VST.EndUpdate;
     end;
   finally
-    FreeAndNil(AConfig);
+    AConfig.Free;
   end;
 end;
 
-procedure TFormServers.UpdateStatus(const pNode : PVirtualNode; const AStatus : TServerStatus; const AStatusMessage : String = '');
+procedure TFormServers.UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: string = '');
 begin
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
-    pData^.Status        := AStatus;
+    pData^.Status := AStatus;
     pData^.StatusMessage := AStatusMessage;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
-procedure TFormServers.UpdateStatus(const AServer : TOptixServerThread; const AStatus : TServerStatus; const AStatusMessage : String = '');
+procedure TFormServers.UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: string = '');
 begin
   var pNode := GetNodeByServer(AServer);
 
@@ -277,16 +278,16 @@ begin
   UpdateStatus(pNode, AStatus, AStatusMessage);
 end;
 
-procedure TFormServers.OnServerStart(Sender : TOptixServerThread; const ASocketFd : TSocket);
+procedure TFormServers.OnServerStart(Sender: TOptixServerThread; const ASocketFd: TSocket);
 begin
   UpdateStatus(Sender, ssListening);
 end;
 
-procedure TFormServers.OnServerStop(Sender : TOptixServerThread);
+procedure TFormServers.OnServerStop(Sender: TOptixServerThread);
 begin
   var pNode := GetNodeByServer(Sender);
   if not Assigned(pNode) then
-    Exit();
+    Exit;
 
   var pData := PTreeData(pNode.GetData);
 
@@ -315,8 +316,8 @@ begin
         Start1.Caption := 'Stop';
     end;
 
-  Remove1.Visible      := Assigned(pData);
-  AutoStart1.Visible   := Assigned(pData);
+  Remove1.Visible := Assigned(pData);
+  AutoStart1.Visible := Assigned(pData);
   Certificate1.Visible := {$IFDEF USETLS}
                             Assigned(pData) and (FormCertificatesStore.CertificateCount > 1)
                           {$ELSE}False{$ENDIF};
@@ -325,7 +326,7 @@ begin
     AutoStart1.Checked := pData^.ServerConfiguration.AutoStart;
 end;
 
-procedure TFormServers.OnServerError(Sender : TOptixServerThread; const AErrorMessage : String);
+procedure TFormServers.OnServerError(Sender: TOptixServerThread; const AErrorMessage: string);
 begin
   UpdateStatus(Sender, ssOnError, AErrorMessage);
 end;
@@ -334,16 +335,16 @@ procedure TFormServers.AutoStart1Click(Sender: TObject);
 begin
   var pNode := VST.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
     pData^.ServerConfiguration.AutoStart := TMenuItem(Sender).Checked;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
@@ -351,30 +352,30 @@ procedure TFormServers.Certificate1Click(Sender: TObject);
 begin
   {$IFDEF USETLS}
   if VST.FocusedNode = nil then
-    Exit();
+    Exit;
 
   var pData := PTreeData(VST.FocusedNode.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
 
   var AForm := TFormSelectCertificate.Create(self, pData^.ServerConfiguration.CertificateFingerprint);
   try
-    AForm.ShowModal();
+    AForm.ShowModal;
 
     if AForm.ModalResult <> mrOk then
-      Exit();
+      Exit;
 
-    VST.BeginUpdate();
+    VST.BeginUpdate;
     try
       pData^.ServerConfiguration.CertificateFingerprint := AForm.ComboCertificate.Text;
 
       ///
       StartServer(VST.FocusedNode);
     finally
-      VST.EndUpdate();
+      VST.EndUpdate;
     end;
   finally
-    FreeAndNil(AForm);
+    AForm.Free;
   end;
   {$ENDIF}
 end;
@@ -382,13 +383,13 @@ end;
 procedure TFormServers.Certificates1Click(Sender: TObject);
 begin
   {$IFDEF USETLS}
-  FormCertificatesStore.Show();
+  FormCertificatesStore.Show
   {$ENDIF}
 end;
 
 procedure TFormServers.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Save();
+  Save;
 end;
 
 procedure TFormServers.FormCreate(Sender: TObject);
@@ -401,22 +402,26 @@ begin
   {$ENDIF}
 
   ///
-  Load();
+  Load;
 
   {$IFDEF DEBUG}
-  var AConfiguration : TServerConfiguration;
+  var AConfiguration: TServerConfiguration;
   AConfiguration.Address := '127.0.0.1';
   AConfiguration.Port := DEBUG_PORT;
   AConfiguration.Version := ipv4;
   AConfiguration.AutoStart := True;
+  {$IFDEF USETLS}
   AConfiguration.CertificateFingerprint := DEBUG_CERTIFICATE_FINGERPRINT;
+  {$ENDIF}
   AConfiguration.Debug := True;
 
   FormServers.RegisterServer(AConfiguration);
 
   AConfiguration.Version := ipv6;
   AConfiguration.Address := '::';
+  {$IFDEF USETLS}
   AConfiguration.CertificateFingerprint := DEBUG_CERTIFICATE_FINGERPRINT;
+  {$ENDIF}
 
   FormServers.RegisterServer(AConfiguration);
   {$ENDIF}
@@ -424,33 +429,33 @@ end;
 
 procedure TFormServers.FormDestroy(Sender: TObject);
 begin
-  VST.Clear();
+  VST.Clear;
 end;
 
-function TFormServers.GetNodeByPort(const APort : Word; const AVersion : TIPVersion) : PVirtualNode;
+function TFormServers.GetNodeByPort(const APort: Word; const AVersion: TIPVersion): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if (pData^.ServerConfiguration.Port = APort) and (pData^.ServerConfiguration.Version = AVersion) then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-function TFormServers.GetNodeByServer(const AServer : TOptixServerThread) : PVirtualNode;
+function TFormServers.GetNodeByServer(const AServer: TOptixServerThread): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if Assigned(pData^.Server) and (pData^.Server = AServer) then begin
-      result := pNode;
+      Result := pNode;
 
       break;
     end;
@@ -458,73 +463,73 @@ begin
 end;
 
 {$IFDEF USETLS}
-function TFormServers.GetNodeByServerFingerprint(const AFingerprint : String) : PVirtualNode;
+function TFormServers.GetNodeByServerFingerprint(const AFingerprint: string): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
-    if String.Compare(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint, True) = 0 then begin
-      result := pNode;
+    if string.Compare(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint, True) = 0 then begin
+      Result := pNode;
 
       break;
     end;
   end;
 end;
 
-function TFormServers.ServerCertificateIsInUse(const AFingerprint : String) : Boolean;
+function TFormServers.ServerCertificateIsInUse(const AFingerprint: string): Boolean;
 begin
-  result := GetNodeByServerFingerprint(AFingerprint) <> nil;
+  Result := GetNodeByServerFingerprint(AFingerprint) <> nil;
 end;
 {$ENDIF}
 
-function TFormServers.RegisterServer(const AServerConfiguration : TServerConfiguration) : PVirtualNode;
+function TFormServers.RegisterServer(const AServerConfiguration: TServerConfiguration): PVirtualNode;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if ServerPortExists(AServerConfiguration.Port, AServerConfiguration.Version) then
-    Exit();
+    Exit;
 
-  VST.BeginUpdate();
+  VST.BeginUpdate;
   try
-    result := VST.AddChild(nil);
-    var pData := PTreeData(result.GetData);
+    Result := VST.AddChild(nil);
+    var pData := PTreeData(Result.GetData);
     ///
 
     pData^.ServerConfiguration := AServerConfiguration;
-    pData^.Status              := ssStopped;
-    pData^.StatusMessage       := '';
-    pData^.StartDateTime       := Now;
+    pData^.Status := ssStopped;
+    pData^.StatusMessage := '';
+    pData^.StartDateTime := Now;
 
     if AServerConfiguration.AutoStart then
-      StartServer(result)
+      StartServer(Result)
     else
       pData^.Server := nil;
   finally
-    VST.EndUpdate();
+    VST.EndUpdate;
   end;
 end;
 
-function TFormServers.ServerPortExists(const APort : Word; const AIpVersion : TIpVersion) : Boolean;
+function TFormServers.ServerPortExists(const APort: Word; const AIpVersion: TIpVersion): Boolean;
 begin
-  result := GetNodeByPort(APort, AIpVersion) <> nil;
+  Result := GetNodeByPort(APort, AIpVersion) <> nil;
 end;
 
-procedure TFormServers.TryRegisterServer(const AServerConfiguration : TServerConfiguration;
-  const ADeleteServerNodeOnException : Boolean);
+procedure TFormServers.TryRegisterServer(const AServerConfiguration: TServerConfiguration;
+  const ADeleteServerNodeOnException: Boolean);
 begin
   var pServerNode := nil;
   try
     pServerNode := RegisterServer(AServerConfiguration);
   except
     if Assigned(pServerNode) then begin
-      VST.BeginUpdate();
+      VST.BeginUpdate;
       try
         VST.DeleteNode(pServerNode);
       finally
-        VST.EndUpdate();
+        VST.EndUpdate;
       end;
     end;
   end;
@@ -534,7 +539,7 @@ procedure TFormServers.Remove1Click(Sender: TObject);
 begin
   var pNode := VST.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
@@ -550,7 +555,7 @@ procedure TFormServers.Start1Click(Sender: TObject);
 begin
   var pNode := VST.FocusedNode;
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
@@ -565,21 +570,21 @@ begin
   end;
 end;
 
-procedure TFormServers.StartServer(const pNode : PVirtualNode);
+procedure TFormServers.StartServer(const pNode: PVirtualNode);
 begin
   if not Assigned(pNode) then
-    Exit();
+    Exit;
   ///
 
   var pData := PTreeData(pNode.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
 
   if Assigned(pData^.Server) then
     pData^.Server.Terminate;
 
   {$IFDEF USETLS}
-    var ACertificate : TX509Certificate;
+    var ACertificate: TX509Certificate;
 
     if not FormCertificatesStore.GetCertificateKeys(pData^.ServerConfiguration.CertificateFingerprint, ACertificate)
     then begin
@@ -587,7 +592,7 @@ begin
                               'certificate first or generate a new one.';
 
       ///
-      Exit();
+      Exit;
     end;
   {$ENDIF}
 
@@ -600,32 +605,32 @@ begin
     pData^.ServerConfiguration.Version
   );
 
-  pData^.Server.OnServerStart       := OnServerStart;
-  pData^.Server.OnServerError       := OnServerError;
-  pData^.Server.OnServerStop        := OnServerStop;
+  pData^.Server.OnServerStart := OnServerStart;
+  pData^.Server.OnServerError := OnServerError;
+  pData^.Server.OnServerStop := OnServerStop;
 
   pData^.Server.OnSessionDisconnect := FormMain.OnSessionDisconnect;
-  pData^.Server.OnReceivePacket     := FormMain.OnReceivePacket;
-  pData^.Server.OnRegisterWorker    := FormMain.OnRegisterWorker;
+  pData^.Server.OnReceivePacket := FormMain.OnReceivePacket;
+  pData^.Server.OnRegisterWorker := FormMain.OnRegisterWorker;
 
   {$IFDEF USETLS}
   pData^.Server.OnVerifyPeerCertificate := FormTrustedCertificates.OnVerifyPeerCertificate;
   {$ENDIF}
 
   ///
-  pData^.Server.Start();
+  pData^.Server.Start;
 end;
 
 procedure TFormServers.New1Click(Sender: TObject);
 begin
   var AForm := TFormListen.Create(self);
   try
-    AForm.ShowModal();
+    AForm.ShowModal;
 
     if AForm.ModalResult = mrOk then
       FormServers.RegisterServer(AForm.GetServerConfiguration);
   finally
-    FreeAndNil(AForm);
+    AForm.Free;
   end;
 end;
 
@@ -639,13 +644,13 @@ procedure TFormServers.VSTBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) then
-    Exit();
+    Exit;
   ///
 
   var AColor := clNone;
 
   case pData^.Status of
-    ssListening : AColor := COLOR_LIST_GREEN;
+    ssListening: AColor := COLOR_LIST_GREEN;
   end;
 
   if AColor <> clNone then begin
@@ -665,22 +670,29 @@ begin
     Result := 0
   else begin
     case Column of
-      0 : Result := CompareText(pData1^.ServerConfiguration.Address, pData2^.ServerConfiguration.Address);
-      1 : Result := CompareValue(pData1^.ServerConfiguration.Port, pData2^.ServerConfiguration.Port);
-      2 : Result := CompareValue(
+      0: Result := CompareText(pData1^.ServerConfiguration.Address, pData2^.ServerConfiguration.Address);
+      1: Result := CompareValue(pData1^.ServerConfiguration.Port, pData2^.ServerConfiguration.Port);
+      2: Result := CompareValue(
         Cardinal(pData1^.ServerConfiguration.Version), Cardinal(pData2^.ServerConfiguration.Version)
       );
-      3 : Result := CompareValue(Cardinal(pData1^.Status), Cardinal(pData2^.Status));
-      4 : Result := Ord(pData1^.ServerConfiguration.AutoStart) - Ord(pData2^.ServerConfiguration.AutoStart);
+      3: Result := CompareValue(Cardinal(pData1^.Status), Cardinal(pData2^.Status));
+      4: Result := Ord(pData1^.ServerConfiguration.AutoStart) - Ord(pData2^.ServerConfiguration.AutoStart);
       {$IFDEF USETLS}
-      5 : Result := CompareText(
+      5: Result := CompareText(
         pData1^.ServerConfiguration.CertificateFingerprint,
         pData2^.ServerConfiguration.CertificateFingerprint
       );
       {$ENDIF}
-      6 : Result := CompareText(pData1^.StatusMessage, pData2^.StatusMessage);
+      6: Result := CompareText(pData1^.StatusMessage, pData2^.StatusMessage);
     end;
   end;
+end;
+
+procedure TFormServers.VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
 end;
 
 procedure TFormServers.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -688,15 +700,15 @@ procedure TFormServers.VSTGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtual
 begin
   var pData := PTreeData(Node.GetData);
   if not Assigned(pData) or (Column <> 0) then
-    Exit();
+    Exit;
   ///
 
   case Kind of
-    ikNormal, ikSelected : begin
+    ikNormal, ikSelected: begin
       case pData^.Status of
-        ssStopped   : ImageIndex := IMAGE_SERVER_STOPPED;
-        ssListening : ImageIndex := IMAGE_SERVER_RUNNING;
-        ssOnError   : ImageIndex := IMAGE_SERVER_ERROR;
+        ssStopped: ImageIndex := IMAGE_SERVER_STOPPED;
+        ssListening: ImageIndex := IMAGE_SERVER_RUNNING;
+        ssOnError: ImageIndex := IMAGE_SERVER_ERROR;
       end;
     end;
 
@@ -720,31 +732,31 @@ begin
 
   if Assigned(pData) then begin
     case Column of
-      0 : CellText := pData^.ServerConfiguration.Address;
-      1 : CellText := pData^.ServerConfiguration.Port.ToString;
+      0: CellText := pData^.ServerConfiguration.Address;
+      1: CellText := pData^.ServerConfiguration.Port.ToString;
 
-      2 : begin
+      2: begin
         case pData^.ServerConfiguration.Version of
-          ipv4 : CellText := 'IPv4';
-          ipv6 : CellText := 'IPv6';
+          ipv4: CellText := 'IPv4';
+          ipv6: CellText := 'IPv6';
         end;
       end;
 
-      3 : begin
+      3: begin
         case pData^.Status of
-          ssStopped   : CellText := 'Stopped';
-          ssListening : CellText := 'Listening';
-          ssOnError   : CellText := 'Error';
+          ssStopped: CellText := 'Stopped';
+          ssListening: CellText := 'Listening';
+          ssOnError: CellText := 'Error';
         end;
       end;
 
-      4 : CellText := BoolToStr(pData^.ServerConfiguration.AutoStart, True);
+      4: CellText := BoolToStr(pData^.ServerConfiguration.AutoStart, True);
 
       {$IFDEF USETLS}
-      5 : CellText := pData^.ServerConfiguration.CertificateFingerprint;
+      5: CellText := pData^.ServerConfiguration.CertificateFingerprint;
       {$ENDIF}
 
-      6 : CellText := pData^.StatusMessage;
+      6: CellText := pData^.StatusMessage;
     end;
   end;
 

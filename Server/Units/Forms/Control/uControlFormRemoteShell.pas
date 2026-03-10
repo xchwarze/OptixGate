@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit uControlFormRemoteShell;
 
 interface
@@ -74,34 +72,34 @@ uses
 type
   TShellInstance = class
   private
-    FName          : String;
-    FHasUnseenData : Boolean;
-    FActive        : Boolean;
-    FPanel         : TPanel;
-    FFrame         : TFrameRemoteShellInstance;
+    FName: string;
+    FHasUnseenData: Boolean;
+    FActive: Boolean;
+    FPanel: TPanel;
+    FFrame: TFrameRemoteShellInstance;
 
     {@M}
-    function GetInstanceId() : TGUID;
-    function GetVisible() : Boolean;
-    procedure SetVisible(const AValue : Boolean);
+    function GetInstanceId: TGUID;
+    function GetVisible: Boolean;
+    procedure SetVisible(const AValue: Boolean);
   public
     {@C}
-    constructor Create(const AName : String; const APanel : TPanel; const AFrame : TFrameRemoteShellInstance);
-    destructor Destroy(); override;
+    constructor Create(const AName: string; const APanel: TPanel; const AFrame: TFrameRemoteShellInstance);
+    destructor Destroy; override;
 
     {@M}
-    procedure AddOutput(const AOutput : String);
-    procedure SaveToFile(const ADestinationFile : String);
-    procedure Close();
+    procedure AddOutput(const AOutput: string);
+    procedure SaveToFile(const ADestinationFile: string);
+    procedure Close;
 
     {@G}
-    property Id            : TGUID   read GetInstanceId;
-    property HasUnseenData : Boolean read FHasUnseenData;
-    property Active        : Boolean read FActive;
+    property Id: TGUID read GetInstanceId;
+    property HasUnseenData: Boolean read FHasUnseenData;
+    property Active: Boolean read FActive;
 
     {@G/S}
-    property Name    : String  read FName      write FName;
-    property Visible : Boolean read GetVisible write SetVisible;
+    property Name: string read FName write FName;
+    property Visible: Boolean read GetVisible write SetVisible;
   end;
 
   TControlFormRemoteShell = class(TBaseFormControl)
@@ -138,26 +136,26 @@ type
     procedure ButtonSaveOutputClick(Sender: TObject);
     procedure SaveInstanceOutputToFile1Execute(Sender: TObject);
   private
-    FInstances : TObjectList<TShellInstance>;
+    FInstances: TObjectList<TShellInstance>;
 
     {@M}
     procedure OnInstanceListNotify(Sender: TObject; const AInstance: TShellInstance; Action: TCollectionNotification);
-    procedure RequestNewShellInstance();
-    function StartShellInstance(const AInstanceId : TGUID) : TShellInstance;
-    procedure ShowInstance(const AInstance : TShellInstance);
-    procedure CloseShellInstance(const AInstanceId : TGUID);
-    function GetShellInstanceById(const AInstanceId : TGUID) : TShellInstance;
-    function GetShellInstanceByName(const AName : String) : TShellInstance;
-    function ShellNameExists(const AName : String) : Boolean;
-    procedure RequestShellInstanceTermination(const AInstance : TShellInstance);
-    function GetActiveShellInstance() : TShellInstance;
-    procedure RefreshActionButtons();
+    procedure RequestNewShellInstance;
+    function StartShellInstance(const AInstanceId: TGUID): TShellInstance;
+    procedure ShowInstance(const AInstance: TShellInstance);
+    procedure CloseShellInstance(const AInstanceId: TGUID);
+    function GetShellInstanceById(const AInstanceId: TGUID): TShellInstance;
+    function GetShellInstanceByName(const AName: string): TShellInstance;
+    function ShellNameExists(const AName: string): Boolean;
+    procedure RequestShellInstanceTermination(const AInstance: TShellInstance);
+    function GetActiveShellInstance: TShellInstance;
+    procedure RefreshActionButtons;
   protected
     {@M}
-    procedure OnFirstShow(); override;
+    procedure OnFirstShow; override;
   public
     {@M}
-    procedure ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean); override;
+    procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
   end;
 
 var
@@ -176,19 +174,19 @@ uses
 
 (* TShellInstance *)
 
-constructor TShellInstance.Create(const AName : String; const APanel : TPanel; const AFrame : TFrameRemoteShellInstance);
+constructor TShellInstance.Create(const AName: string; const APanel: TPanel; const AFrame: TFrameRemoteShellInstance);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FName          := AName;
-  FPanel         := APanel;
-  FFrame         := AFrame;
-  FActive        := True;
+  FName := AName;
+  FPanel := APanel;
+  FFrame := AFrame;
+  FActive := True;
   FHasUnseenData := False;
 end;
 
-destructor TShellInstance.Destroy();
+destructor TShellInstance.Destroy;
 begin
   if Assigned(FFrame) then
     FreeAndNil(FFrame);
@@ -197,48 +195,48 @@ begin
     FreeAndNil(FPanel);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TShellInstance.AddOutput(const AOutput : String);
+procedure TShellInstance.AddOutput(const AOutput: string);
 begin
   if Assigned(FFrame) then
     FFrame.AddOutput(AOutput);
 end;
 
-procedure TShellInstance.SaveToFile(const ADestinationFile : String);
+procedure TShellInstance.SaveToFile(const ADestinationFile: string);
 begin
   if Assigned(FFrame) then
     FFrame.Shell.Lines.SaveToFile(ADestinationFile);
 end;
 
-procedure TShellInstance.Close();
+procedure TShellInstance.Close;
 begin
   FActive := False;
   if Assigned(FFrame) then
-    FFrame.Close();
+    FFrame.Close;
 end;
 
-function TShellInstance.GetInstanceId() : TGUID;
+function TShellInstance.GetInstanceId: TGUID;
 begin
-  result := TGUID.Empty;
+  Result := TGUID.Empty;
   ///
 
   if Assigned(FFrame) then
-    result := FFrame.InstanceId;
+    Result := FFrame.InstanceId;
 end;
 
-procedure TShellInstance.SetVisible(const AValue : Boolean);
+procedure TShellInstance.SetVisible(const AValue: Boolean);
 begin
   if Assigned(FPanel) then
     FPanel.Visible := AValue;
 end;
 
-function TShellInstance.GetVisible() : Boolean;
+function TShellInstance.GetVisible: Boolean;
 begin
-  result := False;
+  Result := False;
   if Assigned(FPanel) then
-    result := FPanel.Visible;
+    Result := FPanel.Visible;
 end;
 
 (* TControlFormRemoteShell *)
@@ -247,7 +245,7 @@ procedure TControlFormRemoteShell.OnInstanceListNotify(Sender: TObject; const AI
   Action: TCollectionNotification);
 begin
   if not Assigned(AInstance) and Assigned(ComboInstance) then
-    Exit();
+    Exit;
   ///
 
   case Action of
@@ -263,53 +261,53 @@ begin
   end;
 
   ///
-  ComboInstance.Refresh();
-  RefreshActionButtons();
+  ComboInstance.Refresh;
+  RefreshActionButtons;
 end;
 
-procedure TControlFormRemoteShell.RefreshActionButtons();
+procedure TControlFormRemoteShell.RefreshActionButtons;
 begin
-  var AActiveInstance := GetActiveShellInstance();
+  var AActiveInstance := GetActiveShellInstance;
   ///
 
   ButtonDeleteInstance.Enabled := Assigned(AActiveInstance);
-  ButtonCloseInstance.Enabled  := Assigned(AActiveInstance) and AActiveInstance.Active;
-  ButtonBreakInstance.Enabled  := ButtonCloseInstance.Enabled;
-  ButtonSaveOutput.Enabled     := ButtonDeleteInstance.Enabled;
+  ButtonCloseInstance.Enabled := Assigned(AActiveInstance) and AActiveInstance.Active;
+  ButtonBreakInstance.Enabled := ButtonCloseInstance.Enabled;
+  ButtonSaveOutput.Enabled := ButtonDeleteInstance.Enabled;
   ButtonRenameInstance.Enabled := ButtonDeleteInstance.Enabled;
 end;
 
-function TControlFormRemoteShell.GetActiveShellInstance() : TShellInstance;
+function TControlFormRemoteShell.GetActiveShellInstance: TShellInstance;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(FInstances) then
-    Exit();
+    Exit;
 
   for var AInstance in FInstances do
     if AInstance.Visible then
       Exit(AInstance);
 end;
 
-function TControlFormRemoteShell.GetShellInstanceById(const AInstanceId : TGUID) : TShellInstance;
+function TControlFormRemoteShell.GetShellInstanceById(const AInstanceId: TGUID): TShellInstance;
 begin
-  result := nil;
+  Result := nil;
 
   if not Assigned(FInstances) then
-    Exit();
+    Exit;
 
   for var AInstance in FInstances do
     if AInstance.Id = AInstanceId then
       Exit(AInstance);
 end;
 
-procedure TControlFormRemoteShell.OnFirstShow();
+procedure TControlFormRemoteShell.OnFirstShow;
 begin
   inherited;
 
   ///
-  RequestNewShellInstance();
+  RequestNewShellInstance;
 end;
 
 procedure TControlFormRemoteShell.NewShellInstance1Execute(Sender: TObject);
@@ -317,7 +315,7 @@ begin
   ButtonNewInstanceClick(ButtonNewInstance);
 end;
 
-procedure TControlFormRemoteShell.ReceivePacket(const AOptixPacket : TOptixPacket; var AHandleMemory : Boolean);
+procedure TControlFormRemoteShell.ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean);
 begin
   inherited;
   ///
@@ -340,21 +338,21 @@ begin
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormRemoteShell.RequestNewShellInstance();
+procedure TControlFormRemoteShell.RequestNewShellInstance;
 begin
-  SendCommand(TOptixCommandCreateShellInstance.Create());
+  SendCommand(TOptixCommandCreateShellInstance.Create);
 end;
 
-function TControlFormRemoteShell.GetShellInstanceByName(const AName : String) : TShellInstance;
+function TControlFormRemoteShell.GetShellInstanceByName(const AName: string): TShellInstance;
 begin
-  result := nil;
+  Result := nil;
   ///
 
   if not Assigned(FInstances) then
-    Exit();
+    Exit;
 
   for var AInstance in FInstances do
-    if String.Compare(AInstance.Name, AName, True) = 0 then
+    if string.Compare(AInstance.Name, AName, True) = 0 then
       Exit(AInstance);
 end;
 
@@ -363,9 +361,9 @@ begin
   ButtonSaveOutputClick(ButtonSaveOutput);
 end;
 
-function TControlFormRemoteShell.ShellNameExists(const AName : String) : Boolean;
+function TControlFormRemoteShell.ShellNameExists(const AName: string): Boolean;
 begin
-  result := GetShellInstanceByName(AName) <> nil;
+  Result := GetShellInstanceByName(AName) <> nil;
 end;
 
 procedure TControlFormRemoteShell.HideInstancesList1Click(Sender: TObject);
@@ -373,10 +371,10 @@ begin
   OMultiPanel.PanelCollection.Items[1].Visible := not TMenuItem(Sender).Checked;
 end;
 
-procedure TControlFormRemoteShell.ShowInstance(const AInstance : TShellInstance);
+procedure TControlFormRemoteShell.ShowInstance(const AInstance: TShellInstance);
 begin
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
   for var AInstanceCandidate in FInstances do
@@ -384,12 +382,12 @@ begin
 
   ///
   ComboInstance.ItemIndex := ComboInstance.Items.IndexOf(AInstance.Name);
-  RefreshActionButtons();
+  RefreshActionButtons;
 end;
 
-function TControlFormRemoteShell.StartShellInstance(const AInstanceId : TGUID) : TShellInstance;
+function TControlFormRemoteShell.StartShellInstance(const AInstanceId: TGUID): TShellInstance;
 
-  function GenerateRandomShellName() : String;
+  function GenerateRandomShellName: string;
   begin
     var I := 0;
     while True do begin
@@ -403,18 +401,18 @@ function TControlFormRemoteShell.StartShellInstance(const AInstanceId : TGUID) :
   end;
 
 begin
-  var AShellName := GenerateRandomShellName();
-  var APanel : TPanel := nil;
-  var AFrame : TFrameRemoteShellInstance := nil;
+  var AShellName := GenerateRandomShellName;
+  var APanel: TPanel := nil;
+  var AFrame: TFrameRemoteShellInstance := nil;
   try
-    APanel            := TPanel.Create(PanelInstances);
-    APanel.Parent     := PanelInstances;
-    APanel.Align      := alClient;
+    APanel := TPanel.Create(PanelInstances);
+    APanel.Parent := PanelInstances;
+    APanel.Align := alClient;
     APanel.BevelOuter := bvNone;
 
-    AFrame        := TFrameRemoteShellInstance.Create(APanel, self, AInstanceId);
+    AFrame := TFrameRemoteShellInstance.Create(APanel, self, AInstanceId);
     AFrame.Parent := APanel;
-    AFrame.Align  := alClient;
+    AFrame.Align := alClient;
   except
     if Assigned(AFrame) then
       FreeAndNil(AFrame);
@@ -423,21 +421,21 @@ begin
       FreeAndNil(APanel);
   end;
 
-  result := TShellInstance.Create(AShellName, APanel, AFrame);
-  FInstances.Add(result);
+  Result := TShellInstance.Create(AShellName, APanel, AFrame);
+  FInstances.Add(Result);
 
-  ShowInstance(result);
+  ShowInstance(Result);
 
   // Hacky method to fix annoying issue with Delphi HDPI designing...
   AFrame.Shell.Font.Size := 9;
   AFrame.EditCommand.Font.Size := AFrame.Shell.Font.Size;
-  AFrame.EditCommand.SetFocus();
+  AFrame.EditCommand.SetFocus;
 end;
 
-procedure TControlFormRemoteShell.RequestShellInstanceTermination(const AInstance : TShellInstance);
+procedure TControlFormRemoteShell.RequestShellInstanceTermination(const AInstance: TShellInstance);
 begin
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
   SendCommand(TOptixCommandDeleteShellInstance.Create(AInstance.Id));
@@ -450,9 +448,9 @@ end;
 
 procedure TControlFormRemoteShell.ButtonBreakInstanceClick(Sender: TObject);
 begin
-  var AInstance := GetActiveShellInstance();
+  var AInstance := GetActiveShellInstance;
   if not Assigned(AInstance) or not AInstance.Active then
-    Exit();
+    Exit;
   ///
 
   SendCommand(TOptixCommandSigIntShellInstance.Create(AInstance.Id));
@@ -460,21 +458,21 @@ end;
 
 procedure TControlFormRemoteShell.ButtonCloseInstanceClick(Sender: TObject);
 begin
-  RequestShellInstanceTermination(GetActiveShellInstance());
+  RequestShellInstanceTermination(GetActiveShellInstance);
 end;
 
 procedure TControlFormRemoteShell.ButtonDeleteInstanceClick(Sender: TObject);
 begin
-  var AInstance := GetActiveShellInstance();
+  var AInstance := GetActiveShellInstance;
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
   if Application.MessageBox(
     'This action will close the current remote shell instance and permanently delete all received content. You will ' +
     'lose all captured data from this session.', 'Delete Current Shell Instance',
     MB_ICONQUESTION + MB_YESNO) = ID_NO then
-      Exit();
+      Exit;
 
   SendCommand(TOptixCommandDeleteShellInstance.Create(AInstance.Id));
 
@@ -487,24 +485,24 @@ end;
 
 procedure TControlFormRemoteShell.ButtonNewInstanceClick(Sender: TObject);
 begin
-  RequestNewShellInstance();
+  RequestNewShellInstance;
 end;
 
 procedure TControlFormRemoteShell.ButtonRenameInstanceClick(Sender: TObject);
 begin
-  var AInstance := GetActiveShellInstance();
+  var AInstance := GetActiveShellInstance;
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
   var AOldName := AInstance.Name;
   var AName := AOldName;
   if not InputQuery('Rename Shell Instance', 'Enter new name', AName) then
-    Exit();
+    Exit;
 
-  AName := TFileSystemHelper.CleanFileName(AName.Trim());
-  if String.Compare(AName, AOldName, True) = 0 then
-    Exit();
+  AName := TFileSystemHelper.CleanFileName(AName.Trim);
+  if string.Compare(AName, AOldName, True) = 0 then
+    Exit;
 
   if ShellNameExists(AName) then
     Application.MessageBox(
@@ -521,37 +519,37 @@ end;
 
 procedure TControlFormRemoteShell.ButtonSaveOutputClick(Sender: TObject);
 begin
-  var AInstance := GetActiveShellInstance();
+  var AInstance := GetActiveShellInstance;
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
   SD.FileName := AInstance.name;
 
-  if not SD.Execute(self.Handle) then
-    Exit();
+  if not SD.Execute(Handle) then
+    Exit;
   ///
 
   AInstance.SaveToFile(SD.FileName);
 end;
 
-procedure TControlFormRemoteShell.CloseShellInstance(const AInstanceId : TGUID);
+procedure TControlFormRemoteShell.CloseShellInstance(const AInstanceId: TGUID);
 begin
   var AInstance := GetShellInstanceById(AInstanceId);
   if not Assigned(AInstance) then
-    Exit();
+    Exit;
   ///
 
-  AInstance.Close();
+  AInstance.Close;
 
   ///
-  RefreshActionButtons();
+  RefreshActionButtons;
 end;
 
 procedure TControlFormRemoteShell.ComboInstanceChange(Sender: TObject);
 begin
   if TFlatComboBox(Sender).ItemIndex < 0 then
-    Exit();
+    Exit;
   ///
 
   var AInstance := GetShellInstanceByName(TFlatComboBox(Sender).Text);
@@ -573,7 +571,7 @@ end;
 
 procedure TControlFormRemoteShell.FormShow(Sender: TObject);
 begin
-  RefreshActionButtons();
+  RefreshActionButtons;
 end;
 
 end.

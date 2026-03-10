@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Protocol.Packet;
 
 interface
@@ -64,10 +62,10 @@ type
   TOptixPacket = class(TOptixSerializableObject)
   protected
     [OptixSerializableAttribute]
-    FWindowGUID : TGUID;
+    FWindowGUID: TGUID;
   public
     {@G/S}
-    property WindowGUID : TGUID read FWindowGUID write FWindowGUID;
+    property WindowGUID: TGUID read FWindowGUID write FWindowGUID;
   end;
 
 implementation

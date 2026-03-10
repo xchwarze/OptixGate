@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.FileSystem;
 
 interface
@@ -65,105 +63,104 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOptixCommandReceiveFileInformation = class(TOptixCommandActionResponse)
+  TOptixCommandFileInformation = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FFileName : String;
+    FFileName: string;
 
     [OptixSerializableAttribute]
-    FIsDirectory : Boolean;
+    FIsDirectory: Boolean;
 
     [OptixSerializableAttribute]
-    FFileInformation : TFileInformation;
+    FFileInformation: TFileInformation;
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@C}
-    constructor Create(const AFileName : String; const AIsDirectory : Boolean); overload;
-    destructor Destroy(); override;
+    constructor Create(const AFileName: string; const AIsDirectory: Boolean); overload;
+    destructor Destroy; override;
 
     {@G}
-    property FileName        : String           read FFileName;
-    property IsDirectory     : Boolean          read FIsDirectory;
-    property FileInformation : TFileInformation read FFileInformation;
+    property FileName: string read FFileName;
+    property IsDirectory: Boolean read FIsDirectory;
+    property FileInformation: TFileInformation read FFileInformation;
   end;
 
-  {@ALIASES: TOptixCommandReceiveFileInformation}
-  TOptixCommandGetUploadedFileInformation = class(TOptixCommandReceiveFileInformation);
+  TOptixCommandGetUploadedFileInformation = class(TOptixCommandFileInformation);
 
   TOptixCommandEnumDrives = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FDrives : TObjectList<TDriveInformation>;
+    FDrives: TObjectList<TDriveInformation>;
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@C}
-    destructor Destroy(); override;
+    destructor Destroy; override;
 
     {@G}
-    property Drives : TObjectList<TDriveInformation> read FDrives;
+    property Drives: TObjectList<TDriveInformation> read FDrives;
   end;
 
   TOptixCommandEnumDirectoryFiles = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FPath : String;
+    FPath: string;
 
     [OptixSerializableAttribute]
-    FAccess : TFileAccessAttributes;
+    FAccess: TFileAccessAttributes;
 
     [OptixSerializableAttribute]
-    FIsRoot : Boolean;
+    FIsRoot: Boolean;
 
     [OptixSerializableAttribute]
-    FParentFolders : TObjectList<TSimpleFolderInformation>;
+    FParentFolders: TObjectList<TSimpleFolderInformation>;
 
     [OptixSerializableAttribute]
-    FFiles : TObjectList<TFileInformation>;
+    FFiles: TObjectList<TFileInformation>;
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@C}
-    constructor Create(const APath : String); overload;
-    destructor Destroy(); override;
+    constructor Create(const APath: string); overload;
+    destructor Destroy; override;
 
     {@G}
-    property Path          : String                                read FPath;
-    property ParentFolders : TObjectList<TSimpleFolderInformation> read FParentFolders;
-    property Files         : TObjectList<TFileInformation>         read FFiles;
-    property Access        : TFileAccessAttributes                 read FAccess;
-    property IsRoot        : Boolean                               read FIsRoot;
+    property Path: string read FPath;
+    property ParentFolders: TObjectList<TSimpleFolderInformation> read FParentFolders;
+    property Files: TObjectList<TFileInformation> read FFiles;
+    property Access: TFileAccessAttributes read FAccess;
+    property IsRoot: Boolean read FIsRoot;
   end;
 
   TOptixCommandTransfer = class(TOptixCommand)
   private
     [OptixSerializableAttribute]
-    FTransferId : TGUID;
+    FTransferId: TGUID;
 
     // FFilePath in TOptixDownloadFile -> File to download (Client)
     // FFilePath in TOptixUploadFile   -> Uploaded destination file path (Client)
     [OptixSerializableAttribute]
-    FFilePath : String;
+    FFilePath: string;
   public
     {@C}
-    constructor Create(const AFilePath : String; const ATransferId : TGUID); overload;
+    constructor Create(const AFilePath: string; const ATransferId: TGUID); overload;
 
     {@G}
-    property TransferId : TGUID  read FTransferId;
-    property FilePath   : String read FFilePath;
+    property TransferId: TGUID read FTransferId;
+    property FilePath: string read FFilePath;
   end;
 
   TOptixCommandDownloadFile = class(TOptixCommandTransfer);
@@ -171,49 +168,124 @@ type
   TOptixCommandUploadFile = class(TOptixCommandTransfer)
   private
     [OptixSerializableAttribute]
-    FFileSize : UInt64;
+    FFileSize: UInt64;
   public
     {@G}
-    property FileSize : UInt64 read FFileSize;
+    property FileSize: UInt64 read FFileSize;
+  end;
+
+  TOptixCommandCreateDirectory = class(TOptixCommandFileInformation)
+  public
+    {@C}
+    constructor Create(const APath, ANewDirectoryName: string); overload;
+
+    {$IFNDEF SERVER}
+    procedure DoAction; override;
+    {$ENDIF}
+  end;
+
+  TOptixCommandCopyFileOrDirectory = class(TOptixCommandTask)
+  private
+    [OptixSerializableAttribute]
+    FSource: string;
+
+    [OptixSerializableAttribute]
+    FDestination: string;
+
+    [OptixSerializableAttribute]
+    FCopyMode: TVirtualClipboardCopyMode;
+  public
+    {@C}
+    constructor Create(const ASource, ADestination: string; const ACopyMode: TVirtualClipboardCopyMode); overload;
+
+    {@M}
+    {$IFNDEF SERVER}
+    function CreateTask(const ACommand: TOptixCommand): TOptixTask; override;
+    {$ENDIF}
+
+    {@G}
+    property Source: string read FSource;
+    property Destination: string read FDestination;
+    property CopyMode: TVirtualClipboardCopyMode read FCopyMode;
+  end;
+
+  TOptixCommandDeleteFileOrDirectory = class(TOptixCommandTask)
+  private
+    [OptixSerializableAttribute]
+    FFilePath: string;
+  public
+    {@C}
+    constructor Create(const AFilePath : string); overload;
+
+    {@M}
+    {$IFNDEF SERVER}
+    function CreateTask(const ACommand: TOptixCommand): TOptixTask; override;
+    {$ENDIF}
+
+    {@G}
+    property FilePath : string read FFilePath;
+  end;
+
+  TOptixCommandRenameFileOrDirectory = class(TOptixCommandActionResponse)
+  private
+    [OptixSerializableAttribute]
+    FFilePath: string;
+
+    [OptixSerializableAttribute]
+    FNewFilePath: string;
+  public
+    {@M}
+    {$IFNDEF SERVER}
+    procedure DoAction; override;
+    {$ENDIF}
+
+    {@C}
+    constructor Create(const AFilePath, ANewName: string); overload;
+
+    {@G}
+    property FilePath: string read FFilePath;
+    property NewFilePath: string read FNewFilePath;
   end;
 
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.IOUtils;
+  System.IOUtils,
+
+  OptixCore.Task.FileOperations, OptixCore.Exceptions;
 // ---------------------------------------------------------------------------------------------------------------------
 
-(* TOptixCommandReceiveFileInformation *)
+(* TOptixCommandFileInformation *)
 
-procedure TOptixCommandReceiveFileInformation.AfterCreate();
+procedure TOptixCommandFileInformation.AfterCreate;
 begin
   inherited;
   ///
 
-  FFileInformation := TFileInformation.Create();
+  FFileInformation := TFileInformation.Create;
 end;
 
-constructor TOptixCommandReceiveFileInformation.Create(const AFileName : String; const AIsDirectory : Boolean);
+constructor TOptixCommandFileInformation.Create(const AFileName: string; const AIsDirectory: Boolean);
 begin
-  Create();
+  Create;
   ///
 
-  FFileName    := AFileName;
+  FFileName := AFileName;
   FIsDirectory := AIsDirectory;
 end;
 
-destructor TOptixCommandReceiveFileInformation.Destroy();
+destructor TOptixCommandFileInformation.Destroy;
 begin
   if Assigned(FFileInformation) then
     FreeAndNil(FFileInformation);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 {$IFNDEF SERVER}
-procedure TOptixCommandReceiveFileInformation.DoAction();
+procedure TOptixCommandFileInformation.DoAction;
 begin
   inherited;
   ///
@@ -228,13 +300,13 @@ end;
 (* TOptixCommandEnumDrives *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandEnumDrives.DoAction();
+procedure TOptixCommandEnumDrives.DoAction;
 begin
   TOptixEnumDrives.Enum(FDrives);
 end;
 {$ENDIF}
 
-procedure TOptixCommandEnumDrives.AfterCreate();
+procedure TOptixCommandEnumDrives.AfterCreate;
 begin
   inherited;
   ///
@@ -242,7 +314,7 @@ begin
   FDrives := TObjectList<TDriveInformation>.Create(True);
 end;
 
-destructor TOptixCommandEnumDrives.Destroy();
+destructor TOptixCommandEnumDrives.Destroy;
 begin
   if Assigned(FDrives) then
     FreeAndNil(FDrives);
@@ -254,9 +326,9 @@ end;
 (* TOptixCommandEnumDirectoryFiles *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandEnumDirectoryFiles.DoAction();
+procedure TOptixCommandEnumDirectoryFiles.DoAction;
 begin
-  FParentFolders.Clear();
+  FParentFolders.Clear;
   ///
 
   FPath := TFileSystemHelper.GetFullPathName(TFileSystemHelper.ExpandPath(FPath));
@@ -266,18 +338,18 @@ begin
   TFileSystemHelper.TraverseDirectories(
     FPath,
     (
-      procedure (const ADirectoryName : String; const AAbsolutePath : String)
+      procedure (const ADirectoryName: string; const AAbsolutePath: string)
       begin
         var APath := IncludeTrailingPathDelimiter(AAbsolutePath);
         var AIsRoot := SameText(APath, TPath.GetPathRoot(APath));
         ///
 
-        var AFileAccess : TFileAccessAttributes := [];
+        var AFileAccess: TFileAccessAttributes := [];
         if not AIsRoot then
           AFileAccess := TFileSystemHelper.TryGetCurrentUserFileAccess(APath);
 
         ///
-        FParentFolders.Add(TSimpleFolderInformation.Create(ADirectoryName, AAbsolutePath, AFileAccess, AIsRoot));
+        FParentFolders.Add(TSimpleFolderInformation.Create(AAbsolutePath, AFileAccess));
       end
     )
   );
@@ -287,7 +359,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TOptixCommandEnumDirectoryFiles.AfterCreate();
+procedure TOptixCommandEnumDirectoryFiles.AfterCreate;
 begin
   inherited;
   ///
@@ -296,17 +368,17 @@ begin
   FFiles := TObjectList<TFileInformation>.Create(True);
 end;
 
-constructor TOptixCommandEnumDirectoryFiles.Create(const APath : String);
+constructor TOptixCommandEnumDirectoryFiles.Create(const APath: string);
 begin
-  Create();
+  Create;
   ///
 
-  FPath   := APath;
+  FPath := APath;
   FAccess := [];
   FIsRoot := False;
 end;
 
-destructor TOptixCommandEnumDirectoryFiles.Destroy();
+destructor TOptixCommandEnumDirectoryFiles.Destroy;
 begin
   if Assigned(FFiles) then
     FreeAndNil(FFiles);
@@ -320,13 +392,99 @@ end;
 
 (* TOptixCommandTransfer *)
 
-constructor TOptixCommandTransfer.Create(const AFilePath : String; const ATransferId : TGUID);
+constructor TOptixCommandTransfer.Create(const AFilePath: string; const ATransferId: TGUID);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
-  FFilePath   := AFilePath;
+  FFilePath := AFilePath;
   FTransferId := ATransferId;
 end;
+
+(* TOptixCommandCreateDirectory *)
+
+constructor TOptixCommandCreateDirectory.Create(const APath, ANewDirectoryName: string);
+begin
+  inherited Create(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName, True);
+end;
+
+{$IFNDEF SERVER}
+procedure TOptixCommandCreateDirectory.DoAction;
+begin
+  TFileSystemHelper.CreateDirectory(FFileName);
+
+  if Assigned(FFileInformation) then
+    FreeAndNil(FFileInformation);
+
+  FFileInformation := TFileInformation.Create(FFileName, FIsDirectory);
+end;
+{$ENDIF}
+
+(* TOptixCommandCopyFileOrDirectory *)
+
+constructor TOptixCommandCopyFileOrDirectory.Create(const ASource, ADestination: string;
+  const ACopyMode: TVirtualClipboardCopyMode);
+begin
+  inherited Create;
+  ///
+
+  FSource := ASource;
+  FDestination := ADestination;
+  FCopyMode := ACopyMode;
+end;
+
+{$IFNDEF SERVER}
+function TOptixCommandCopyFileOrDirectory.CreateTask(const ACommand: TOptixCommand): TOptixTask;
+begin
+  if Assigned(ACommand) then
+    Result := TOptixCopyFileOrDirectoryTask.Create(ACommand)
+  else
+    Result := nil;
+end;
+{$ENDIF}
+
+(* TOptixCommandDeleteFileOrDirectory *)
+
+constructor TOptixCommandDeleteFileOrDirectory.Create(const AFilePath : string);
+begin
+  inherited Create;
+  ///
+
+  FFilePath := AFilePath;
+end;
+
+{$IFNDEF SERVER}
+function TOptixCommandDeleteFileOrDirectory.CreateTask(const ACommand: TOptixCommand): TOptixTask;
+begin
+  if Assigned(ACommand) then
+    Result := TOptixDeleteFileOrDirectoryTask.Create(ACommand)
+  else
+    Result := nil;
+end;
+{$ENDIF}
+
+(* TOptixCommandRenameFileOrDirectory *)
+
+constructor TOptixCommandRenameFileOrDirectory.Create(const AFilePath, ANewName: string);
+begin
+  inherited Create;
+  ///
+
+  FFilePath := AFilePath;
+  FNewFilePath := TFileSystemHelper.ExtractFilePath(FFilePath, True) + ANewName;
+end;
+
+{$IFNDEF SERVER}
+procedure TOptixCommandRenameFileOrDirectory.DoAction;
+begin
+  inherited;
+  ///
+
+  var ASourcePath := ExcludeTrailingPathDelimiter(FFilePath);
+
+  if not Winapi.Windows.MoveFile(PWideChar(ASourcePath), PWideChar(FNewFilePath)) then
+    raise EWindowsException.Create('MoveFile(@Rename)');
+end;
+{$ENDIF}
 
 end.

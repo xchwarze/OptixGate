@@ -55,22 +55,22 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------
 
 type
-  TOnValueChanged = procedure(Sender : TObject; ANewValue : Integer) of object;
+  TOnValueChanged = procedure(Sender: TObject; ANewValue: Integer) of object;
 
   TFlatImageButton = class(TGraphicControl)
   private
-    FBackground     : TColor;
-    FImageList      : TCustomImageList;
-    FImageIndex     : Integer;
-    FMouseIsDown    : Boolean;
-    FOnClick        : TNotifyEvent;
-    FValue          : Integer;
-    FOnValueChanged : TOnValueChanged;
+    FBackground: TColor;
+    FImageList: TCustomImageList;
+    FImageIndex: Integer;
+    FMouseIsDown: Boolean;
+    FOnClick: TNotifyEvent;
+    FValue: Integer;
+    FOnValueChanged: TOnValueChanged;
 
     {@M}
-    procedure SetBackground(AValue : TColor);
-    procedure SetImageIndex(Avalue : Integer);
-    procedure SetValue(AValue : Integer);
+    procedure SetBackground(AValue: TColor);
+    procedure SetImageIndex(Avalue: Integer);
+    procedure SetValue(AValue: Integer);
   protected
     {@M}
     procedure Paint; override;
@@ -79,8 +79,8 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
   published
     property Align;
@@ -90,12 +90,12 @@ type
     property Margins;
 
     {@G/S}
-    property Background     : TColor           read FBackground     write SetBackground;
-    property ImageList      : TCustomImageList read FImageList      write FImageList;
-    property ImageIndex     : Integer          read FImageIndex     write SetImageIndex;
-    property OnClick        : TNotifyEvent     read FOnClick        write FOnClick;
-    property Value          : Integer          read FValue          write SetValue;
-    property OnValueChanged : TOnValueChanged  read FOnValueChanged write FOnValueChanged;
+    property Background: TColor read FBackground write SetBackground;
+    property ImageList: TCustomImageList read FImageList write FImageList;
+    property ImageIndex: Integer read FImageIndex write SetImageIndex;
+    property OnClick: TNotifyEvent read FOnClick write FOnClick;
+    property Value: Integer read FValue write SetValue;
+    property OnValueChanged: TOnValueChanged read FOnValueChanged write FOnValueChanged;
   end;
 
 implementation
@@ -107,33 +107,33 @@ uses
   NeoFlat.Helper;
 // ---------------------------------------------------------------------------------------------------------------------
 
-constructor TFlatImageButton.Create(AOwner : TComponent);
+constructor TFlatImageButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ///
 
-  ShowHint        := True;
-  FImageList      := nil;
-  FBackground     := MAIN_GRAY;
-  Height          := 30;
-  Width           := 30;
-  FImageIndex     := -1;
-  FMouseIsDown    := False;
-  FOnClick        := nil;
-  FValue          := 0;
+  ShowHint := True;
+  FImageList := nil;
+  FBackground := MAIN_GRAY;
+  Height := 30;
+  Width := 30;
+  FImageIndex := -1;
+  FMouseIsDown := False;
+  FOnClick := nil;
+  FValue := 0;
   FOnValueChanged := nil;
 end;
 
-destructor TFlatImageButton.Destroy();
+destructor TFlatImageButton.Destroy;
 begin
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
 procedure TFlatImageButton.Paint;
 begin
-  Canvas.Lock();
+  Canvas.Lock;
   try
     // Draw Background
     Canvas.Brush.Color := FBackground;
@@ -150,7 +150,7 @@ begin
         Inc(Y);
       end;
 
-      var AGlyph := TBitmap.Create();
+      var AGlyph := TBitmap.Create;
       try
         InitializeBitmap32(AGlyph, FImageList.Width, FImageList.Height);
 
@@ -162,12 +162,11 @@ begin
         ///
         Canvas.Draw(X, Y, AGlyph);
       finally
-        if Assigned(AGlyph) then
-          FreeAndNil(AGlyph);
+        AGlyph.Free;
       end;
     end;
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 
@@ -197,7 +196,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatImageButton.SetBackground(AValue : TColor);
+procedure TFlatImageButton.SetBackground(AValue: TColor);
 begin
   if AValue = FBackground then
     Exit;
@@ -208,7 +207,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatImageButton.SetImageIndex(AValue : Integer);
+procedure TFlatImageButton.SetImageIndex(AValue: Integer);
 begin
   if AValue = FImageIndex then
     Exit;
@@ -219,7 +218,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatImageButton.SetValue(AValue : Integer);
+procedure TFlatImageButton.SetValue(AValue: Integer);
 begin
   if FValue = AValue then
     Exit;

@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.OpenSSL.Exceptions;
 
 interface
@@ -63,17 +61,17 @@ uses
 type
   EOpenSSLBaseException = class(Exception)
   private
-    FErrorCode   : Integer;
-    FErrorString : AnsiString;
+    FErrorCode: Integer;
+    FErrorString: AnsiString;
   public
     {@C}
-    constructor Create(); overload;
-    constructor Create(const pSSLConnection : Pointer); overload;
-    constructor Create(const AErrorCode : Integer); overload;
+    constructor Create overload;
+    constructor Create(const pSSLConnection: Pointer); overload;
+    constructor Create(const AErrorCode: Integer); overload;
 
     {@G}
-    property ErrorCode   : Integer    read FErrorCode;
-    property ErrorString : AnsiString read FErrorString;
+    property ErrorCode: Integer read FErrorCode;
+    property ErrorString: AnsiString read FErrorString;
   end;
 
   EOpenSSLPrivateKeyException = class(EOpenSSLBaseException);
@@ -92,17 +90,17 @@ uses
 
 (* EOpenSSLBaseException *)
 
-constructor EOpenSSLBaseException.Create();
+constructor EOpenSSLBaseException.Create;
 begin
-  Create(ERR_get_error());
+  Create(ERR_get_error);
 end;
 
-constructor EOpenSSLBaseException.Create(const pSSLConnection : Pointer);
+constructor EOpenSSLBaseException.Create(const pSSLConnection: Pointer);
 begin
   Create(SSL_get_error(pSSLConnection, FErrorCode));
 end;
 
-constructor EOpenSSLBaseException.Create(const AErrorCode : Integer);
+constructor EOpenSSLBaseException.Create(const AErrorCode: Integer);
 begin
   FErrorCode := AErrorCode;
 

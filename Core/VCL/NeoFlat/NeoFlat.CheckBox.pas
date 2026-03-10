@@ -59,54 +59,54 @@ type
 
   TFlatCheckBox = class(TCustomControl)
   private
-    FMode           : TCheckBoxMode;
-    FControlState   : TFlatControlState;
+    FMode: TCheckBoxMode;
+    FControlState: TFlatControlState;
 
-    FMouseHover     : Boolean;
+    FMouseHover: Boolean;
 
-    FOldWindowProc  : TWndMethod;
+    FOldWindowProc: TWndMethod;
 
-    FButtonIsDown   : Boolean;
+    FButtonIsDown: Boolean;
 
-    FChecked        : Boolean;
+    FChecked: Boolean;
 
-    FColor          : TColor;
-    FHoverColor     : TColor;
-    FActiveColor    : TColor;
+    FColor: TColor;
+    FHoverColor: TColor;
+    FActiveColor: TColor;
 
-    FMetrics        : TFlatMetrics;
+    FMetrics: TFlatMetrics;
 
-    FOnStateChanged : TNotifyEvent;
+    FOnStateChanged: TNotifyEvent;
 
     {@M}
-    procedure SetMode(const AValue : TCheckBoxMode);
+    procedure SetMode(const AValue: TCheckBoxMode);
 
-    procedure AdjustBound();
+    procedure AdjustBound;
 
-    function IsDesigning() : Boolean;
+    function IsDesigning: Boolean;
 
     procedure CMFontChanged(var AMessage: TMessage); message CM_FONTCHANGED;
 
-    procedure OnCustomWindowProc(var AMessage : TMessage);
+    procedure OnCustomWindowProc(var AMessage: TMessage);
 
-    procedure SetControlState(const AValue : TFlatControlState);
-    procedure SetChecked(AValue : Boolean);
+    procedure SetControlState(const AValue: TFlatControlState);
+    procedure SetChecked(AValue: Boolean);
 
-    function GetButtonRect() : TRect;
+    function GetButtonRect: TRect;
   protected
     {@M}
     procedure Paint; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
-    procedure Loaded(); override;
+    procedure Loaded; override;
   public
     {@M}
-    procedure _SetChecked(const AValue : Boolean);
+    procedure _SetChecked(const AValue: Boolean);
 
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     property Align;
     property AlignWithMargins;
@@ -117,12 +117,12 @@ type
     property Font;
 
     {@G/S}
-    property Mode           : TCheckBoxMode read FMode           write SetMode;
-    property Checked        : Boolean       read FChecked        write SetChecked;
-    property OnStateChanged : TNotifyEvent  read FOnStateChanged write FOnStateChanged;
+    property Mode: TCheckBoxMode read FMode write SetMode;
+    property Checked: Boolean read FChecked write SetChecked;
+    property OnStateChanged: TNotifyEvent read FOnStateChanged write FOnStateChanged;
   end;
 
-  const CHECKBOX_GLYPH_TEMPLATE : TMatrixGlyph = [
+  const CHECKBOX_GLYPH_TEMPLATE: TMatrixGlyph = [
                                               [$0, $0, $0, $0, $0, $0, $0, $0, $0],
                                               [$0, $0, $0, $0, $0, $0, $0, $1, $0],
                                               [$0, $0, $0, $0, $0, $0, $1, $1, $0],
@@ -134,7 +134,7 @@ type
                                               [$0, $0, $0, $0, $0, $0, $0, $0, $0]
   ];
 
-  RADIOBOX_GLYPH_TEMPLATE : TMatrixGlyph = [
+  RADIOBOX_GLYPH_TEMPLATE: TMatrixGlyph = [
                                         [$0, $1, $1, $0],
                                         [$1, $1, $1, $1],
                                         [$1, $1, $1, $1],
@@ -148,18 +148,18 @@ uses
   System.SysUtils, System.Types;
 // ---------------------------------------------------------------------------------------------------------------------
 
-function TFlatCheckBox.GetButtonRect() : TRect;
+function TFlatCheckBox.GetButtonRect: TRect;
 begin
   if FMode = cbmCheckBox then begin
-    result.Left   := 0;
-    result.Top    := (ClientHeight div 2) - FMetrics._6;
-    result.Width  := FMetrics._11;
-    result.Height := FMetrics._11;
+    Result.Left := 0;
+    Result.Top := (ClientHeight div 2) - FMetrics._6;
+    Result.Width := FMetrics._11;
+    Result.Height := FMetrics._11;
   end else begin
-    result.Left   := 0;
-    result.Top    := (ClientHeight div 2) - FMetrics._5;
-    result.Width  := FMetrics._10;
-    result.Height := FMetrics._10;
+    Result.Left := 0;
+    Result.Top := (ClientHeight div 2) - FMetrics._5;
+    Result.Width := FMetrics._10;
+    Result.Height := FMetrics._10;
   end;
 end;
 
@@ -185,13 +185,13 @@ begin
   FButtonIsDown := False;
 end;
 
-procedure TFlatCheckBox.OnCustomWindowProc(var AMessage : TMessage);
+procedure TFlatCheckBox.OnCustomWindowProc(var AMessage: TMessage);
 begin
   FOldWindowProc(AMessage);
   ///
 
   case AMessage.Msg of
-    CM_TEXTCHANGED :
+    CM_TEXTCHANGED: 
       Invalidate;
   end;
 
@@ -201,11 +201,11 @@ begin
   ///
 
   case AMessage.Msg of
-    WM_LBUTTONDOWN : begin
+    WM_LBUTTONDOWN: begin
       SetControlState(csActive);
     end;
 
-    WM_LBUTTONUP : begin
+    WM_LBUTTONUP: begin
       FMouseHover := ptinrect(ClientRect, Point(TWMLButtonUp(AMessage).XPos, TWMLButtonUp(AMessage).YPos));
       ///
 
@@ -216,7 +216,7 @@ begin
       ///
     end;
 
-    WM_MOUSEMOVE : begin
+    WM_MOUSEMOVE: begin
       FMouseHover := True;
       ///
 
@@ -226,7 +226,7 @@ begin
       SetControlState(csHover);
     end;
 
-    WM_MOUSELEAVE, {VCL ->} CM_MOUSELEAVE : begin
+    WM_MOUSELEAVE, {VCL ->} CM_MOUSELEAVE: begin
       FMouseHover := False;
       ///
 
@@ -236,9 +236,9 @@ begin
   end;
 end;
 
-function TFlatCheckBox.IsDesigning() : Boolean;
+function TFlatCheckBox.IsDesigning: Boolean;
 begin
-  result := (csDesigning in ComponentState);
+  Result := (csDesigning in ComponentState);
 end;
 
 constructor TFlatCheckBox.Create(AOwner: TComponent);
@@ -246,32 +246,32 @@ begin
   inherited Create(AOwner);
   ///
 
-  Font.Height  := -11;
-  Font.Name    := FONT_1;
-  Font.Color   := MAIN_ACCENT;
+  Font.Height := -11;
+  Font.Name := FONT_1;
+  Font.Color := MAIN_ACCENT;
 
   ShowHint := True;
 
   FMode := cbmCheckBox;
 
   FControlState := csNormal;
-  FMouseHover   := False;
-  FChecked      := False;
+  FMouseHover := False;
+  FChecked := False;
 
-  FOldWindowProc  := WindowProc;
+  FOldWindowProc := WindowProc;
   WindowProc := OnCustomWindowProc;
 
   FColor := MAIN_GRAY;
   FButtonIsDown := False;
   FOnStateChanged := nil;
 
-  FHoverColor  := MAIN_GRAY;
+  FHoverColor := MAIN_GRAY;
   FActiveColor := MAIN_GRAY;
 
   FMetrics := TFlatMetrics.Create(self);
 end;
 
-destructor TFlatCheckBox.Destroy();
+destructor TFlatCheckBox.Destroy;
 begin
   if Assigned(FOldWindowProc) then
     WindowProc := FOldWindowProc;
@@ -280,19 +280,19 @@ begin
     FreeAndNil(FMetrics);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TFlatCheckBox.Loaded();
+procedure TFlatCheckBox.Loaded;
 begin
   inherited;
   ///
 
-  if NOT IsDesigning() then
-    AdjustBound();
+  if NOT IsDesigning then
+    AdjustBound;
 end;
 
-procedure TFlatCheckBox.AdjustBound();
+procedure TFlatCheckBox.AdjustBound;
 begin
   var AMetrics: TTextMetric;
 
@@ -311,7 +311,7 @@ end;
 
 procedure TFlatCheckBox.Paint;
 begin
-  Canvas.Lock();
+  Canvas.Lock;
   try
     // Draw Background
     Canvas.Brush.Style := bsSolid;
@@ -319,35 +319,35 @@ begin
 
     Canvas.FillRect(Rect(0, 0, ClientWidth, ClientHeight));
 
-    var AButtonRect : TRect;
+    var AButtonRect: TRect;
 
     // Draw checkbox / radio
-    Canvas.Pen.Style   := psClear;
+    Canvas.Pen.Style := psClear;
     Canvas.Brush.Style := bsClear;
     case FMode of
-      cbmCheckBox : begin
+      cbmCheckBox: begin
         // Draw Border
-        var ABorder     := clNone;
+        var ABorder := clNone;
         var ABackground := clNone;
 
         case FControlState of
-          csNormal : begin
-            ABorder     := MAIN_ACCENT;
+          csNormal: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
 
-          csHover : begin
-            ABorder     := MAIN_ACCENT;
+          csHover: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
 
-          csActive : begin
-            ABorder     := MAIN_ACCENT;
+          csActive: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
         end;
 
-        AButtonRect := GetButtonRect();
+        AButtonRect := GetButtonRect;
 
         if (ABorder <> clNone) then begin
           Canvas.Brush.Style := bsSolid;
@@ -402,30 +402,30 @@ begin
           var X := (AButtonRect.Left + FMetrics._1);
           var Y := (AButtonRect.Top + FMetrics._1);
 
-          var AGlyph : TMatrixGlyph;
+          var AGlyph: TMatrixGlyph;
           ScaleMatrixGlyph(CHECKBOX_GLYPH_TEMPLATE, AGlyph, round(ScaleFactor));
 
           DrawMatrixGlyph(Canvas, AGlyph, X, Y, MAIN_ACCENT);
         end;
       end;
 
-      cbmRadioBox : begin
-        var ABorder     := clNone;
+      cbmRadioBox: begin
+        var ABorder := clNone;
         var ABackground := clNone;
 
         case FControlState of
-          csNormal : begin
-            ABorder     := MAIN_ACCENT;
+          csNormal: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
 
-          csHover : begin
-            ABorder     := MAIN_ACCENT;
+          csHover: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
 
-          csActive : begin
-            ABorder     := MAIN_ACCENT;
+          csActive: begin
+            ABorder := MAIN_ACCENT;
             ABackground := clNone;
           end;
         end;
@@ -440,7 +440,7 @@ begin
           Canvas.Pen.Style := psSolid;
         end;
 
-        AButtonRect := GetButtonRect();
+        AButtonRect := GetButtonRect;
 
         Canvas.Ellipse(AButtonRect);
 
@@ -456,7 +456,7 @@ begin
         var Y := (AButtonRect.Top + FMetrics._3);
 
         if FChecked then begin
-          var AGlyph : TMatrixGlyph;
+          var AGlyph: TMatrixGlyph;
 
           ScaleMatrixGlyph(RADIOBOX_GLYPH_TEMPLATE, AGlyph, round(ScaleFactor));
 
@@ -471,17 +471,17 @@ begin
     Canvas.Font.Assign(Font);
 
     var ALeft := (AButtonRect.Left + AButtonRect.Width + FMetrics._6);
-    var ATextRect : TRect;
+    var ATextRect: TRect;
 
-    ATextRect.Top    := 0;
+    ATextRect.Top := 0;
     ATextRect.Height := ClientHeight - FMetrics._2;
-    ATextRect.Left   := ALeft;
-    ATextRect.Width  := (ClientWidth - FMetrics._6 - ALeft);
+    ATextRect.Left := ALeft;
+    ATextRect.Width := (ClientWidth - FMetrics._6 - ALeft);
 
-    var ACaption : String := inherited Caption;
+    var ACaption: string := inherited Caption;
     Canvas.TextRect(ATextRect, ACaption, [tfSingleLine, tfVerticalCenter, tfEndEllipsis]);
   finally
-    Canvas.Unlock();
+    Canvas.Unlock;
   end;
 end;
 
@@ -490,11 +490,11 @@ begin
   inherited;
   ///
 
-  if not IsDesigning() and (csLoading in ComponentState) then
-    AdjustBound();
+  if not IsDesigning and (csLoading in ComponentState) then
+    AdjustBound;
 end;
 
-procedure TFlatCheckBox.SetMode(const AValue : TCheckBoxMode);
+procedure TFlatCheckBox.SetMode(const AValue: TCheckBoxMode);
 begin
   if (AValue = FMode) then
     Exit;
@@ -506,7 +506,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatCheckBox.SetControlState(const AValue : TFlatControlState);
+procedure TFlatCheckBox.SetControlState(const AValue: TFlatControlState);
 begin
   if (AValue = FControlState) then
     Exit;
@@ -518,9 +518,9 @@ begin
   Invalidate;
 end;
 
-procedure TFlatCheckBox.SetChecked(AValue : Boolean);
+procedure TFlatCheckBox.SetChecked(AValue: Boolean);
 
-  procedure UncheckGroupRadio();
+  procedure UncheckGroupRadio;
   begin
     for var I := 0 to Owner.ComponentCount -1 do begin
       var C := Owner.Components[i];
@@ -543,7 +543,7 @@ begin
     Exit;
 
   if (Mode = cbmRadioBox) then begin
-    UncheckGroupRadio();
+    UncheckGroupRadio;
 
     AValue := True; // always for radio
   end;
@@ -551,7 +551,7 @@ begin
   _SetChecked(AValue);
 end;
 
-procedure TFlatCheckBox._SetChecked(const AValue : Boolean);
+procedure TFlatCheckBox._SetChecked(const AValue: Boolean);
 begin
   FChecked := AValue;
 

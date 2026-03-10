@@ -57,15 +57,15 @@ uses
 type
   TFlatEdit = class(TEdit)
   private
-    FMouseHover : Boolean;
+    FMouseHover: Boolean;
 
-    FBackground : TFlatStateColors;
-    FBorder     : TFlatStateColors;
-    FShowBorder : Boolean;
+    FBackground: TFlatStateColors;
+    FBorder: TFlatStateColors;
+    FShowBorder: Boolean;
 
-    FEditStatus : TControlStatus;
+    FEditStatus: TControlStatus;
 
-    FValidators : TValidators;
+    FValidators: TValidators;
 
 
     {@M}
@@ -77,39 +77,39 @@ type
     procedure CMEnabledChanged(var AMessage: TMessage);message CM_ENABLEDCHANGED;
     procedure CMFontChanged(var AMessage: TMessage); message CM_FONTCHANGED;
 
-    procedure DrawFlatBorder(ARegion : HRGN);
+    procedure DrawFlatBorder(ARegion: HRGN);
 
-    function IsDesigning() : Boolean;
+    function IsDesigning: Boolean;
 
-    procedure AdjustBound();
+    procedure AdjustBound;
 
-    procedure SetEditStatus(const AValue : TControlStatus);
-    procedure SetShowBorder(const AValue : Boolean);
-    function GetIsEmpty() : Boolean;
+    procedure SetEditStatus(const AValue: TControlStatus);
+    procedure SetShowBorder(const AValue: Boolean);
+    function GetIsEmpty: Boolean;
 
-    procedure SetValidators(const AValue : TValidators);
-    function GetIsValid() : Boolean;
+    procedure SetValidators(const AValue: TValidators);
+    function GetIsValid: Boolean;
 
-    procedure DoValidate();
+    procedure DoValidate;
   protected
     {@M}
-    procedure Loaded(); override;
-    procedure Change(); override;
+    procedure Loaded; override;
+    procedure Change; override;
 
-    procedure SetEnabled(AValue : Boolean); override;
+    procedure SetEnabled(AValue: Boolean); override;
   public
     {@C}
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy(); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     {@G}
-    property IsValid : Boolean read GetIsValid;
-    property IsEmpty : Boolean read GetIsEmpty;
+    property IsValid: Boolean read GetIsValid;
+    property IsEmpty: Boolean read GetIsEmpty;
   published
     {@G/S}
-    property Status     : TControlStatus read FEditStatus write SetEditStatus;
-    property Validators : TValidators    read FValidators write SetValidators;
-    property ShowBorder : Boolean        read FShowBorder write SetShowBorder;
+    property Status: TControlStatus read FEditStatus write SetEditStatus;
+    property Validators: TValidators read FValidators write SetValidators;
+    property ShowBorder: Boolean read FShowBorder write SetShowBorder;
   end;
 
 implementation
@@ -121,7 +121,7 @@ uses
   NeoFlat.Theme, NeoFlat.Validators;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TFlatEdit.DoValidate();
+procedure TFlatEdit.DoValidate;
 begin
   if Validate(Text, FValidators) then
     Status := cStatusNormal
@@ -129,9 +129,9 @@ begin
     Status := cStatusError;
 end;
 
-procedure TFlatEdit.AdjustBound();
+procedure TFlatEdit.AdjustBound;
 begin
-  var AMetrics : TTextMetric;
+  var AMetrics: TTextMetric;
 
   var ADC := GetDC(0);
   try
@@ -147,27 +147,27 @@ begin
   Height := (AMetrics.tmHeight + ScaleValue(6));
 end;
 
-procedure TFlatEdit.Loaded();
+procedure TFlatEdit.Loaded;
 begin
   inherited;
   ///
 
-  if NOT IsDesigning() then
-    AdjustBound();
+  if NOT IsDesigning then
+    AdjustBound;
 end;
 
-procedure TFlatEdit.Change();
+procedure TFlatEdit.Change;
 begin
   inherited;
   ///
 
   if (Status = cStatusError) then
-    DoValidate();
+    DoValidate;
 end;
 
-function TFlatEdit.IsDesigning() : Boolean;
+function TFlatEdit.IsDesigning: Boolean;
 begin
-  result := (csDesigning in ComponentState);
+  Result := (csDesigning in ComponentState);
 end;
 
 constructor TFlatEdit.Create(AOwner: TComponent);
@@ -175,10 +175,10 @@ begin
   inherited Create(AOwner);
   ///
 
-  Color       := clWhite;
+  Color := clWhite;
   Font.Height := -11;
-  Font.Color  := clBlack;
-  Font.Name   := FONT_1;
+  Font.Color := clBlack;
+  Font.Name := FONT_1;
 
   FEditStatus := cStatusNormal;
 
@@ -187,25 +187,25 @@ begin
   ShowHint := True;
 
   ControlStyle := ControlStyle - [csFramed];
-  Ctl3D        := False;
-  AutoSize     := False;
+  Ctl3D := False;
+  AutoSize := False;
 
   FMouseHover := False;
 
   FBackground := TFlatStateColors.Create(self);
   FBackground.Normal := clWhite;
-  FBackground.Hover  := clWhite;
-  FBackground.Focus  := clWhite;
+  FBackground.Hover := clWhite;
+  FBackground.Focus := clWhite;
 
   FBorder := TFlatStateColors.Create(self);
   FBorder.Normal := clBlack;
-  FBorder.Hover  := clBlack;
-  FBorder.Focus  := clBlack;
+  FBorder.Hover := clBlack;
+  FBorder.Focus := clBlack;
 
   FValidators := [];
 end;
 
-destructor TFlatEdit.Destroy();
+destructor TFlatEdit.Destroy;
 begin
   if Assigned(FBackground) then
     FreeAndNil(FBackground);
@@ -214,10 +214,10 @@ begin
     FreeAndNil(FBorder);
 
   ///
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-procedure TFlatEdit.DrawFlatBorder(ARegion : HRGN);
+procedure TFlatEdit.DrawFlatBorder(ARegion: HRGN);
 begin
   if not FShowBorder then
     Exit;
@@ -225,7 +225,7 @@ begin
 
   var ADC := GetWindowDC(Handle);
   try
-    var AColor : TColor;
+    var AColor: TColor;
     if Focused then begin
       AColor := ColorToRGB(FBorder.Focus);
     end else begin
@@ -239,7 +239,7 @@ begin
     // Override Outer Color if status is <> Normal
     if (FEditStatus <> cStatusNormal) and enabled then begin
       case FEditStatus of
-        cStatusError : AColor := MAIN_RED;
+        cStatusError: AColor := MAIN_RED;
       end;
     end;
 
@@ -247,12 +247,12 @@ begin
 
     var ABrush := CreateSolidBrush(AColor);
     try
-      var AClientRect : TRect;
+      var AClientRect: TRect;
       GetWindowRect(Handle, AClientRect);
 
       // Border Top
       var ARect := TRect.Empty;
-      ARect.Width  := AClientRect.Width;
+      ARect.Width := AClientRect.Width;
       ARect.Height := ABorderWidth;
       FillRect(ADC, ARect, ABrush);
 
@@ -264,15 +264,15 @@ begin
 
       // Border Right
       ARect := TRect.Empty;
-      ARect.Left   := AClientRect.Width - ABorderWidth;
+      ARect.Left := AClientRect.Width - ABorderWidth;
       ARect.Height := AClientRect.Height;
-      ARect.Width  := ABorderWidth;
+      ARect.Width := ABorderWidth;
       FillRect(ADC, ARect, ABrush);
 
       // Border Bottom
       ARect := TRect.Empty;
-      ARect.Top    := AClientRect.Height - ABorderWidth;
-      ARect.Width  := AClientRect.Width;
+      ARect.Top := AClientRect.Height - ABorderWidth;
+      ARect.Width := AClientRect.Width;
       ARect.Height := ABorderWidth;
       FillRect(ADC, ARect, ABrush);
     finally
@@ -320,7 +320,7 @@ begin
   inherited;
   ///
 
-  if NOT IsDesigning() then
+  if NOT IsDesigning then
     DrawFlatBorder(0);
 end;
 
@@ -329,7 +329,7 @@ begin
   inherited;
   ///
 
-  if NOT IsDesigning() then
+  if NOT IsDesigning then
     DrawFlatBorder(0);
 end;
 
@@ -346,16 +346,16 @@ begin
   inherited;
   ///
 
-  if NOT IsDesigning() and (csLoading in ComponentState) then
-    AdjustBound();
+  if NOT IsDesigning and (csLoading in ComponentState) then
+    AdjustBound;
 end;
 
-function TFlatEdit.GetIsEmpty() : Boolean;
+function TFlatEdit.GetIsEmpty: Boolean;
 begin
-  result := Length(Trim(Text)) = 0;
+  Result := Length(Trim(Text)) = 0;
 end;
 
-procedure TFlatEdit.SetEnabled(AValue : Boolean);
+procedure TFlatEdit.SetEnabled(AValue: Boolean);
 begin
   if AValue = Enabled then
     Exit;
@@ -369,7 +369,7 @@ begin
     Font.Color := clGray;
 end;
 
-procedure TFlatEdit.SetValidators(const AValue : TValidators);
+procedure TFlatEdit.SetValidators(const AValue: TValidators);
 begin
   if AValue = FValidators then
     Exit;
@@ -381,7 +381,7 @@ begin
   Invalidate;
 end;
 
-procedure TFlatEdit.SetEditStatus(const AValue : TControlStatus);
+procedure TFlatEdit.SetEditStatus(const AValue: TControlStatus);
 begin
   if AValue = FEditStatus then
     Exit;
@@ -395,15 +395,15 @@ begin
   Invalidate;
 end;
 
-function TFlatEdit.GetIsValid() : Boolean;
+function TFlatEdit.GetIsValid: Boolean;
 begin
-  DoValidate();
+  DoValidate;
   ///
 
-  result := (Status = cStatusNormal);
+  Result := (Status = cStatusNormal);
 end;
 
-procedure TFlatEdit.SetShowBorder(const AValue : Boolean);
+procedure TFlatEdit.SetShowBorder(const AValue: Boolean);
 begin
   if AValue = FShowBorder then
     Exit;

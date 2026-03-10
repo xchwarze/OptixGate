@@ -63,17 +63,17 @@ type
 
   TX509CertificateEnumerator = record
   private
-    FTarget : TOptixConfigCertificatesStore;
-    FIndex  : Integer;
+    FTarget: TOptixConfigCertificatesStore;
+    FIndex: Integer;
 
     {@M}
-    function GetCurrent() : TX509Certificate;
+    function GetCurrent: TX509Certificate;
   public
     {@C}
-    constructor Create(ATarget : TOptixConfigCertificatesStore);
+    constructor Create(ATarget: TOptixConfigCertificatesStore);
 
     {@M}
-    function MoveNext() : Boolean;
+    function MoveNext: Boolean;
 
     {@G}
     property Current: TX509Certificate read GetCurrent;
@@ -82,14 +82,14 @@ type
   TOptixConfigCertificatesStore = class(TOptixConfigEnumBase)
   private
     {@M}
-    function GetItem(const AIndex : Integer) : TX509Certificate;
+    function GetItem(const AIndex: Integer): TX509Certificate;
   public
     {@M}
-    procedure Add(const ACertificate : TX509Certificate);
-    function GetEnumerator() : TX509CertificateEnumerator;
+    procedure Add(const ACertificate: TX509Certificate);
+    function GetEnumerator: TX509CertificateEnumerator;
 
     {@G}
-    property Count : Integer read GetCount;
+    property Count: Integer read GetCount;
   end;
 
 implementation
@@ -106,26 +106,26 @@ uses
 constructor TX509CertificateEnumerator.Create(ATarget: TOptixConfigCertificatesStore);
 begin
   FTarget := ATarget;
-  FIndex  := -1;
+  FIndex := -1;
 end;
 
-function TX509CertificateEnumerator.MoveNext(): Boolean;
+function TX509CertificateEnumerator.MoveNext: Boolean;
 begin
   Inc(FIndex);
 
-  result := FIndex < FTarget.Count;
+  Result := FIndex < FTarget.Count;
 end;
 
-function TX509CertificateEnumerator.GetCurrent() : TX509Certificate;
+function TX509CertificateEnumerator.GetCurrent: TX509Certificate;
 begin
-  result := FTarget.GetItem(FIndex);
+  Result := FTarget.GetItem(FIndex);
 end;
 
 (* TOptixConfigCertificatesStore *)
 
-function TOptixConfigCertificatesStore.GetItem(const AIndex : Integer) : TX509Certificate;
+function TOptixConfigCertificatesStore.GetItem(const AIndex: Integer): TX509Certificate;
 begin
-  ZeroMemory(@result, SizeOf(TX509Certificate));
+  Result := Default(TX509Certificate);
   if not Assigned(FItems) then
     Exit;
   ///
@@ -135,35 +135,37 @@ begin
 
   var ARow := FItems.Items[AIndex];
 
-  var APublicKey, APrivateKey : String;
+  var APublicKey, APrivateKey: string;
   if not ARow.TryGetValue('PublicKey', APublicKey) or not ARow.TryGetValue('PrivateKey', APrivateKey) then
     Exit;
   try
-    TOptixOpenSSLHelper.LoadCertificate(APublicKey, APrivateKey, result);
+    TOptixOpenSSLHelper.LoadCertificate(APublicKey, APrivateKey, Result);
   except
+
   end;
 end;
 
-procedure TOptixConfigCertificatesStore.Add(const ACertificate : TX509Certificate);
+procedure TOptixConfigCertificatesStore.Add(const ACertificate: TX509Certificate);
 begin
   if not Assigned(FItems) then
     Exit;
   ///
 
-  var AItem := TJsonObject.Create();
+  var AItem := TJsonObject.Create;
   try
     AItem.AddPair('PublicKey', TOptixOpenSSLHelper.SerializeCertificateKey(ACertificate, cktPublic));
     AItem.AddPair('PrivateKey', TOptixOpenSSLHelper.SerializeCertificateKey(ACertificate, cktPrivate));
+	
+	///
+	FItems.AddElement(AItem);
   except
-    FreeAndNil(AItem);
-  end;
-
-  FItems.AddElement(AItem);
+    AItem.Free;
+  end;  
 end;
 
-function TOptixConfigCertificatesStore.GetEnumerator() : TX509CertificateEnumerator;
+function TOptixConfigCertificatesStore.GetEnumerator: TX509CertificateEnumerator;
 begin
-  result := TX509CertificateEnumerator.Create(Self);
+  Result := TX509CertificateEnumerator.Create(Self);
 end;
 
 end.

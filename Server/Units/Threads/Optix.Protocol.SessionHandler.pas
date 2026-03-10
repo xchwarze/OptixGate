@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit Optix.Protocol.SessionHandler;
 
 interface
@@ -65,24 +63,24 @@ uses
 type
   TOptixSessionHandlerThread = class;
 
-  TOnSessionDisconnect = procedure(Sender : TOptixSessionHandlerThread) of object;
+  TOnSessionDisconnect = procedure(Sender: TOptixSessionHandlerThread) of object;
 
-  TOnReceivePacket = procedure(Sender : TOptixSessionHandlerThread; const AOptixPacket : TOptixPacket;
-    var AHandleMemory : Boolean) of object;
+  TOnReceivePacket = procedure(Sender: TOptixSessionHandlerThread; const AOptixPacket: TOptixPacket;
+    var AHandleMemory: Boolean) of object;
 
   TOptixSessionHandlerThread = class(TOptixClientHandlerThread)
   private
-    FOnSessionDisconnect : TOnSessionDisconnect;
-    FOnReceivePacket     : TOnReceivePacket;
+    FOnSessionDisconnect: TOnSessionDisconnect;
+    FOnReceivePacket: TOnReceivePacket;
   protected
     {@M}
-    procedure ClientTerminate(); override;
-    procedure PacketReceived(const AOptixPacket : TOptixPacket; var ACallHandleMemory : Boolean); override;
-    procedure Initialize(); override;
+    procedure ClientTerminate; override;
+    procedure PacketReceived(const AOptixPacket: TOptixPacket; var ACallHandleMemory: Boolean); override;
+    procedure Initialize; override;
   public
     {@G/S}
-    property OnSessionDisconnect : TOnSessionDisconnect read FOnSessionDisconnect write FOnSessionDisconnect;
-    property OnReceivePacket     : TOnReceivePacket     read FOnReceivePacket     write FOnReceivePacket;
+    property OnSessionDisconnect: TOnSessionDisconnect read FOnSessionDisconnect write FOnSessionDisconnect;
+    property OnReceivePacket: TOnReceivePacket read FOnReceivePacket write FOnReceivePacket;
   end;
 
 implementation
@@ -92,18 +90,18 @@ uses
   System.SysUtils;
 // ---------------------------------------------------------------------------------------------------------------------
 
-procedure TOptixSessionHandlerThread.Initialize();
+procedure TOptixSessionHandlerThread.Initialize;
 begin
   inherited;
   ///
 
   FOnSessionDisconnect := nil;
-  FOnReceivePacket     := nil;
+  FOnReceivePacket := nil;
 end;
 
-procedure TOptixSessionHandlerThread.ClientTerminate();
+procedure TOptixSessionHandlerThread.ClientTerminate;
 begin
-  inherited ClientTerminate();
+  inherited ClientTerminate;
   ///
 
   if Assigned(FOnSessionDisconnect) then
@@ -112,7 +110,7 @@ begin
     end);
 end;
 
-procedure TOptixSessionHandlerThread.PacketReceived(const AOptixPacket : TOptixPacket; var ACallHandleMemory : Boolean);
+procedure TOptixSessionHandlerThread.PacketReceived(const AOptixPacket: TOptixPacket; var ACallHandleMemory: Boolean);
 begin
   if not Assigned(AOptixPacket) or not Assigned(FOnReceivePacket) then
     Exit;

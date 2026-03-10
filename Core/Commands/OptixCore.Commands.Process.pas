@@ -47,8 +47,6 @@
 {                                                                              }
 {******************************************************************************}
 
-
-
 unit OptixCore.Commands.Process;
 
 interface
@@ -69,68 +67,68 @@ type
   TOptixCommandProcessActionResponse = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FProcessId : Cardinal;
+    FProcessId: Cardinal;
   public
     {@C}
-    constructor Create(const AProcessId : Cardinal) overload;
+    constructor Create(const AProcessId: Cardinal) overload;
 
     {@G}
-    property ProcessId : Cardinal read FProcessId;
+    property ProcessId: Cardinal read FProcessId;
   end;
 
   TOptixCommandTerminateProcess = class(TOptixCommandProcessActionResponse)
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
   end;
 
   TOptixCommandDumpProcess = class(TOptixCommandTask)
   private
     [OptixSerializableAttribute]
-    FProcessId : Cardinal;
+    FProcessId: Cardinal;
 
     [OptixSerializableAttribute]
-    FDestTempPath : Boolean;
+    FDestTempPath: Boolean;
 
     [OptixSerializableAttribute]
-    FDestFilePath : String;
+    FDestFilePath: string;
 
     [OptixSerializableAttribute]
-    FTypesValue : DWORD;
+    FTypesValue: DWORD;
   public
     {@C}
-    constructor Create(const AProcessId : Cardinal; const ADestFilePath : String; const ATypesValue : DWORD); overload;
+    constructor Create(const AProcessId: Cardinal; const ADestFilePath: string; const ATypesValue: DWORD); overload;
 
     {@M}
     {$IFNDEF SERVER}
-    function CreateTask(const ACommand : TOptixCommand) : TOptixTask; override;
+    function CreateTask(const ACommand: TOptixCommand): TOptixTask; override;
     {$ENDIF}
 
     {@G}
-    property ProcessId    : Cardinal read FProcessId;
-    property DestTempPath : Boolean  read FDestTempPath;
-    property DestFilePath : String   read FDestFilePath;
-    property TypesValue   : DWORD    read FTypesValue;
+    property ProcessId: Cardinal read FProcessId;
+    property DestTempPath: Boolean read FDestTempPath;
+    property DestFilePath: string read FDestFilePath;
+    property TypesValue: DWORD read FTypesValue;
   end;
 
   TOptixCommandEnumRunningProcesses = class(TOptixCommandActionResponse)
   private
     [OptixSerializableAttribute]
-    FProcesses : TObjectList<TProcessInformation>;
+    FProcesses: TObjectList<TProcessInformation>;
   public
     {@M}
     {$IFNDEF SERVER}
-    procedure DoAction(); override;
+    procedure DoAction; override;
     {$ENDIF}
-    procedure AfterCreate(); override;
+    procedure AfterCreate; override;
 
     {@C}
-    destructor Destroy(); override;
+    destructor Destroy; override;
 
     {@G}
-    property Processes : TObjectList<TProcessInformation> read FProcesses;
+    property Processes: TObjectList<TProcessInformation> read FProcesses;
   end;
 
 implementation
@@ -144,9 +142,9 @@ uses
 
 (* TOptixCommandProcessActionResponse *)
 
-constructor TOptixCommandProcessActionResponse.Create(const AProcessId : Cardinal);
+constructor TOptixCommandProcessActionResponse.Create(const AProcessId: Cardinal);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FProcessId := AProcessId;
@@ -155,7 +153,7 @@ end;
 (* TOptixCommandTerminateProcess *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandTerminateProcess.DoAction();
+procedure TOptixCommandTerminateProcess.DoAction;
 begin
   TProcessHelper.TerminateProcess(FProcessId);
 end;
@@ -163,16 +161,16 @@ end;
 
 (* TOptixCommandDumpProcess *)
 
-constructor TOptixCommandDumpProcess.Create(const AProcessId : Cardinal; const ADestFilePath : String; const ATypesValue : DWORD);
+constructor TOptixCommandDumpProcess.Create(const AProcessId: Cardinal; const ADestFilePath: string; const ATypesValue: DWORD);
 begin
-  inherited Create();
+  inherited Create;
   ///
 
   FProcessId := AProcessId;
 
-  FDestTempPath := String.IsNullOrWhiteSpace(ADestFilePath);
+  FDestTempPath := string.IsNullOrWhiteSpace(ADestFilePath);
   if not FDestTempPath then
-    FDestFilePath := ADestFilePath.Trim()
+    FDestFilePath := ADestFilePath.Trim
   else
     FDestFilePath := '';
 
@@ -180,25 +178,25 @@ begin
 end;
 
 {$IFNDEF SERVER}
-function TOptixCommandDumpProcess.CreateTask(const ACommand : TOptixCommand) : TOptixTask;
+function TOptixCommandDumpProcess.CreateTask(const ACommand: TOptixCommand): TOptixTask;
 begin
   if Assigned(ACommand) then
-    result := TOptixProcessDumpTask.Create(ACommand)
+    Result := TOptixProcessDumpTask.Create(ACommand)
   else
-    result := nil;
+    Result := nil;
 end;
 {$ENDIF}
 
 (* TOptixCommandEnumRunningProcesses *)
 
 {$IFNDEF SERVER}
-procedure TOptixCommandEnumRunningProcesses.DoAction();
+procedure TOptixCommandEnumRunningProcesses.DoAction;
 begin
   TOptixEnumProcess.Enum(FProcesses);
 end;
 {$ENDIF}
 
-procedure TOptixCommandEnumRunningProcesses.AfterCreate();
+procedure TOptixCommandEnumRunningProcesses.AfterCreate;
 begin
   inherited;
   ///
@@ -206,7 +204,7 @@ begin
   FProcesses := TObjectList<TProcessInformation>.Create(True);
 end;
 
-destructor TOptixCommandEnumRunningProcesses.Destroy();
+destructor TOptixCommandEnumRunningProcesses.Destroy;
 begin
   if Assigned(FProcesses) then
     FreeAndNil(FProcesses);
