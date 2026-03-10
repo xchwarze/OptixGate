@@ -83,7 +83,7 @@ type
     function GetAvailableOutputBytes: DWORD;
   public
     {@C}
-    constructor Create(const ACommandLine: String); overload;
+    constructor Create(const ACommandLine: string); overload;
     constructor Create(const ACommandLine: string; const AGroupId: TGUID); overload;
     destructor Destroy; override;
 
@@ -107,7 +107,7 @@ type
     {@G}
     property InstanceId: TGUID read FInstanceId;
     property GroupId: TGUID read FGroupId;
-    property CommandLine: String read FCommandLine;
+    property CommandLine: string read FCommandLine;
     property Active: Boolean read IsActive;
   end;
 
@@ -120,7 +120,7 @@ uses
   OptixCore.WinApiEx, OptixCore.Exceptions;
 // ---------------------------------------------------------------------------------------------------------------------
 
-constructor TProcessHandler.Create(const ACommandLine: String);
+constructor TProcessHandler.Create(const ACommandLine: string);
 begin
   inherited Create;
   ///

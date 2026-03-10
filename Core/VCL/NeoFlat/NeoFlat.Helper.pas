@@ -106,7 +106,7 @@ procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGly
 procedure DrawMatrixGlyph(const ACanvas: TCanvas; const AGlyphMatrix: TMatrixGlyph; const APoint: TPoint;
   const AGlyphColor: TColor); overload;
 function IsValidMatrixGlyph(const AGlyph: TMatrixGlyph): Boolean;
-function DebugRect(const ARect: TRect; const AName: String): string;
+function DebugRect(const ARect: TRect; const AName: string): string;
 
 implementation
 
@@ -117,7 +117,7 @@ uses
 
 (* Local *)
 
-function DebugRect(const ARect: TRect; const AName: String): string;
+function DebugRect(const ARect: TRect; const AName: string): string;
 begin
   Result := Format('[%s] X:%d, Y:%d, W:%d, H:%d', [AName, ARect.Left, ARect.Top, ARect.Width, ARect.Height]);
 end;

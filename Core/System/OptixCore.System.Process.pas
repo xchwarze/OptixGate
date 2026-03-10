@@ -76,15 +76,15 @@ type
     class function TryIsElevatedByProcessId(const AProcessId: Cardinal): TElevatedStatus; static;
     class function IsElevated(AProcessHandle: THandle = 0): TElevatedStatus; static;
     class function TryGetIsElevated(AProcessHandle: THandle = 0): TElevatedStatus; static;
-    class procedure GetProcessUserInformation(const AProcessId: Cardinal; out AUserName, ADomain: String); static;
-    class function TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: String): Boolean; static;
+    class procedure GetProcessUserInformation(const AProcessId: Cardinal; out AUserName, ADomain: string); static;
+    class function TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string): Boolean; static;
     class function GetProcessImagePath(const AProcessID: Cardinal): string; static;
-    class function TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: String = ''): string; static;
+    class function TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: string = ''): string; static;
     class function IsWow64Process(const AProcessId: Cardinal): Boolean; static;
     class function TryIsWow64Process(const AProcessId: Cardinal): TBoolResult; static;
     class function GetProcessCommandLine(const AProcessId: Cardinal): string; static;
     class function TryGetProcessCommandLine(const AProcessId: Cardinal): string; static;
-    class function MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: String = ''): string; static;
+    class function MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: string = ''): string; static;
     class procedure TerminateProcess(const AProcessId: Cardinal); static;
   end;
 
@@ -143,13 +143,13 @@ type
     constructor Create(const pProcessInformation: PSystemProcessInformation); overload;
 
     {@G}
-    property Name: String read FName;
-    property ImagePath: String read FImagePath;
+    property Name: string read FName;
+    property ImagePath: string read FImagePath;
     property Id: Cardinal read FId;
     property ParentId: Cardinal read FParentId;
-    property Username: String read FUsername;
-    property Domain: String read FDomain;
-    property UserSid: String read FUserSid;
+    property Username: string read FUsername;
+    property Domain: string read FDomain;
+    property UserSid: string read FUserSid;
     property Elevated: TElevatedStatus read FElevated;
     property SessionId: Cardinal read FSessionId;
     property ThreadCount: Cardinal read FThreadCount;
@@ -157,7 +157,7 @@ type
     property IsCurrentProcess: Boolean read EvaluateIfCurrentProcess;
     property IsWow64Process: TBoolResult read FIsWow64Process;
     property IsSystem: Boolean read CheckIfSystemUser;
-    property CommandLine: String read FCommandLine;
+    property CommandLine: string read FCommandLine;
   end;
 
   TOptixEnumProcess = class
@@ -248,7 +248,7 @@ begin
   end;
 end;
 
-class procedure TProcessHelper.GetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: String);
+class procedure TProcessHelper.GetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string);
 begin
   var AFlags: Cardinal;
 
@@ -341,7 +341,7 @@ begin
   end;
 end;
 
-class function TProcessHelper.TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: String): Boolean;
+class function TProcessHelper.TryGetProcessUserInformation(const AProcessId: Cardinal; out AUsername, ADomain: string): Boolean;
 begin
   try
     GetProcessUserInformation(AProcessId, AUsername, ADomain);
@@ -381,7 +381,7 @@ begin
   end;
 end;
 
-class function TProcessHelper.TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: String = ''): string;
+class function TProcessHelper.TryGetProcessImagePath(const AProcessID: Cardinal; const ADefault: string = ''): string;
 begin
   try
     Result := GetProcessImagePath(AProcessId);
@@ -477,9 +477,9 @@ begin
   end;
 end;
 
-class function TProcessHelper.MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: String = ''): string;
+class function TProcessHelper.MiniDumpWriteDump(const ATargetProcessId: Cardinal; const ATypesValue: DWORD; AOutputFilePath: string = ''): string;
 begin
-  if String.IsNullOrWhiteSpace(AOutputFilePath) then
+  if string.IsNullOrWhiteSpace(AOutputFilePath) then
     AOutputFilePath := TPath.GetTempFileName;
   ///
 
@@ -521,7 +521,7 @@ end;
 
 function TProcessInformation.CheckIfSystemUser: Boolean;
 begin
-  Result := String.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := string.Compare(FUserSid, 'S-1-5-18', True) =  0;
 end;
 
 procedure TProcessInformation.Assign(ASource: TPersistent);

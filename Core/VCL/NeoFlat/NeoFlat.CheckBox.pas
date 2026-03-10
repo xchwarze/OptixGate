@@ -478,7 +478,7 @@ begin
     ATextRect.Left := ALeft;
     ATextRect.Width := (ClientWidth - FMetrics._6 - ALeft);
 
-    var ACaption: String := inherited Caption;
+    var ACaption: string := inherited Caption;
     Canvas.TextRect(ATextRect, ACaption, [tfSingleLine, tfVerticalCenter, tfEndEllipsis]);
   finally
     Canvas.Unlock;

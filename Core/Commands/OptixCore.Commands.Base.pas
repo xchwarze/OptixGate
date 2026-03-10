@@ -101,7 +101,7 @@ type
   public
     {@M}
     procedure SetTaskDuration(const AValue: UInt64);
-    procedure TaskFailed(const AExceptionMessage: String);
+    procedure TaskFailed(const AExceptionMessage: string);
     procedure TaskSucceed;
 
     {@C}
@@ -111,9 +111,9 @@ type
 
     {@G}
     property Success: Boolean read FSuccess;
-    property ExceptionMessage: String read FExceptionMessage;
+    property ExceptionMessage: string read FExceptionMessage;
     property TaskDuration: UInt64 read FTaskDuration;
-    property Description: String read GetDescription;
+    property Description: string read GetDescription;
   end;
 
   TOptixTaskCallback = class(TOptixPacket)
@@ -144,7 +144,7 @@ type
 
     {@G}
     property Id: TGUID read FId;
-    property TaskClassName: String read FTaskClassName;
+    property TaskClassName: string read FTaskClassName;
     property State: TOptixTaskState read FState;
     property HasEnded: Boolean read GetHasEnded;
     property Result: TOptixTaskResult read FResult;
@@ -255,7 +255,7 @@ begin
   ///
 
   var AResultClass: string;
-  if not AResult.TryGetValue<String>('META_CLASSNAME', AResultClass) then
+  if not AResult.TryGetValue<string>('META_CLASSNAME', AResultClass) then
     Exit;
 
   if Assigned(FResult) then
@@ -438,7 +438,7 @@ begin
       ATimingInformation := Format(' (Task completed in %d seconds.)', [FTaskDuration div 1000]);
     ///
 
-    if not String.IsNullOrWhiteSpace(AExtendedDescription) then
+    if not string.IsNullOrWhiteSpace(AExtendedDescription) then
       Result := Format('%s%s', [
         AExtendedDescription,
         ATimingInformation
@@ -449,7 +449,7 @@ begin
     Result := Format('Task Failed: %s', [FExceptionMessage]);
 end;
 
-procedure TOptixTaskResult.TaskFailed(const AExceptionMessage: String);
+procedure TOptixTaskResult.TaskFailed(const AExceptionMessage: string);
 begin
   FSuccess := False;
   FExceptionMessage := AExceptionMessage;

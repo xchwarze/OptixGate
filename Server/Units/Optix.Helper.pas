@@ -75,15 +75,15 @@ type
 
     { Text / Format Helpers }
     class function Pluralize(const AText, ASuffix: string; const ACount: Cardinal;
-      APluralForm: String = '') : string; static;
+      APluralForm: string = '') : string; static;
     class function FormatInt(const AInteger: Integer): string; static;
-    class function DefaultIfEmpty(const AValue: string; const ADefault: String = '-'): string; static;
+    class function DefaultIfEmpty(const AValue: string; const ADefault: string = '-'): string; static;
     class function FormatFileSize(const ASize: Int64): string; static;
-    class function IsCertificateFingerprintValid(const AValue: String): Boolean; static;
-    class procedure CheckCertificateFingerprint(const AValue: String); static;
+    class function IsCertificateFingerprintValid(const AValue: string): Boolean; static;
+    class procedure CheckCertificateFingerprint(const AValue: string); static;
 
     { Dialogs / Forms Helpers }
-    class function Error(const AHandle: THandle; const AMessage: String): Integer; static;
+    class function Error(const AHandle: THandle; const AMessage: string): Integer; static;
 
     { Date Helpers }
     class function ElapsedTime(const ADays, AHours, AMinutes, ASeconds: UInt64): string; overload; static;
@@ -91,14 +91,14 @@ type
     class function ElapsedDateTime(const AFirstDateTime, ASecondDateTime: TDateTime): string; static;
 
     { System / Windows / Shell Helpers }
-    class function ReadResourceString(const AResourceName: String): string; static;
-    class function TryReadResourceString(const AResourceName: String): string; static;
+    class function ReadResourceString(const AResourceName: string): string; static;
+    class function TryReadResourceString(const AResourceName: string): string; static;
     class procedure InitializeSystemIcons(var AImages: TImageList; var AFileInfo: TSHFileInfo;
       const ALargeIcon: Boolean = False); static;
     class function SystemFileIcon(const AFileName: string; AExtensionMode: Boolean = False): Integer; static;
-    class function SystemFolderIcon(APath: String = ''): Integer; static;
+    class function SystemFolderIcon(APath: string = ''): Integer; static;
     class function GetWindowsDirectory: string; static;
-    class procedure Open(const ACommand: String); static;
+    class procedure Open(const ACommand: string); static;
 
     { Data Comparison Helpers }
     class function CompareObjectAssignement(const AObject1, AObject2: TObject): Integer; static;
@@ -110,7 +110,7 @@ type
   TOptixVirtualTreesHelper = class
   public
     class function GetVisibleNodesCount(const AVST: TVirtualStringTree): UInt64; static;
-    class function GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: String): Integer; static;
+    class function GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: string): Integer; static;
     class procedure UpdateColumnVisibility(const AVST: TVirtualStringTree; const AName: string;
       AVisible: Boolean); static;
     class function GetRootParentNode(const AVST: TVirtualStringTree;
@@ -120,7 +120,7 @@ type
 
   TOptixVirtualTreesFolderTreeHelper = class
   type
-    TCompareFolderNameCallback = reference to function(const pData: Pointer; const ACompareTo: String) : Boolean;
+    TCompareFolderNameCallback = reference to function(const pData: Pointer; const ACompareTo: string) : Boolean;
     TGetFolderNameFromItemCallback<T> = reference to function(const AItem: T): string;
     TGetFolderNameFromDataCallback = reference to function(const pData: Pointer): string;
     TSetupNodeDataCallback<T> = reference to procedure(var pNode, pParentNode: PVirtualNode; const AItem: T);
@@ -141,7 +141,7 @@ type
     destructor Destroy; override;
 
     {@M}
-    procedure Add(const AError: String);
+    procedure Add(const AError: string);
     function ShowErrors: Boolean;
   end;
 
@@ -199,7 +199,7 @@ begin
     if Assigned(ALevelItems) then begin
       // Generate Or Update Level Folder
       var ALevelNodesCache := TDictionary<String, PVirtualNode>.Create; // For Optimization
-      var ALevelItemsCache := TList<String>.Create;
+      var ALevelItemsCache := TList<string>.Create;
       try
         // Fill Cache with Existing Nodes
         pNode := AVST.GetFirstChild(pParentNode);
@@ -271,7 +271,7 @@ begin
   end;
 end;
 
-class function TOptixVirtualTreesHelper.GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: String): Integer;
+class function TOptixVirtualTreesHelper.GetColumnIndexByName(const AVST: TVirtualStringTree; const AName: string): Integer;
 begin
   Result := -1;
   ///
@@ -280,7 +280,7 @@ begin
     Exit;
 
   for var AIndex := 0 to AVST.Header.Columns.Count -1 do begin
-    if String.Compare(AName, AVST.Header.Columns.Items[AIndex].Text, True) = 0 then begin
+    if string.Compare(AName, AVST.Header.Columns.Items[AIndex].Text, True) = 0 then begin
       Result := AIndex;
 
       ///
@@ -371,7 +371,7 @@ begin
 end;
 
 class function TOptixHelper.Pluralize(const AText, ASuffix: string; const ACount: Cardinal;
-  APluralForm: String = '') : string;
+  APluralForm: string = '') : string;
 begin
   if ACount <= 1 then
     Result := AText
@@ -389,7 +389,7 @@ begin
   ]);
 end;
 
-class function TOptixHelper.Error(const AHandle: THandle; const AMessage: String): Integer;
+class function TOptixHelper.Error(const AHandle: THandle; const AMessage: string): Integer;
 begin
   Result := MessageBoxW(AHandle, PWideChar(AMessage), 'Error', MB_ICONHAND);
 end;
@@ -426,12 +426,12 @@ begin
     Result := -1;
 end;
 
-class function TOptixHelper.IsCertificateFingerprintValid(const AValue: String): Boolean;
+class function TOptixHelper.IsCertificateFingerprintValid(const AValue: string): Boolean;
 begin
   Result := TRegEx.IsMatch(AValue, '^([0-9A-Fa-f]{2}:){63}[0-9A-Fa-f]{2}$');
 end;
 
-class procedure TOptixHelper.CheckCertificateFingerprint(const AValue: String);
+class procedure TOptixHelper.CheckCertificateFingerprint(const AValue: string);
 begin
   if not IsCertificateFingerprintValid(AValue) then
     raise Exception.Create(
@@ -440,7 +440,7 @@ begin
     );
 end;
 
-class procedure TOptixHelper.Open(const ACommand: String);
+class procedure TOptixHelper.Open(const ACommand: string);
 begin
   ShellExecute(0, 'open', PWideChar(ACommand), nil, nil, SW_SHOW);
 end;
@@ -497,7 +497,7 @@ begin
   Result := AFileInfo.iIcon;
 end;
 
-class function TOptixHelper.SystemFolderIcon(APath: String = ''): Integer;
+class function TOptixHelper.SystemFolderIcon(APath: string = ''): Integer;
 var AFileInfo: TSHFileInfo;
 begin
   ZeroMemory(@AFileInfo, sizeof(AFileInfo));
@@ -531,7 +531,7 @@ begin
   );
 end;
 
-class function TOptixHelper.ReadResourceString(const AResourceName: String): string;
+class function TOptixHelper.ReadResourceString(const AResourceName: string): string;
 begin
   var AResourceStream := TResourceStream.Create(hInstance, AResourceName, RT_RCDATA);
   try
@@ -541,7 +541,7 @@ begin
   end;
 end;
 
-class function TOptixHelper.TryReadResourceString(const AResourceName: String): string;
+class function TOptixHelper.TryReadResourceString(const AResourceName: string): string;
 begin
   try
     Result := ReadResourceString(AResourceName);
@@ -550,7 +550,7 @@ begin
   end;
 end;
 
-class function TOptixHelper.DefaultIfEmpty(const AValue: string; const ADefault: String = '-'): string;
+class function TOptixHelper.DefaultIfEmpty(const AValue: string; const ADefault: string = '-'): string;
 begin
   if String.IsNullOrEmpty(AValue) then
     Result := ADefault
@@ -635,7 +635,7 @@ begin
   inherited;
 end;
 
-procedure TOptixErrorDialog.Add(const AError: String);
+procedure TOptixErrorDialog.Add(const AError: string);
 begin
   FErrors.Add(AError);
 end;

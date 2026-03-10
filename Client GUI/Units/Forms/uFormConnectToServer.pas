@@ -104,7 +104,7 @@ type
   public
     {$IFDEF USETLS}
     {@C}
-    constructor Create(AOwner: TComponent; const ACertificatesFingerprints: TList<String>); reintroduce;
+    constructor Create(AOwner: TComponent; const ACertificatesFingerprints: TList<string>); reintroduce;
     {$ENDIF}
 
     {@M}
@@ -152,7 +152,7 @@ procedure TFormConnectToServer.ButtonConnectClick(Sender: TObject);
 begin
   var AErrorDialog := TOptixErrorDialog.Create(self);
   try
-    if String.IsNullOrWhiteSpace(EditServerAddress.Text) or
+    if string.IsNullOrWhiteSpace(EditServerAddress.Text) or
        not TOptixSocketHelper.IsValidHost(EditServerAddress.Text, TIPVersion(ComboIpVersion.ItemIndex))
     then begin
       EditServerAddress.SetFocus;
@@ -262,7 +262,7 @@ begin
   end;
 end;
 
-{$IFDEF USETLS}constructor TFormConnectToServer.Create(AOwner: TComponent; const ACertificatesFingerprints: TList<String>);
+{$IFDEF USETLS}constructor TFormConnectToServer.Create(AOwner: TComponent; const ACertificatesFingerprints: TList<string>);
 begin
   inherited Create(AOwner);
   ///

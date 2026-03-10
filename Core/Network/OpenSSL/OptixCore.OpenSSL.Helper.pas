@@ -76,14 +76,14 @@ type
   TOptixOpenSSLHelper = class
   public
     class function NewPrivateKey: Pointer; static;
-    class function NewX509(const pKey: Pointer; const C, O, CN: String): Pointer; static;
+    class function NewX509(const pKey: Pointer; const C, O, CN: string): Pointer; static;
     class procedure LoadCertificate(const APublicKey: string; const APrivateKey: string;
       var ACertificate: TX509Certificate); static;
     class procedure ImportCertificate(const ACertificateFile: string; var ACertificate: TX509Certificate); static;
     class procedure ExportCertificate(const ADestinationFile: string; var ACertificate: TX509Certificate;
       AExportWhich: TOpenSSLCertificateKeyTypes = []); static;
     class procedure RetrieveCertificateInformation(var ACertificate: TX509Certificate); static;
-    class procedure CheckCertificateFile(const ACertificateFile: String); static;
+    class procedure CheckCertificateFile(const ACertificateFile: string); static;
     class function GetPeerSha512Fingerprint(const pSSLConnection: Pointer): string; static;
     class function GetX509Sha512Fingerprint(const pX509: Pointer): string; static;
     class procedure CopyCertificate(const ASource: TX509Certificate; var ADest: TX509Certificate); static;
@@ -93,7 +93,7 @@ type
     class function SerializePublicKey(const ACertificate: TX509Certificate): string; static;
     class function SerializePrivateKey(const ACertificate: TX509Certificate): string; static;
     class procedure SerializeKeys(const ACertificate: TX509Certificate; var APublicKey: string;
-      var APrivateKey: String); static;
+      var APrivateKey: string); static;
   end;
 
 implementation
@@ -154,7 +154,7 @@ begin
   end;
 end;
 
-class function TOptixOpenSSLHelper.NewX509(const pKey: Pointer; const C, O, CN: String): Pointer;
+class function TOptixOpenSSLHelper.NewX509(const pKey: Pointer; const C, O, CN: string): Pointer;
 begin
   var pTempX509 := PX509(X509_new);
   if not Assigned(pTempX509) then
@@ -324,7 +324,7 @@ begin
   ACertificate.CN := GetTextFieldByNID(pSubject, NID_commonName);
 end;
 
-class procedure TOptixOpenSSLHelper.CheckCertificateFile(const ACertificateFile: String);
+class procedure TOptixOpenSSLHelper.CheckCertificateFile(const ACertificateFile: string);
 var AContext: TOptixOpenSSLContext;
 begin
   AContext := TOptixOpenSSLContext.Create(sslClient, ACertificateFile);
@@ -459,7 +459,7 @@ begin
 end;
 
 class procedure TOptixOpenSSLHelper.SerializeKeys(const ACertificate: TX509Certificate; var APublicKey: string;
-  var APrivateKey: String);
+  var APrivateKey: string);
 begin
   APublicKey := '';
   APrivateKey := '';

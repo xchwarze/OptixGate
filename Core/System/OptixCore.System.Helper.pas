@@ -68,7 +68,7 @@ type
     class procedure TryNTSetPrivilege(const APrivilegeName: string; const AEnabled: Boolean); static;
     class function AccessCheck(ADesiredAccess: DWORD; const hToken: THandle;
       const ptrSecurityDescriptor: PSecurityDescriptor) : Boolean; static;
-    class function IncludeTrailingPathDelimiterIfNotEmpty(const AValue: String): string; static;
+    class function IncludeTrailingPathDelimiterIfNotEmpty(const AValue: string): string; static;
   end;
 
 implementation
@@ -178,9 +178,9 @@ begin
     Result := AStatus;
 end;
 
-class function TSystemHelper.IncludeTrailingPathDelimiterIfNotEmpty(const AValue: String): string;
+class function TSystemHelper.IncludeTrailingPathDelimiterIfNotEmpty(const AValue: string): string;
 begin
-  if not String.IsNullOrWhiteSpace(AValue) then
+  if not string.IsNullOrWhiteSpace(AValue) then
     Result := IncludeTrailingPathDelimiter(AValue)
   else
     Result := AValue;

@@ -71,14 +71,14 @@ type
 
     {@M}
     procedure CreateContext;
-    procedure LoadCertificate(const ACertificateFile: String); overload;
+    procedure LoadCertificate(const ACertificateFile: string); overload;
     procedure LoadCertificate(const ACertificate: TX509Certificate); overload;
 
     {@C}
     constructor Create(const AOpenSSLMethod: TOpenSSLMethod); overload;
   public
     {@C}
-    constructor Create(const AOpenSSLMethod: TOpenSSLMethod; const ACertificateFile: String); overload;
+    constructor Create(const AOpenSSLMethod: TOpenSSLMethod; const ACertificateFile: string); overload;
     constructor Create(const AOpenSSLMethod: TOpenSSLMethod; const ACertificate: TX509Certificate); overload;
     destructor Destroy; override;
 
@@ -132,7 +132,7 @@ begin
   SSL_CTX_set_verify(FContext, SSL_VERIFY_PEER or SSL_VERIFY_FAIL_IF_NO_PEER_CERT, @OpenSSLVerifyCallback);
 end;
 
-procedure TOptixOpenSSLContext.LoadCertificate(const ACertificateFile: String);
+procedure TOptixOpenSSLContext.LoadCertificate(const ACertificateFile: string);
 begin
   if not Assigned(FContext) then
     Exit;
@@ -174,7 +174,7 @@ begin
   CreateContext;
 end;
 
-constructor TOptixOpenSSLContext.Create(const AOpenSSLMethod: TOpenSSLMethod; const ACertificateFile: String);
+constructor TOptixOpenSSLContext.Create(const AOpenSSLMethod: TOpenSSLMethod; const ACertificateFile: string);
 begin
   Create(AOpenSSLMethod);
   ///

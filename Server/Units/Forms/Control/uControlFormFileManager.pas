@@ -93,7 +93,7 @@ type
     function Path(const IncludeTrailingPathDelimiterIfDirectory: Boolean = False): string;
 
     {@G}
-    property Name: String read GetName;
+    property Name: string read GetName;
     property Access: TFileAccessAttributes read GetAccess;
   end;
   PFileTreeData = ^TFileTreeData;
@@ -203,11 +203,11 @@ type
     procedure ClearClipboard1Click(Sender: TObject);
   private
     FHistoryCursor: Integer;
-    FPathHistory: TList<String>;
+    FPathHistory: TList<string>;
     FCurrentPathACL: TFileAccessAttributes;
 
     {@M}
-    procedure InsertPathToHistory(APath: String);
+    procedure InsertPathToHistory(APath: string);
     procedure BrowseFromCurrentHistoryLocation;
     function CanNodeFileBeRead(var pData: PFileTreeData): Boolean;
     function CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
@@ -221,7 +221,7 @@ type
     procedure RefreshDrives(const APushToHistory: Boolean = True);
     procedure RefreshFiles;
     function GetFolderImageIndex(const AFolderAccess: TFileAccessAttributes): Integer;
-    function GetNodeByFileName(const AFileName: String): PVirtualNode;
+    function GetNodeByFileName(const AFileName: string): PVirtualNode;
     procedure CopyOrCutSelectedNode(const ACopyMode: TVirtualClipboardCopyMode);
     procedure PasteFileOrDirectory(const pNode: PVirtualNode = nil);
     procedure OnVirtualClipboardUpdate(Sender: TObject);
@@ -230,8 +230,8 @@ type
     function GetContextDescription: string; override;
     procedure OnFirstShow; override;
 
-    function RequestFileDownload(const ARemoteFilePath: String = ''; ALocalFilePath: String = ''): TGUID; reintroduce;
-    function RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: String = ''; const AContext: String = ''): TGUID; reintroduce;
+    function RequestFileDownload(const ARemoteFilePath: string = ''; ALocalFilePath: string = ''): TGUID; reintroduce;
+    function RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = ''; const AContext: string = ''): TGUID; reintroduce;
   public
     {@M}
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
@@ -290,7 +290,7 @@ end;
 
 (* TControlFormFileManager *)
 
-function TControlFormFileManager.GetNodeByFileName(const AFileName: String): PVirtualNode;
+function TControlFormFileManager.GetNodeByFileName(const AFileName: string): PVirtualNode;
 begin
   Result := nil;
   ///
@@ -299,7 +299,7 @@ begin
     var pData := PFileTreeData(pNode.GetData);
     ///
 
-    if String.Compare(pData^.Name, AFileName, True) = 0 then begin
+    if string.Compare(pData^.Name, AFileName, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -313,7 +313,7 @@ begin
     Exit;
   ///
 
-  if String.Compare(
+  if string.Compare(
     IncludeTrailingPathDelimiter(APath),
     IncludeTrailingPathDelimiter(EditPath.Text),
     True
@@ -350,7 +350,7 @@ end;
 
 procedure TControlFormFileManager.DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
 begin
-  if String.Compare(
+  if string.Compare(
     IncludeTrailingPathDelimiter(ExtractFilePath(ANewFilePath)),
     IncludeTrailingPathDelimiter(EditPath.Text),
     True
@@ -404,13 +404,13 @@ begin
     AParentFolders,
     AFolders,
     (
-      function (const pData: Pointer): String
+      function (const pData: Pointer): string
       begin
         Result := PFolderTreeData(pData)^.Information.Name
       end
     ),
     (
-      function (const AItem: TSimpleFolderInformation): String
+      function (const AItem: TSimpleFolderInformation): string
       begin
         Result := AItem.Name
       end
@@ -446,7 +446,7 @@ begin
   if (FPathHistory.Count > 0) and (FHistoryCursor >= 0) then begin
     var APath := FPathHistory.Items[FHistoryCursor];
 
-    if String.Compare(APath, '\\:DRIVES:\\') = 0 then
+    if string.Compare(APath, '\\:DRIVES:\\') = 0 then
       RefreshDrives(False)
     else
       BrowsePath(APath, False);
@@ -463,7 +463,7 @@ begin
   ButtonPaste.Enabled := ButtonUpload.Enabled and not FSharedClass.FileClipboard.IsEmpty;
 end;
 
-procedure TControlFormFileManager.InsertPathToHistory(APath: String);
+procedure TControlFormFileManager.InsertPathToHistory(APath: string);
 begin
   if not Assigned(FPathHistory) then
     Exit;
@@ -472,7 +472,7 @@ begin
   APath := IncludeTrailingPathDelimiter(APath);
 
   if (FPathHistory.Count = 0) or
-     (String.Compare(FPathHistory.Items[FPathHistory.Count-1], APath, True) <> 0) then begin
+     (string.Compare(FPathHistory.Items[FPathHistory.Count-1], APath, True) <> 0) then begin
 
      if FHistoryCursor < FPathHistory.Count -1 then
       FPathHistory.DeleteRange(FHistoryCursor +1, (FPathHistory.Count -1) - FHistoryCursor);
@@ -495,12 +495,12 @@ begin
   RefreshDrives;
 end;
 
-function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: String = ''; ALocalFilePath: String = ''): TGUID;
+function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: string = ''; ALocalFilePath: string = ''): TGUID;
 begin
   inherited RequestFileDownload(ARemoteFilePath, ALocalFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
 
-function TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: String = ''; const AContext: String = ''): TGUID;
+function TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
   inherited RequestFileUpload(ALocalFilePath, ARemoteFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
@@ -570,7 +570,7 @@ begin
     ADestination := EditPath.Text;
 
   ///
-  if not String.IsNullOrWhiteSpace(ADestination) then
+  if not string.IsNullOrWhiteSpace(ADestination) then
     SendCommand(TOptixCommandCopyFileOrDirectory.Create(
       FSharedClass.FileClipboard.Content,
       ADestination,
@@ -655,7 +655,7 @@ begin
     Exit;
 
   AFolderName := TFileSystemHelper.CleanFileName(AFolderName);
-  if String.IsNullOrWhiteSpace(AFolderName) then
+  if string.IsNullOrWhiteSpace(AFolderName) then
     Exit;
 
   ///
@@ -975,7 +975,7 @@ begin
 
       ikState: begin
         if not FSharedClass.FileClipboard.IsEmpty and
-          (String.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0)
+          (string.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0)
         then begin
           if FSharedClass.FileClipboard.CopyMode = vccmCopy then
             ImageIndex := IMAGE_COPY
@@ -1084,7 +1084,7 @@ begin
     Exit;
 
   if not FSharedClass.FileClipboard.IsEmpty and
-    (String.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
+    (string.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
   then begin
     case FSharedClass.FileClipboard.CopyMode of
       vccmCopy: TargetCanvas.Font.Color := clBlue;
@@ -1313,7 +1313,7 @@ end;
 procedure TControlFormFileManager.FormCreate(Sender: TObject);
 begin
   FHistoryCursor := 0;
-  FPathHistory := TList<String>.Create;
+  FPathHistory := TList<string>.Create;
 
   SetDisplayMode(dmDrives);
 

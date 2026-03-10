@@ -69,10 +69,10 @@ type
     FKeyPath: string;
   public
     {@C}
-    constructor Create(const AKeyPath: String); overload; virtual;
+    constructor Create(const AKeyPath: string); overload; virtual;
 
     {@G}
-    property KeyPath: String read FKeyPath;
+    property KeyPath: string read FKeyPath;
   end;
 
   TOptixCommandEnumRegistry = class(TOptixCommandRegistryActionResponse)
@@ -163,7 +163,7 @@ type
     {$ENDIF}
 
     {@G}
-    property Name: String read FName;
+    property Name: string read FName;
     property Kind: DWORD read FKind;
     property NewValue: TRegistryValueInformation read FNewValue;
   end;
@@ -177,7 +177,7 @@ type
     FNewName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AExistingName, ANewName: String); overload;
+    constructor Create(const AKeyPath, AExistingName, ANewName: string); overload;
 
     {@M}
     {$IFNDEF SERVER}
@@ -185,8 +185,8 @@ type
     {$ENDIF}
 
     {@G}
-    property NewName: String read FNewName;
-    property ExistingName: String read FExistingName;
+    property NewName: string read FNewName;
+    property ExistingName: string read FExistingName;
   end;
 
   TOptixCommandSetRegistryValueName = class(TOptixCommandRegistryActionResponse)
@@ -198,7 +198,7 @@ type
     FNewName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AExistingName, ANewName: String); overload;
+    constructor Create(const AKeyPath, AExistingName, ANewName: string); overload;
 
     {@M}
     {$IFNDEF SERVER}
@@ -206,8 +206,8 @@ type
     {$ENDIF}
 
     {@G}
-    property ExistingName: String read FExistingName;
-    property NewName: String read FNewName;
+    property ExistingName: string read FExistingName;
+    property NewName: string read FNewName;
   end;
 
   TOptixCommandDeleteRegistryValue = class(TOptixCommandRegistryActionResponse)
@@ -216,7 +216,7 @@ type
     FName: string;
   public
     {@C}
-    constructor Create(const AKeyPath, AName: String); overload;
+    constructor Create(const AKeyPath, AName: string); overload;
 
     {@M}
     {$IFNDEF SERVER}
@@ -224,7 +224,7 @@ type
     {$ENDIF}
 
     {@G}
-    property Name: String read FName;
+    property Name: string read FName;
   end;
 
 implementation
@@ -236,7 +236,7 @@ uses
 
 (* TOptixCommandRegistryActionResponse *)
 
-constructor TOptixCommandRegistryActionResponse.Create(const AKeyPath: String);
+constructor TOptixCommandRegistryActionResponse.Create(const AKeyPath: string);
 begin
   inherited Create;
   ///
@@ -272,7 +272,7 @@ end;
 
 function TOptixCommandEnumRegistry.GetIsRoot: Boolean;
 begin
-  Result := String.IsNullOrWhiteSpace(FKeyPath);
+  Result := string.IsNullOrWhiteSpace(FKeyPath);
 end;
 
 (* TOptixCommandEnumRegistryHives *)
@@ -299,7 +299,7 @@ begin
   TFileSystemHelper.TraverseDirectories(
     FKeyPath,
     (
-      procedure (const ADirectoryName: string; const AAbsolutePath: String)
+      procedure (const ADirectoryName: string; const AAbsolutePath: string)
       begin
         FParentKeys.Add(TRegistryKeyInformation.Create(ADirectoryName, AAbsolutePath));
       end
@@ -385,7 +385,7 @@ end;
 
 (* TOptixCommandSetRegistryKeyName *)
 
-constructor TOptixCommandSetRegistryKeyName.Create(const AKeyPath, AExistingName, ANewName: String);
+constructor TOptixCommandSetRegistryKeyName.Create(const AKeyPath, AExistingName, ANewName: string);
 begin
   inherited Create(AKeyPath);
   ///
@@ -403,7 +403,7 @@ end;
 
 (* TOptixCommandSetRegistryValueName *)
 
-constructor TOptixCommandSetRegistryValueName.Create(const AKeyPath, AExistingName, ANewName: String);
+constructor TOptixCommandSetRegistryValueName.Create(const AKeyPath, AExistingName, ANewName: string);
 begin
   inherited Create(AKeyPath);
   ///
@@ -421,7 +421,7 @@ end;
 
 (* TOptixCommandDeleteRegistryValue *)
 
-constructor TOptixCommandDeleteRegistryValue.Create(const AKeyPath, AName: String);
+constructor TOptixCommandDeleteRegistryValue.Create(const AKeyPath, AName: string);
 begin
   inherited Create(AKeyPath);
   ///

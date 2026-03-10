@@ -66,7 +66,7 @@ type
     {@M}
     procedure Invalidate;
 
-    procedure SetText(const AValue: String);
+    procedure SetText(const AValue: string);
     procedure SetWidth(const AValue: Integer);
     procedure SetAlignment(const AValue: TAlignment);
   public
@@ -78,9 +78,9 @@ type
     property Rect: TRect read FRect write FRect;
   published
     {@G/S}
-    property Text: String read FText write SetText;
+    property Text: string read FText write SetText;
     property Width: Integer read FWidth write SetWidth;
-    property Hint: String read FHint write FHint;
+    property Hint: string read FHint write FHint;
     property Alignment: TAlignment read FAlignment write SetAlignment;
   end;
 
@@ -300,7 +300,7 @@ begin
     TFlatStatusBar(TStatusPanels(GetOwner).GetOwner).Invalidate;
 end;
 
-procedure TStatusPanel.SetText(const AValue: String);
+procedure TStatusPanel.SetText(const AValue: string);
 begin
   if (FText = AValue) then
     Exit;

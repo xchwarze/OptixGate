@@ -71,7 +71,7 @@ type
     function GetCount: Integer;
 
     {@C}
-    constructor Create(const AJsonString: String = '');
+    constructor Create(const AJsonString: string = '');
     destructor Destroy; override;
 
     {@G}
@@ -92,7 +92,7 @@ type
 
     {@}
     procedure Write(const AName: string; const AConfig: TOptixConfigEnumBase);
-    function Read(const AName: String): TOptixConfigEnumBase;
+    function Read(const AName: string): TOptixConfigEnumBase;
   end;
 
   {$IF defined(SERVER) or defined(CLIENT_GUI)}
@@ -108,7 +108,7 @@ uses
 
 (* TOptixConfigEnumBase *)
 
-constructor TOptixConfigEnumBase.Create(const AJsonString: String);
+constructor TOptixConfigEnumBase.Create(const AJsonString: string);
 begin
   inherited Create;
   ///
@@ -191,7 +191,7 @@ begin
   var AKeyPath := 'Software\' + FKeyName;
   ///
 
-  if String.Compare(FRegistry.CurrentPath, AKeyPath, True) <> 0 then
+  if string.Compare(FRegistry.CurrentPath, AKeyPath, True) <> 0 then
     FRegistry.OpenKey(AKeyPath, True);
 end;
 
@@ -206,7 +206,7 @@ begin
   FRegistry.WriteString(AName, AConfig.ToString);
 end;
 
-function TOptixConfigHelper.Read(const AName: String): TOptixConfigEnumBase;
+function TOptixConfigHelper.Read(const AName: string): TOptixConfigEnumBase;
 begin
   Result := nil;
   ///

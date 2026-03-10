@@ -576,7 +576,7 @@ begin
   ACanvas.Font.Assign(FFont);
   ACanvas.Font.Height := FOwnerForm.ScaleValue(FFont.Height);
 
-  var ACaption: String := FOwnerForm.Caption;
+  var ACaption: string := FOwnerForm.Caption;
 
   var ATextFormat: TTextFormat := [tfVerticalCenter, tfEndEllipsis, tfSingleLine];
   case FCaptionAlign of

@@ -118,19 +118,19 @@ type
     procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    function RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: String = ''): TGUID;
+    function RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: string = ''): TGUID;
 
     function GetNodeByTransferId(const ATransferId: TGUID): PVirtualNode;
   public
     {@M}
-    function RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = ''; const AContext: String = ''): TGUID; override;
-    function RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: String = ''; const AContext: String = ''): TGUID; override;
+    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID; override;
+    function RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID; override;
 
-    procedure ApplyTransferException(const ATransferId: TGUID; const AReason: String); overload;
+    procedure ApplyTransferException(const ATransferId: TGUID; const AReason: string); overload;
     procedure ApplyTransferException(const ALogTransferException: TOptixCommandReceiveTransferException); overload;
 
     procedure OnRequestTransferTask(Sender: TObject; const ATransferId: TGUID; var ATask: TOptixTransferTask);
-    procedure OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: String);
+    procedure OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: string);
     procedure OnTransferBegins(Sender: TObject; const ATransferId: TGUID; const AFileSize: Int64);
     procedure OnTransferUpdate(Sender: TObject; const ATransferId: TGUID; const AWorkCount: Int64; var ACanceled: Boolean);
     procedure OnTransferEnds(Sender: TObject; const ATransferId: TGUID);
@@ -264,7 +264,7 @@ begin
   end;
 end;
 
-procedure TControlFormTransfers.ApplyTransferException(const ATransferId: TGUID; const AReason: String);
+procedure TControlFormTransfers.ApplyTransferException(const ATransferId: TGUID; const AReason: string);
 begin
   var pNode := GetNodeByTransferId(ATransferId);
   if not Assigned(pNode) then
@@ -335,12 +335,12 @@ begin
   end;
 end;
 
-procedure TControlFormTransfers.OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: String);
+procedure TControlFormTransfers.OnTransferError(Sender: TObject; const ATransferId: TGUID; const AReason: string);
 begin
   ApplyTransferException(ATransferId, AReason);
 end;
 
-function TControlFormTransfers.RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: String = ''): TGUID;
+function TControlFormTransfers.RegisterNewTransfer(const ASourceFilePath, ADestinationFilePath: string; const ADirection: TOptixTransferDirection; const AContext: string = ''): TGUID;
 var pNode: PVirtualNode;
     pData: PTreeData;
 begin
@@ -380,13 +380,13 @@ begin
   TOptixHelper.ShowForm(self);
 end;
 
-function TControlFormTransfers.RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = ''; const AContext: String = ''): TGUID;
+function TControlFormTransfers.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
-  if String.IsNullOrWhiteSpace(ARemoteFilePath) then
+  if string.IsNullOrWhiteSpace(ARemoteFilePath) then
     if not InputQuery('Download File', 'Remote File Path', ARemoteFilePath) then
       Exit;
 
-  if String.IsNullOrWhiteSpace(ALocalFilePath) then begin
+  if string.IsNullOrWhiteSpace(ALocalFilePath) then begin
     var ADirectory := '';
 
     if not SelectDirectory('Select Destination', '', ADirectory) then
@@ -399,9 +399,9 @@ begin
   Result := RegisterNewTransfer(ARemoteFilePath, ALocalFilePath, otdClientIsUploading, AContext);
 end;
 
-function TControlFormTransfers.RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: String = ''; const AContext: String = ''): TGUID;
+function TControlFormTransfers.RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
-  if String.IsNullOrWhiteSpace(ALocalFilePath) then begin
+  if string.IsNullOrWhiteSpace(ALocalFilePath) then begin
     if not OpenDialog.Execute then
       Exit;
 
@@ -409,7 +409,7 @@ begin
     ALocalFilePath := OpenDialog.FileName;
   end;
 
-  if String.IsNullOrWhiteSpace(ARemoteFilePath) then begin
+  if string.IsNullOrWhiteSpace(ARemoteFilePath) then begin
     if not InputQuery('Upload File', 'Remote Destination (File or Folder "\")', ARemoteFilePath) then
       Exit;
   end;

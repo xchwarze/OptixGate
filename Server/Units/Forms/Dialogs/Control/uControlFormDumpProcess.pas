@@ -121,11 +121,11 @@ type
     procedure DoResize;
     function GetMiniDumpTypesValue: DWORD;
     procedure SetProcessId(const AValue: Cardinal);
-    procedure SetProcessName(const AValue: String);
+    procedure SetProcessName(const AValue: string);
   public
     {@S}
     property ProcessId: Cardinal write SetProcessId;
-    property ProcessName: String write SetProcessName;
+    property ProcessName: string write SetProcessName;
   end;
 
 var
@@ -149,7 +149,7 @@ begin
   labelProcessId.Caption := Format('%d (0x%x)', [FProcessId, FProcessId]);
 end;
 
-procedure TControlFormDumpProcess.SetProcessName(const AValue: String);
+procedure TControlFormDumpProcess.SetProcessName(const AValue: string);
 begin
   LabelProcessName.Caption := AValue;
 end;

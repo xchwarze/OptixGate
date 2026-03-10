@@ -73,7 +73,7 @@ type
     constructor Create(const AFilePath: string; const APageSize: UInt64); overload;
 
     {@G}
-    property FilePath: String read FFilePath;
+    property FilePath: string read FFilePath;
     property PageSize: UInt64 read FPageSize;
   end;
 
@@ -133,7 +133,7 @@ type
     property PageNumber: UInt64 read FPageNumber;
     property PageCount: UInt64 read FPageCount;
     property TotalSize: UInt64 read FTotalSize;
-    property FilePath: String read FFilePath;
+    property FilePath: string read FFilePath;
     property PageSize: UInt64 read FPageSize;
     property PageOffset: UInt64 read GetPageOffset;
   end;

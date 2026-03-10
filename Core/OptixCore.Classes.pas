@@ -95,14 +95,14 @@ type
     procedure CopyFrom(const pCopyFromAddress: Pointer; const ASize: UInt64); overload;
     procedure CopyFrom(const AOptixMemoryObject: TOptixMemoryObject); overload;
     procedure Assign(const pMemoryAddress: Pointer; const ASize: UInt64);
-    constructor Create(const ABase64Data: String); overload;
+    constructor Create(const ABase64Data: string); overload;
     destructor Destroy; override;
 
     {@G}
     property HasData: Boolean read GetHasData;
     property Address: Pointer read FAddress;
     property Size: UInt64 read FSize;
-    property ToBase64: String read GetAsBase64;
+    property ToBase64: string read GetAsBase64;
   end;
 
 implementation
@@ -408,9 +408,9 @@ begin
   Result := Assigned(FAddress) and (FSize > 0);
 end;
 
-constructor TOptixMemoryObject.Create(const ABase64Data: String);
+constructor TOptixMemoryObject.Create(const ABase64Data: string);
 begin
-  if String.IsNullOrWhiteSpace(ABase64Data) then
+  if string.IsNullOrWhiteSpace(ABase64Data) then
     Create
   else begin
     var ABytes := TNetEncoding.Base64.DecodeStringToBytes(ABase64Data);

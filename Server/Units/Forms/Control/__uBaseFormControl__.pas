@@ -104,7 +104,7 @@ type
     property LastReceivedDataTime: TDateTime read FLastReceivedDataTime write FLastReceivedDataTime;
     property HasReceivedData: Boolean read FHasReceivedData write FHasReceivedData;
     property HasUnseenData: Boolean read FHasUnseenData write SetHasUnseenData;
-    property UserIdentifier: String read FUserIdentifier write FUserIdentifier;
+    property UserIdentifier: string read FUserIdentifier write FUserIdentifier;
     property HasFocus: Boolean read FHasFocus write SetHasFocus;
     property State: TFormControlState read FState write SetState;
     property GUID: TGUID read FGUID write FGUID;
@@ -127,10 +127,10 @@ type
     function GetContextDescription: string; virtual;
     procedure RefreshCaption; virtual;
 
-    function RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = '';
-      const AContext: String = '') : TGUID; virtual;
-    function RequestFileUpload(ALocalFilePath: String = ''; ARemoteFilePath: String = '';
-      const AContext: String = '') : TGUID; virtual;
+    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+      const AContext: string = '') : TGUID; virtual;
+    function RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
+      const AContext: string = '') : TGUID; virtual;
 
     procedure StreamFileContent(const AFilePath: string; const APageSize: UInt64 = 1024);
 
@@ -165,7 +165,7 @@ type
     property GUID: TGUID read GetGUID;
     property SpecialForm: Boolean read FSpecialForm;
     property FormInformation: TFormControlInformation read FFormInformation;
-    property ContextInformation: String read GetContextDescription;
+    property ContextInformation: string read GetContextDescription;
   end;
 
   TBaseFormControlClass = class of TBaseFormControl;
@@ -365,14 +365,14 @@ begin
   FormMain.SendCommand(self, ACommand);
 end;
 
-function TBaseFormControl.RequestFileDownload(ARemoteFilePath: String = ''; ALocalFilePath: String = ''; const AContext: String = ''): TGUID;
+function TBaseFormControl.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
     AForm.RequestFileDownload(ARemoteFilePath, ALocalFilePath, AContext);
 end;
 
-function TBaseFormControl.RequestFileUpload(ALocalFilePath: String = ''; ARemoteFilePath: String = ''; const AContext: String = ''): TGUID;
+function TBaseFormControl.RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
@@ -381,7 +381,7 @@ end;
 
 procedure TBaseFormControl.StreamFileContent(const AFilePath: string; const APageSize: UInt64 = 1024);
 begin
-  if String.IsNullOrWhiteSpace(AFilePath) then
+  if string.IsNullOrWhiteSpace(AFilePath) then
     Exit;
   ///
 

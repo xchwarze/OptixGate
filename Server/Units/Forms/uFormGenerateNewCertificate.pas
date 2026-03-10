@@ -110,13 +110,13 @@ procedure TFormGenerateNewCertificate.ButtonGenerateClick(Sender: TObject);
 begin
   var AErrorDialog := TOptixErrorDialog.Create(self);
   try
-    if String.IsNullOrWhiteSpace(EditC.Text) then
+    if string.IsNullOrWhiteSpace(EditC.Text) then
       AErrorDialog.Add('You must specify a country.');
 
-    if String.IsNullOrWhiteSpace(EditO.Text) then
+    if string.IsNullOrWhiteSpace(EditO.Text) then
       AErrorDialog.Add('You must specify an organization name.');
 
-    if String.IsNullOrWhiteSpace(EditCN.Text) then
+    if string.IsNullOrWhiteSpace(EditCN.Text) then
       AErrorDialog.Add('You must specify a common name.');
 
     if AErrorDialog.ShowErrors then

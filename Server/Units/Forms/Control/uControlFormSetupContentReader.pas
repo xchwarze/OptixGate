@@ -107,7 +107,7 @@ end;
 
 procedure TControlFormSetupContentReader.ButtonStartClick(Sender: TObject);
 begin
-  if String.IsNullOrWhiteSpace(EditPath.Text) then begin
+  if string.IsNullOrWhiteSpace(EditPath.Text) then begin
     EditPath.SetFocus;
 
     ///

@@ -246,7 +246,7 @@ begin
         var ARetrievedOutput := AShellInstance.ReadAvailableOutput;
         ///
 
-        if not String.IsNullOrWhiteSpace(ARetrievedOutput) then
+        if not string.IsNullOrWhiteSpace(ARetrievedOutput) then
           AddPacket(TOptixCommandReadShellInstance.Create(AShellInstance.GroupId, ARetrievedOutput, AShellInstance.InstanceId));
       except
         AShellInstance.Close;

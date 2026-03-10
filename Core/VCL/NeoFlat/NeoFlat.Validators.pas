@@ -52,12 +52,12 @@ uses
   NeoFlat.Types, NeoFlat.Panel;
 // ---------------------------------------------------------------------------------------------------------------------
 
-function IsValidIpAddress(const AIP: String): Boolean;
-function IsValidHost(const AHost: String): Boolean;
-function IsValidNetworkAddress(const AValue: String): Boolean;
+function IsValidIpAddress(const AIP: string): Boolean;
+function IsValidHost(const AHost: string): Boolean;
+function IsValidNetworkAddress(const AValue: string): Boolean;
 
 function IsValidPort(const APort: Integer): Boolean; overload;
-function IsValidPort(const APort: String): Boolean; overload;
+function IsValidPort(const APort: string): Boolean; overload;
 
 function Validate(const AInput: string; const AValidators: TValidators): Boolean;
 
@@ -101,21 +101,21 @@ begin
   Result := True;
 end;
 
-function IsValidIpAddress(const AIP: String): Boolean;
+function IsValidIpAddress(const AIP: string): Boolean;
 begin
   Result := TRegEx.IsMatch(AIP,
     '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
   );
 end;
 
-function IsValidHost(const AHost: String): Boolean;
+function IsValidHost(const AHost: string): Boolean;
 begin
   Result := TRegEx.IsMatch(AHost,
     '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
   );
 end;
 
-function IsValidNetworkAddress(const AValue: String): Boolean;
+function IsValidNetworkAddress(const AValue: string): Boolean;
 begin
   Result := IsValidIpAddress(AValue) or
             IsValidHost(AValue);
@@ -126,7 +126,7 @@ begin
   Result := (APort >= Low(word)) and (APort <= High(word));
 end;
 
-function IsValidPort(const APort: String): Boolean;
+function IsValidPort(const APort: string): Boolean;
 var AValue: Integer;
 begin
   Result := False;

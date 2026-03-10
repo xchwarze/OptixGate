@@ -143,14 +143,14 @@ type
     procedure OnConnectedToServer(Sender: TOptixSessionHandlerThread);
     procedure OnDisconnectedFromServer(Sender: TOptixSessionHandlerThread);
     procedure OnSessionHandlerDestroyed(Sender: TOptixSessionHandlerThread);
-    procedure OnNetworkException(Sender: TOptixClientThread; const AErrorMessage: String);
+    procedure OnNetworkException(Sender: TOptixClientThread; const AErrorMessage: string);
 
-    procedure UpdateNodeStatus(const pNode: PVirtualNode; const ANewStatus: TClientStatus; const AExtraDescription: String = ''); overload;
-    procedure UpdateNodeStatus(const AHandler: TOptixSessionHandlerThread; const ANewStatus: TClientStatus; const AExtraDescription: String = ''); overload;
+    procedure UpdateNodeStatus(const pNode: PVirtualNode; const ANewStatus: TClientStatus; const AExtraDescription: string = ''); overload;
+    procedure UpdateNodeStatus(const AHandler: TOptixSessionHandlerThread; const ANewStatus: TClientStatus; const AExtraDescription: string = ''); overload;
     function GetNodeFromHandler(const AHandler: TOptixSessionHandlerThread): PVirtualNode;
 
     {$IFNDEF DEBUG}
-    function DisplayNotification(const ATitle, ABody: String): TGUID;
+    function DisplayNotification(const ATitle, ABody: string): TGUID;
     {$ENDIF}
   public
     { Public declarations }
@@ -175,7 +175,7 @@ uses
 {$R *.dfm}
 
 {$IFNDEF DEBUG}
-function TFormMain.DisplayNotification(const ATitle, ABody: String): TGUID;
+function TFormMain.DisplayNotification(const ATitle, ABody: string): TGUID;
 begin
   var ANotification := NotificationCenter.CreateNotification;
   try
@@ -221,7 +221,7 @@ begin
   FormDebugThreads.Show;
 end;
 
-procedure TFormMain.UpdateNodeStatus(const pNode: PVirtualNode; const ANewStatus: TClientStatus; const AExtraDescription: String = '');
+procedure TFormMain.UpdateNodeStatus(const pNode: PVirtualNode; const ANewStatus: TClientStatus; const AExtraDescription: string = '');
 begin
   if not Assigned(pNode) then
     Exit;
@@ -240,7 +240,7 @@ begin
   end;
 end;
 
-procedure TFormMain.UpdateNodeStatus(const AHandler: TOptixSessionHandlerThread; const ANewStatus: TClientStatus; const AExtraDescription: String = '');
+procedure TFormMain.UpdateNodeStatus(const AHandler: TOptixSessionHandlerThread; const ANewStatus: TClientStatus; const AExtraDescription: string = '');
 begin
   UpdateNodeStatus(GetNodeFromHandler(AHandler), ANewStatus, AExtraDescription);
 end;
@@ -280,7 +280,7 @@ begin
   VST.DeleteNode(pNode);
 end;
 
-procedure TFormMain.OnNetworkException(Sender: TOptixClientThread; const AErrorMessage: String);
+procedure TFormMain.OnNetworkException(Sender: TOptixClientThread; const AErrorMessage: string);
 begin
   UpdateNodeStatus(TOptixSessionHandlerThread(Sender), csOnError, AErrorMessage);
 end;

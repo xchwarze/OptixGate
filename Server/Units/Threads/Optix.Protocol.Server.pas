@@ -68,7 +68,7 @@ type
 
   TOnServerStart = procedure(Sender: TOptixServerThread; const ASocketFd: TSocket) of object;
   TOnServerStop = procedure(Sender: TOptixServerThread) of object;
-  TOnServerError = procedure(Sender: TOptixServerThread; const AErrorMessage: String) of object;
+  TOnServerError = procedure(Sender: TOptixServerThread; const AErrorMessage: string) of object;
 
   {$IFDEF USETLS}
   TOnVerifyPeerCertificate = procedure(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean) of object;

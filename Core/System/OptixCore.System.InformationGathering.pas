@@ -71,7 +71,7 @@ type
     class function GetUserSidByType(const AUserName: string; ASidType: TSidNameUse = SidTypeUser): string; static;
     class function GetWindowsDirectory: string; static;
     class function GetHardDriveSerial: string; static;
-    class function GetUserUID(const AIntegrateOptionalExtraInformation: String = ''): TGUID; static;
+    class function GetUserUID(const AIntegrateOptionalExtraInformation: string = ''): TGUID; static;
     class function GetCurrentUserSid: string; static;
     class function TryGetCurrentUserSid: string; static;
     class function GetLangroup: string; static;
@@ -296,7 +296,7 @@ begin
   end;
 end;
 
-class function TOptixInformationGathering.GetUserUID(const AIntegrateOptionalExtraInformation: String = ''): TGUID;
+class function TOptixInformationGathering.GetUserUID(const AIntegrateOptionalExtraInformation: string = ''): TGUID;
 begin
   var A128BitHash := THashMD5.GetHashBytes(
     GetHardDriveSerial +                                  // Uniqueness in machine level

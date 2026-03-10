@@ -510,7 +510,7 @@ function RegGetValueW(
 
 function RegDeleteTreeW(hKey: HKEY; lpSubKey: PWideChar): Longint; stdcall; external 'Advapi32.dll';
 
-function RegRenameKey(hKey: HKEY; lpSubKeyName, lpNewKeyName: String): Longint; stdcall; external 'Advapi32.dll';
+function RegRenameKey(hKey: HKEY; lpSubKeyName, lpNewKeyName: string): Longint; stdcall; external 'Advapi32.dll';
 
 (* NTDLL.dll *)
 

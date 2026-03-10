@@ -63,7 +63,7 @@ type
     FWSALastError: Integer;
   public
     {@C}
-    constructor Create(const ASocketAPI: String); overload;
+    constructor Create(const ASocketAPI: string); overload;
 
     {@G}
     property WSALastError: Integer read FWSALastError;
@@ -75,7 +75,7 @@ implementation
 
 (* ESocketException *)
 
-constructor ESocketException.Create(const ASocketAPI: String);
+constructor ESocketException.Create(const ASocketAPI: string);
 var AFormatedMessage: string;
 begin
   FWSALastError := WSAGetLastError;

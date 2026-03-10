@@ -66,7 +66,7 @@ type
   {$IFDEF CLIENT_GUI}
     TOptixClientThread = class;
 
-    TOnNetworkException = procedure(Sender: TOptixClientThread; const AErrorMessage: String) of object;
+    TOnNetworkException = procedure(Sender: TOptixClientThread; const AErrorMessage: string) of object;
 
     {$IFDEF USETLS}
       TOnVerifyPeerCertificate = procedure(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean) of object;
@@ -139,12 +139,12 @@ type
     {$ELSE}
       {$IFDEF USETLS}
         {@S}
-        property ServerCertificateFingerprint: String read FServerCertificateFingerprint write FServerCertificateFingerprint;
+        property ServerCertificateFingerprint: string read FServerCertificateFingerprint write FServerCertificateFingerprint;
       {$ENDIF}
     {$ENDIF}
 
     {@G}
-    property RemoteAddress: String read FRemoteAddress;
+    property RemoteAddress: string read FRemoteAddress;
     property RemotePort: Word read FRemotePort;
     property IPVersion: TIPVersion read FIpVersion;
     property ClientId: TGUID read FClientId;
@@ -264,7 +264,7 @@ begin
             FOnVerifyPeerCertificate(self, AFingerprint, ASuccess);
           end);
         {$ELSE}
-          ASuccess := String.Compare(FServerCertificateFingerprint, AFingerprint) = 0;
+          ASuccess := string.Compare(FServerCertificateFingerprint, AFingerprint) = 0;
         {$ENDIF}
 
         if not ASuccess then

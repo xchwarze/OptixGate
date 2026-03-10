@@ -94,8 +94,8 @@ type
     procedure VSTFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     {@M}
-    function GetNodeByFingerprint(const AFingerprint: String): PVirtualNode;
-    procedure AddTrustedCertificate(const AFingerprint: String);
+    function GetNodeByFingerprint(const AFingerprint: string): PVirtualNode;
+    procedure AddTrustedCertificate(const AFingerprint: string);
     function GetTrustedCertificateCount: Integer;
     procedure Save;
     procedure Load;
@@ -169,7 +169,7 @@ end;
 procedure TFormTrustedCertificates.OnVerifyPeerCertificate(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean);
 begin
   {$IFDEF DEBUG}
-    ASuccess := String.Compare(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint, True) = 0;
+    ASuccess := string.Compare(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint, True) = 0;
     if ASuccess then
       Exit;
   {$ENDIF}
@@ -182,7 +182,7 @@ begin
   Result := VST.RootNodeCount;
 end;
 
-function TFormTrustedCertificates.GetNodeByFingerprint(const AFingerprint: String): PVirtualNode;
+function TFormTrustedCertificates.GetNodeByFingerprint(const AFingerprint: string): PVirtualNode;
 begin
   Result := nil;
   ///
@@ -193,7 +193,7 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
-    if String.Compare(pData^.Fingerprint, AFingerprint, True) = 0 then begin
+    if string.Compare(pData^.Fingerprint, AFingerprint, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -206,7 +206,7 @@ begin
   AddTrustedCertificate1Click(AddTrustedCertificate1);
 end;
 
-procedure TFormTrustedCertificates.AddTrustedCertificate(const AFingerprint: String);
+procedure TFormTrustedCertificates.AddTrustedCertificate(const AFingerprint: string);
 begin
   VST.BeginUpdate;
   try

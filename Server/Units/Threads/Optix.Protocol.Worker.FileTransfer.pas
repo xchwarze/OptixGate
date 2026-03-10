@@ -62,7 +62,7 @@ uses
 
 type
   TOnRequestTransferTask = procedure(Sender: TObject; const ATransferId: TGUID; var ATask: TOptixTransferTask) of object;
-  TOnTransferError = procedure(Sender: TObject; const ATransferId: TGUID; const AReason: String) of object;
+  TOnTransferError = procedure(Sender: TObject; const ATransferId: TGUID; const AReason: string) of object;
   TOnTransferBegins = procedure(Sender: TObject; const ATransferId: TGUID; const AFileSize: Int64) of object;
   TOnTransferUpdate = procedure(Sender: TObject; const ATransferId: TGUID; const AWorkCount: Int64; var ACanceled: Boolean) of object;
   TOnTransferEnds = procedure(Sender: TObject; const ATransferId: TGUID) of object;

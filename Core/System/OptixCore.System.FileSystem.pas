@@ -158,7 +158,7 @@ type
 
   TFileSystemHelper = class
   type
-    TTraversedDirectoryCallback = reference to procedure(const ADirectoryName: string; const AAbsolutePath: String);
+    TTraversedDirectoryCallback = reference to procedure(const ADirectoryName: string; const AAbsolutePath: string);
   private
 
   public
@@ -166,33 +166,33 @@ type
       var ADriveType: TDriveType) : Boolean; static;
     class function TryGetDriveInformation(ADriveLetter: string; out AName: string; out AFormat: string;
       var ADriveType: TDriveType) : Boolean; static;
-    class function GetFileACLString(const AFileName: String): string; static;
-    class function TryGetFileACLString(const AFileName: String): string; static;
+    class function GetFileACLString(const AFileName: string): string; static;
+    class function TryGetFileACLString(const AFileName: string): string; static;
     class procedure GetCurrentUserFileAccess(const AFileName: string; out ARead, AWrite, AExecute: Boolean); overload; static;
-    class function GetCurrentUserFileAccess(const AFileName: String): TFileAccessAttributes; overload; static;
+    class function GetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes; overload; static;
     class procedure TryGetCurrentUserFileAccess(const AFileName: string; out ARead, AWrite, AExecute: Boolean); overload; static;
-    class function TryGetCurrentUserFileAccess(const AFileName: String): TFileAccessAttributes; overload; static;
-    class function GetFileSize(const AFileName: String): Int64; static;
-    class function TryGetFileSize(const AFileName: String): Int64; static;
-    class function GetFileTypeDescription(const AFileName: String): string; static;
+    class function TryGetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes; overload; static;
+    class function GetFileSize(const AFileName: string): Int64; static;
+    class function TryGetFileSize(const AFileName: string): Int64; static;
+    class function GetFileTypeDescription(const AFileName: string): string; static;
     class procedure GetFileTime(const AFileName: string; out ACreate, ALastModified, ALastAccess: TDateTime); static;
     class function TryGetFileTime(const AFileName: string; out ACreate, ALastModified, ALastAccess: TDateTime): Boolean; static;
-    class function UniqueFileName(const AFilePath: String): string; static;
-    class function UniqueDirectoryName(const ADirectoryPath: String): string; static;
+    class function UniqueFileName(const AFilePath: string): string; static;
+    class function UniqueDirectoryName(const ADirectoryPath: string): string; static;
     class function UniqueFileOrDirectoryName(const APath: string): string; static;
-    class function ExpandPath(const APath: String): string; static;
+    class function ExpandPath(const APath: string): string; static;
     class procedure TraverseDirectories(const APath: string;
       const ATraversedDirectoryFunc: TTraversedDirectoryCallback); static;
-    class function GetFullPathName(const APath: String): string; static;
-    class procedure PathExists(const APath: String); static;
-    class function CleanFileName(const AFileName: String): string; static;
-    class procedure CreateDirectory(const APath, ANewDirectoryName: String); overload; static;
-    class procedure CreateDirectory(const AFullPath: String); overload; static;
+    class function GetFullPathName(const APath: string): string; static;
+    class procedure PathExists(const APath: string); static;
+    class function CleanFileName(const AFileName: string): string; static;
+    class procedure CreateDirectory(const APath, ANewDirectoryName: string); overload; static;
+    class procedure CreateDirectory(const AFullPath: string); overload; static;
     class function Copy(const ASource, ADestination: string; const ADoMove: Boolean;
       const ABlockThread: Boolean = True): string; static;
     class function GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
       ABuild : Cardinal) : Boolean; overload; static;
-    class function GetFileVersion(const AFilePath : String) : string; overload; static;
+    class function GetFileVersion(const AFilePath : string) : string; overload; static;
   end;
 
   TContentReader = class
@@ -220,7 +220,7 @@ type
     {@G}
     property FileSize: UInt64 read FFileSize;
     property PageCount: UInt64 read GetPageCount;
-    property FilePath: String read FFilePath;
+    property FilePath: string read FFilePath;
 
     {@S}
     property PageSize: UInt64 read FPageSize write SetPageSize;
@@ -249,8 +249,8 @@ type
     procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Name: String read FName;
-    property Path: String read FPath;
+    property Name: string read FName;
+    property Path: string read FPath;
     property Access: TFileAccessAttributes read FAccess;
     property IsRoot: Boolean read FIsRoot;
   end;
@@ -287,9 +287,9 @@ type
     procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Letter: String read FLetter;
-    property Name: String read FName;
-    property Format: String read FFormat;
+    property Letter: string read FLetter;
+    property Name: string read FName;
+    property Format: string read FFormat;
     property DriveType: TDriveType read FType;
     property TotalSize: Int64 read FTotalSize;
     property FreeSize: Int64 read FFreeSize;
@@ -346,12 +346,12 @@ type
     procedure Assign(ASource: TPersistent); override;
 
     {@G}
-    property Path: String read FPath;
-    property Name: String read FName;
+    property Path: string read FPath;
+    property Name: string read FName;
     property IsDirectory: Boolean read FIsDirectory;
-    property ACL_SSDL: String read FACL_SSDL;
+    property ACL_SSDL: string read FACL_SSDL;
     property Access: TFileAccessAttributes read FAccess;
-    property TypeDescription: String read GetFileTypeDescription;
+    property TypeDescription: string read GetFileTypeDescription;
     property Size: Int64 read FSize;
     property DateAreValid: Boolean read FDateAreValid;
     property CreatedDate: TDateTime read FCreatedDate;
@@ -367,7 +367,7 @@ type
 
   function DriveTypeToString(const AValue: TDriveType): string;
   function AccessSetToString(const AValue: TFileAccessAttributes): string;
-  function StringToAccessSet(const AValue: String): TFileAccessAttributes;
+  function StringToAccessSet(const AValue: string): TFileAccessAttributes;
   function AccessSetToReadableString(const AValue: TFileAccessAttributes): string;
 
 implementation
@@ -409,7 +409,7 @@ begin
   Result[3] := IfThen(faExecute in AValue, 'E', '_')[1];
 end;
 
-function StringToAccessSet(const AValue: String): TFileAccessAttributes;
+function StringToAccessSet(const AValue: string): TFileAccessAttributes;
 begin
   Result := [];
   ///
@@ -499,7 +499,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFileACLString(const AFileName: String): string;
+class function TFileSystemHelper.GetFileACLString(const AFileName: string): string;
 begin
   var ptrSecurityDescriptor: PSecurityDescriptor := nil;
   var pFileACL_SSDL: LPWSTR := nil;
@@ -541,7 +541,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.TryGetFileACLString(const AFileName: String): string;
+class function TFileSystemHelper.TryGetFileACLString(const AFileName: string): string;
 begin
   try
     Result := GetFileACLString(AFileName);
@@ -605,7 +605,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetCurrentUserFileAccess(const AFileName: String): TFileAccessAttributes;
+class function TFileSystemHelper.GetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes;
 begin
   var ARead, AWrite, AExecute: Boolean;
 
@@ -635,7 +635,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName: String): TFileAccessAttributes;
+class function TFileSystemHelper.TryGetCurrentUserFileAccess(const AFileName: string): TFileAccessAttributes;
 begin
   try
     Result := GetCurrentUserFileAccess(AFileName);
@@ -644,7 +644,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFileSize(const AFileName: String): Int64;
+class function TFileSystemHelper.GetFileSize(const AFileName: string): Int64;
 begin
   var AFileInfo: TWin32FileAttributeData;
 
@@ -655,7 +655,7 @@ begin
   Result := Int64(AFileInfo.nFileSizeLow) or Int64(AFileInfo.nFileSizeHigh shl 32);
 end;
 
-class function TFileSystemHelper.TryGetFileSize(const AFileName: String): Int64;
+class function TFileSystemHelper.TryGetFileSize(const AFileName: string): Int64;
 begin
   try
     Result := GetFileSize(AFileName);
@@ -664,7 +664,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFileTypeDescription(const AFileName: String): string;
+class function TFileSystemHelper.GetFileTypeDescription(const AFileName: string): string;
 begin
   var AShFileInfo: TSHFileInfoW;
 
@@ -723,7 +723,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.UniqueFileName(const AFilePath: String): string;
+class function TFileSystemHelper.UniqueFileName(const AFilePath: string): string;
 begin
   if not FileExists(AFilePath) then
     Exit(AFilePath);
@@ -766,7 +766,7 @@ begin
     Result := APath;
 end;
 
-class function TFileSystemHelper.ExpandPath(const APath: String): string;
+class function TFileSystemHelper.ExpandPath(const APath: string): string;
 begin
   var APathLength := ExpandEnvironmentStrings(PWideChar(APath), nil, 0);
   if APathLength = 0 then
@@ -797,7 +797,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFullPathName(const APath: String): string;
+class function TFileSystemHelper.GetFullPathName(const APath: string): string;
 begin
   Result := '';
   ///
@@ -824,13 +824,13 @@ begin
   end;
 end;
 
-class procedure TFileSystemHelper.PathExists(const APath: String);
+class procedure TFileSystemHelper.PathExists(const APath: string);
 begin
   if GetFileAttributesW(PWideChar(APath)) = INVALID_FILE_ATTRIBUTES then
     raise EWindowsException.Create('GetFileAttributesW');
 end;
 
-class function TFileSystemHelper.CleanFileName(const AFileName: String): string;
+class function TFileSystemHelper.CleanFileName(const AFileName: string): string;
 begin
   Result := AFileName;
   ///
@@ -840,13 +840,13 @@ begin
     Result := Result.Replace(AChar, '_');
 end;
 
-class procedure TFileSystemHelper.CreateDirectory(const AFullPath: String);
+class procedure TFileSystemHelper.CreateDirectory(const AFullPath: string);
 begin
   if not Winapi.Windows.CreateDirectoryW(PWideChar(AFullPath), nil) then
     raise EWindowsException.Create('CreateDirectoryW');
 end;
 
-class procedure TFileSystemHelper.CreateDirectory(const APath, ANewDirectoryName: String);
+class procedure TFileSystemHelper.CreateDirectory(const APath, ANewDirectoryName: string);
 begin
   TFileSystemHelper.CreateDirectory(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName);
 end;
@@ -937,7 +937,7 @@ begin
   end;
 end;
 
-class function TFileSystemHelper.GetFileVersion(const AFilePath : String) : string;
+class function TFileSystemHelper.GetFileVersion(const AFilePath : string) : string;
 begin
   var AMajor, AMinor, ARelease, ABuild : Cardinal;
   if not GetFileVersion(AFilePath, AMajor, AMinor, ARelease, ABuild) then
@@ -1265,7 +1265,7 @@ end;
 
 function TVirtualClipboard.IsEmpty: Boolean;
 begin
-  Result := String.IsNullOrWhiteSpace(Content);
+  Result := string.IsNullOrWhiteSpace(Content);
 end;
 
 procedure TVirtualClipboard.SubscribeToClipboardUpdateSignal(const ASignalFunc: TNotifyEvent);

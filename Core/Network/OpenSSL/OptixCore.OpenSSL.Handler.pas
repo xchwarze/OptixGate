@@ -81,7 +81,7 @@ type
     procedure Recv(var buf; const len: Integer);
 
     {@G}
-    property PeerCertificateFingerprint: String read GetPeerCertificateFingerprint;
+    property PeerCertificateFingerprint: string read GetPeerCertificateFingerprint;
   end;
 
 implementation

@@ -81,7 +81,7 @@ type
     procedure SendCommandLine;
   public
     {@M}
-    procedure AddOutput(const AOutput: String);
+    procedure AddOutput(const AOutput: string);
     procedure Close;
 
     {@C}
@@ -155,7 +155,7 @@ begin
   EditCommand.Clear;
 end;
 
-procedure TFrameRemoteShellInstance.AddOutput(const AOutput: String);
+procedure TFrameRemoteShellInstance.AddOutput(const AOutput: string);
 begin
   Shell.SelStart := Length(Shell.Text);
   Shell.SelLength := 0;

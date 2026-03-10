@@ -85,7 +85,7 @@ type
     destructor Destroy; override;
 
     {@G}
-    property FileName: String read FFileName;
+    property FileName: string read FFileName;
     property IsDirectory: Boolean read FIsDirectory;
     property FileInformation: TFileInformation read FFileInformation;
   end;
@@ -134,11 +134,11 @@ type
     procedure AfterCreate; override;
 
     {@C}
-    constructor Create(const APath: String); overload;
+    constructor Create(const APath: string); overload;
     destructor Destroy; override;
 
     {@G}
-    property Path: String read FPath;
+    property Path: string read FPath;
     property ParentFolders: TObjectList<TSimpleFolderInformation> read FParentFolders;
     property Files: TObjectList<TFileInformation> read FFiles;
     property Access: TFileAccessAttributes read FAccess;
@@ -160,7 +160,7 @@ type
 
     {@G}
     property TransferId: TGUID read FTransferId;
-    property FilePath: String read FFilePath;
+    property FilePath: string read FFilePath;
   end;
 
   TOptixCommandDownloadFile = class(TOptixCommandTransfer);
@@ -177,7 +177,7 @@ type
   TOptixCommandCreateDirectory = class(TOptixCommandFileInformation)
   public
     {@C}
-    constructor Create(const APath, ANewDirectoryName: String); overload;
+    constructor Create(const APath, ANewDirectoryName: string); overload;
 
     {$IFNDEF SERVER}
     procedure DoAction; override;
@@ -204,8 +204,8 @@ type
     {$ENDIF}
 
     {@G}
-    property Source: String read FSource;
-    property Destination: String read FDestination;
+    property Source: string read FSource;
+    property Destination: string read FDestination;
     property CopyMode: TVirtualClipboardCopyMode read FCopyMode;
   end;
 
@@ -298,7 +298,7 @@ begin
   TFileSystemHelper.TraverseDirectories(
     FPath,
     (
-      procedure (const ADirectoryName: string; const AAbsolutePath: String)
+      procedure (const ADirectoryName: string; const AAbsolutePath: string)
       begin
         var APath := IncludeTrailingPathDelimiter(AAbsolutePath);
         var AIsRoot := SameText(APath, TPath.GetPathRoot(APath));
@@ -328,7 +328,7 @@ begin
   FFiles := TObjectList<TFileInformation>.Create(True);
 end;
 
-constructor TOptixCommandEnumDirectoryFiles.Create(const APath: String);
+constructor TOptixCommandEnumDirectoryFiles.Create(const APath: string);
 begin
   Create;
   ///
@@ -363,7 +363,7 @@ end;
 
 (* TOptixCommandCreateDirectory *)
 
-constructor TOptixCommandCreateDirectory.Create(const APath, ANewDirectoryName: String);
+constructor TOptixCommandCreateDirectory.Create(const APath, ANewDirectoryName: string);
 begin
   inherited Create(IncludeTrailingPathDelimiter(APath) + ANewDirectoryName, True);
 end;

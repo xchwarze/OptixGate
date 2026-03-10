@@ -117,7 +117,7 @@ type
     procedure Import2Click(Sender: TObject);
   private
     {@M}
-    function GetNodeByFingerprint(const AFingerPrint: String): PVirtualNode;
+    function GetNodeByFingerprint(const AFingerPrint: string): PVirtualNode;
     procedure ExportCertificate(const pNode: PVirtualNode; const AExportWhich: TOpenSSLCertificateKeyTypes = []);
     procedure RegisterCertificate(const ACertificate: TX509Certificate);
     function GetCertificateCount: Integer;
@@ -126,7 +126,7 @@ type
   public
     {@M}
     function GetCertificateKeys(const AFingerPrint: string; var ACertificate: TX509Certificate): Boolean;
-    function GetCertificatesFingerprints: TList<String>;
+    function GetCertificatesFingerprints: TList<string>;
 
     {@G}
     property CertificateCount: Integer read GetCertificateCount;
@@ -201,9 +201,9 @@ begin
   Result := VST.RootNodeCount;
 end;
 
-function TFormCertificatesStore.GetCertificatesFingerprints: TList<String>;
+function TFormCertificatesStore.GetCertificatesFingerprints: TList<string>;
 begin
-  Result := TList<String>.Create;
+  Result := TList<string>.Create;
   ///
 
   for var pNode in VST.Nodes do begin
@@ -214,7 +214,7 @@ begin
   end;
 end;
 
-function TFormCertificatesStore.GetNodeByFingerprint(const AFingerPrint: String): PVirtualNode;
+function TFormCertificatesStore.GetNodeByFingerprint(const AFingerPrint: string): PVirtualNode;
 begin
   Result := nil;
   ///
@@ -222,7 +222,7 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
-    if String.Compare(pData^.Certificate.Fingerprint, AFingerPrint, True) = 0 then begin
+    if string.Compare(pData^.Certificate.Fingerprint, AFingerPrint, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -254,7 +254,7 @@ begin
         var pData := PTreeData(pNode.GetData);
 
         {$IFDEF DEBUG}
-        if String.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
+        if string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
           continue;
         {$ENDIF}
 
@@ -383,7 +383,7 @@ begin
 
   var AColor := clNone;
 
-  if String.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
+  if string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
     AColor := COLOR_LIST_RED;
 
   if AColor <> clNone then begin
@@ -437,7 +437,7 @@ begin
       {$IFDEF DEBUG}
       var pData := PTreeData(Node.GetData);
 
-      if Assigned(pData) and (String.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) = 0) then
+      if Assigned(pData) and (string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) = 0) then
         ImageIndex := IMAGE_BUG
       else
       {$ENDIF}
@@ -551,7 +551,7 @@ end;
 
 procedure TFormCertificatesStore.Import1Click(Sender: TObject);
 
-  function GetErrorMessage(const AKeyName: String): string;
+  function GetErrorMessage(const AKeyName: string): string;
   begin
     var ATemplate := 'Could not import the certificate. The %s key is either missing, corrupted, or in a format ' +
                      'that does not match the expected file format (must contain both the private and public keys).';
@@ -578,7 +578,7 @@ begin
       AErrorMessage := GetErrorMessage('public');
   end;
 
-  if String.IsNullOrWhiteSpace(AErrorMessage) then
+  if string.IsNullOrWhiteSpace(AErrorMessage) then
     RegisterCertificate(ACertificate)
   else
     Application.MessageBox(PWideChar(AErrorMessage), 'Import Certificate', MB_ICONERROR);

@@ -227,13 +227,13 @@ type
 
     procedure LoadPositionsFromRegistry(aReg: TRegIniFile); overload;
     procedure SavePositionsToRegistry(aReg: TRegIniFile); overload;
-    procedure LoadPositionsFromRegistry(aReg: TRegIniFile; const aSection, aIdent: String); overload; virtual;
-    procedure SavePositionsToRegistry(aReg: TRegIniFile; const aSection, aIdent: String); overload; virtual;
+    procedure LoadPositionsFromRegistry(aReg: TRegIniFile; const aSection, aIdent: string); overload; virtual;
+    procedure SavePositionsToRegistry(aReg: TRegIniFile; const aSection, aIdent: string); overload; virtual;
 
     procedure LoadPositionsFromIniFile(aIni: TCustomIniFile); overload;
     procedure SavePositionsToIniFile(aIni: TCustomIniFile); overload;
-    procedure LoadPositionsFromIniFile(aIni: TCustomIniFile; const aSection, aIdent: String); overload; virtual;
-    procedure SavePositionsToIniFile(aIni: TCustomIniFile; const aSection, aIdent: String); overload; virtual;
+    procedure LoadPositionsFromIniFile(aIni: TCustomIniFile; const aSection, aIdent: string); overload; virtual;
+    procedure SavePositionsToIniFile(aIni: TCustomIniFile; const aSection, aIdent: string); overload; virtual;
 
     procedure DoSplitterMoved;
 
@@ -706,7 +706,7 @@ begin
 end;
 
 procedure TOCustomMultiPanel.LoadPositionsFromIniFile(aIni: TCustomIniFile;
-  const aSection, aIdent: String);
+  const aSection, aIdent: string);
 var
   I: Integer;
 begin
@@ -723,7 +723,7 @@ begin
 end;
 
 procedure TOCustomMultiPanel.LoadPositionsFromRegistry(aReg: TRegIniFile;
-  const aSection, aIdent: String);
+  const aSection, aIdent: string);
 var I: Integer;
 begin
   for I := 0 to PanelCollection.Count-2 do
@@ -1068,7 +1068,7 @@ begin
 end;
 
 procedure TOCustomMultiPanel.SavePositionsToIniFile(aIni: TCustomIniFile;
-  const aSection, aIdent: String);
+  const aSection, aIdent: string);
 var I: Integer;
 begin
   for I := 0 to PanelCollection.Count-2 do
@@ -1081,7 +1081,7 @@ begin
 end;
 
 procedure TOCustomMultiPanel.SavePositionsToRegistry(aReg: TRegIniFile;
-  const aSection, aIdent: String);
+  const aSection, aIdent: string);
 var I: Integer;
 begin
   for I := 0 to PanelCollection.Count-2 do

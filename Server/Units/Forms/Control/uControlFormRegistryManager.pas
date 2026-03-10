@@ -167,24 +167,24 @@ type
     FCurrentKeyPermissions: TRegistryKeyPermissions;
 
     {@M}
-    procedure BrowsePath(const AKeyFullPath: String);
+    procedure BrowsePath(const AKeyFullPath: string);
     procedure DisplayKeys(const AList: TOptixCommandEnumRegistry); overload;
     procedure DisplayKeys(const AParentKeys, ALevelKeys: TObjectList<TRegistryKeyInformation>); overload;
     procedure AddNewValueNode(const AValueInformation: TRegistryValueInformation);
     procedure DisplayValues(const AList: TOptixCommandEnumRegistry);
-    function GetNodeByKeyPath(const AKeyPath: String): PVirtualNode;
-    function GetNodeByValueName(const AKeyPath, AValueName: String): PVirtualNode;
+    function GetNodeByKeyPath(const AKeyPath: string): PVirtualNode;
+    function GetNodeByValueName(const AKeyPath, AValueName: string): PVirtualNode;
     procedure RefreshNodesVisibility;
     procedure CreateOrEditRegistryValue(const AValueKind: DWORD;
       const AExistingValue: TRegistryValueInformation = nil);
-    function GetValueNode(const AFullKeyPath, AValueName: String): PVirtualNode;
+    function GetValueNode(const AFullKeyPath, AValueName: string): PVirtualNode;
 
     function GetIsRoot: Boolean;
   protected
     {@M}
     procedure OnFirstShow; override;
-    procedure CreateNewRegistryKey(const ANewKeyFullPath: String);
-    procedure CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: String);
+    procedure CreateNewRegistryKey(const ANewKeyFullPath: string);
+    procedure CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: string);
   public
     {@M}
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
@@ -213,15 +213,15 @@ uses
 
 function TControlFormRegistryManager.GetIsRoot: Boolean;
 begin
-  Result := String.IsNullOrWhiteSpace(FCurrentKeyPath.Trim);
+  Result := string.IsNullOrWhiteSpace(FCurrentKeyPath.Trim);
 end;
 
-function TControlFormRegistryManager.GetValueNode(const AFullKeyPath, AValueName: String): PVirtualNode;
+function TControlFormRegistryManager.GetValueNode(const AFullKeyPath, AValueName: string): PVirtualNode;
 begin
   Result := nil;
   ///
 
-  if String.Compare(FCurrentKeyPath, AFullKeyPath, True) <> 0 then
+  if string.Compare(FCurrentKeyPath, AFullKeyPath, True) <> 0 then
     Exit;
 
   for var pNode in VSTValues.Nodes do begin
@@ -230,7 +230,7 @@ begin
       continue;
     ///
 
-    if String.Compare(AValueName, pData^.ValueInformation.Name, True) = 0 then begin
+    if string.Compare(AValueName, pData^.ValueInformation.Name, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -264,7 +264,7 @@ begin
   TOptixHelper.ShowForm(AForm);
 end;
 
-function TControlFormRegistryManager.GetNodeByKeyPath(const AKeyPath: String): PVirtualNode;
+function TControlFormRegistryManager.GetNodeByKeyPath(const AKeyPath: string): PVirtualNode;
 begin
   Result := nil;
   ///
@@ -275,7 +275,7 @@ begin
       continue;
     ///
 
-    if String.Compare(pData^.Path, AKeyPath, True) = 0 then begin
+    if string.Compare(pData^.Path, AKeyPath, True) = 0 then begin
       Result := pNode;
 
       ///
@@ -284,12 +284,12 @@ begin
   end;
 end;
 
-function TControlFormRegistryManager.GetNodeByValueName(const AKeyPath, AValueName: String): PVirtualNode;
+function TControlFormRegistryManager.GetNodeByValueName(const AKeyPath, AValueName: string): PVirtualNode;
 begin
   Result := nil;
   ///
 
-  if String.Compare(AKeyPath, FCurrentKeyPath, True) <> 0 then
+  if string.Compare(AKeyPath, FCurrentKeyPath, True) <> 0 then
     Exit;
 
   for var pNode in VSTValues.Nodes do begin
@@ -298,7 +298,7 @@ begin
       continue;
     ///
 
-    if String.Compare(pData^.ValueInformation.Name, AValueName, True) = 0 then begin
+    if string.Compare(pData^.ValueInformation.Name, AValueName, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -315,20 +315,20 @@ begin
 
   APath := TRegistryHelper.ExpandHiveShortName(APath);
 
-  if not String.IsNullOrWhiteSpace(APath) then
+  if not string.IsNullOrWhiteSpace(APath) then
     CreateNewRegistryKey(IncludeTrailingPathDelimiter(APath));
 end;
 
-procedure TControlFormRegistryManager.CreateNewRegistryKey(const ANewKeyFullPath: String);
+procedure TControlFormRegistryManager.CreateNewRegistryKey(const ANewKeyFullPath: string);
 begin
   SendCommand(TOptixCommandCreateRegistryKey.Create(ANewKeyFullPath));
 end;
 
-procedure TControlFormRegistryManager.CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: String);
+procedure TControlFormRegistryManager.CreateNewRegistryKeyEx(const ANewKeyBaseFullPath: string);
 begin
   var ANewKeyName := '';
   if not InputQuery('Create New Registry Key', 'New Key Name:', ANewKeyName) or
-     String.IsNullOrWhiteSpace(ANewKeyName) then
+     string.IsNullOrWhiteSpace(ANewKeyName) then
       Exit;
   ///
 
@@ -352,13 +352,13 @@ end;
 
 procedure TControlFormRegistryManager.Refresh1Click(Sender: TObject);
 begin
-  if not String.IsNullOrWhiteSpace(EditPath.Text) then
+  if not string.IsNullOrWhiteSpace(EditPath.Text) then
     BrowsePath(EditPath.Text);
 end;
 
 procedure TControlFormRegistryManager.Refresh2Click(Sender: TObject);
 begin
-  if String.IsNullOrWhiteSpace(FCurrentKeyPath) then
+  if string.IsNullOrWhiteSpace(FCurrentKeyPath) then
     Exit;
 
   BrowsePath(FCurrentKeyPath);
@@ -393,13 +393,13 @@ begin
       AParentKeys,
       ALevelKeys,
       (
-        function (const pData: Pointer): String
+        function (const pData: Pointer): string
         begin
           Result := PKeysTreeData(pData)^.KeyInformation.Name;
         end
       ),
       (
-        function (const AItem: TRegistryKeyInformation): String
+        function (const AItem: TRegistryKeyInformation): string
         begin
           if Assigned(AItem) then
             Result := AItem.Name
@@ -558,7 +558,7 @@ begin
   if not InputQuery('Edit Registry Key Name', 'New Name:', ANewKeyName) then
     Exit;
 
-  if String.IsNullOrWhiteSpace(ANewKeyName) then
+  if string.IsNullOrWhiteSpace(ANewKeyName) then
     Exit;
 
   if GetNodeByKeyPath(IncludeTrailingPathDelimiter(pParentData^.Path) + ANewKeyName) <> nil then
@@ -596,10 +596,10 @@ begin
   if not InputQuery('Edit Registry Value Name', 'New Name:', ANewValueName) then
     Exit;
 
-  if String.IsNullOrWhiteSpace(ANewValueName) then
+  if string.IsNullOrWhiteSpace(ANewValueName) then
     Exit;
 
-  if String.Compare(pData^.ValueInformation.Name, ANewValueName) = 0 then
+  if string.Compare(pData^.ValueInformation.Name, ANewValueName) = 0 then
     Exit;
 
   if GetNodeByValueName(FCurrentKeyPath, ANewValueName) <> nil then
@@ -637,7 +637,7 @@ begin
 
   APath := TRegistryHelper.ExpandHiveShortName(APath);
 
-  if not String.IsNullOrWhiteSpace(APath) then
+  if not string.IsNullOrWhiteSpace(APath) then
     BrowsePath(APath);
 end;
 
@@ -658,7 +658,7 @@ end;
 
 procedure TControlFormRegistryManager.NewKey1Click(Sender: TObject);
 begin
-  if String.IsNullOrWhiteSpace(FCurrentKeyPath) or not (rkpCreateSubKey in FCurrentKeyPermissions) then
+  if string.IsNullOrWhiteSpace(FCurrentKeyPath) or not (rkpCreateSubKey in FCurrentKeyPermissions) then
     Exit;
   ///
 
@@ -710,7 +710,7 @@ begin
       VSTKeys.EndUpdate;
     end;
 
-    if String.Compare(FCurrentKeyPath, AResult.KeyPath, True) = 0 then begin
+    if string.Compare(FCurrentKeyPath, AResult.KeyPath, True) = 0 then begin
       VSTValues.Clear;
 
       FCurrentKeyPath := '';
@@ -759,7 +759,7 @@ begin
         pData^.Path := ANewKeyPath;
         ///
 
-        if String.Compare(FCurrentKeyPath, AExistingKeyPath, True) = 0 then begin
+        if string.Compare(FCurrentKeyPath, AExistingKeyPath, True) = 0 then begin
           EditPath.Text := ANewKeyPath;
           FCurrentKeyPath := ANewKeyPath;
         end;
@@ -805,7 +805,7 @@ begin
   // -------------------------------------------------------------------------------------------------------------------
 end;
 
-procedure TControlFormRegistryManager.BrowsePath(const AKeyFullPath: String);
+procedure TControlFormRegistryManager.BrowsePath(const AKeyFullPath: string);
 begin
   SendCommand(TOptixCommandEnumRegistryKeys.Create(AKeyFullPath));
 end;
@@ -840,7 +840,7 @@ end;
 
 procedure TControlFormRegistryManager.PopupValuesPopup(Sender: TObject);
 begin
-  TOptixHelper.UpdatePopupMenuRootItemsVisibility(TPopupMenu(Sender), not String.IsNullOrWhiteSpace(FCurrentKeyPath));
+  TOptixHelper.UpdatePopupMenuRootItemsVisibility(TPopupMenu(Sender), not string.IsNullOrWhiteSpace(FCurrentKeyPath));
 
   ///
   NewKey1.Enabled := rkpCreateSubKey in FCurrentKeyPermissions;

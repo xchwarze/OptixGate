@@ -285,10 +285,10 @@ begin
     ADictionary.Add('Remote Address / Port', Format('%s/%d', [Handler.PeerAddress, Handler.Port]));
     ADictionary.Add('Username@Computer', GetUPN);
 
-    if not String.IsNullOrWhiteSpace(SessionInformation.Langroup) then
+    if not string.IsNullOrWhiteSpace(SessionInformation.Langroup) then
       ADictionary.Add('LAN Group Name', SessionInformation.Langroup);
 
-    if not String.IsNullOrWhiteSpace(SessionInformation.DomainName) then
+    if not string.IsNullOrWhiteSpace(SessionInformation.DomainName) then
       ADictionary.Add('Domain Name', SessionInformation.DomainName);
 
     ADictionary.Add('Windows Version', SessionInformation.WindowsVersion);

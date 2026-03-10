@@ -89,7 +89,7 @@ type
     property OnClientDisconnect: TOnClientDisconnect read FOnClientDisconnect write FOnClientDisconnect;
 
     {@G}
-    property PeerAddress: String read FPeerAddress;
+    property PeerAddress: string read FPeerAddress;
     property Port: Word read FPort;
   end;
 

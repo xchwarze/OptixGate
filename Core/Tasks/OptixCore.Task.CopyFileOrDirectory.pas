@@ -89,8 +89,8 @@ type
 
     {@G}
     property FileInformation: TFileInformation read FFileInformation;
-    property Source: String read FSource;
-    property Destination: String read FDestination;
+    property Source: string read FSource;
+    property Destination: string read FDestination;
     property Moved: Boolean read FMoved;
   end;
 

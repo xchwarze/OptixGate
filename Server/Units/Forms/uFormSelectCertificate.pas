@@ -78,7 +78,7 @@ type
     procedure DoResize;
   public
     {@C}
-    constructor Create(AOwner: TComponent; const APreSelectCertificate: String = ''); reintroduce;
+    constructor Create(AOwner: TComponent; const APreSelectCertificate: string = ''); reintroduce;
   end;
 
 var
@@ -144,7 +144,7 @@ begin
     ModalResult := mrOk;
 end;
 
-constructor TFormSelectCertificate.Create(AOwner: TComponent; const APreSelectCertificate: String = '');
+constructor TFormSelectCertificate.Create(AOwner: TComponent; const APreSelectCertificate: string = '');
 begin
   inherited Create(AOwner);
   ///
@@ -157,7 +157,7 @@ begin
   try
     for var AFingerprint in AFingerprints do begin
       var AIndex := ComboCertificate.Items.Add(AFingerprint);
-      if (APreSelectCertificate <> '') and (String.Compare(APreSelectCertificate, AFingerprint, True) = 0) then
+      if (APreSelectCertificate <> '') and (string.Compare(APreSelectCertificate, AFingerprint, True) = 0) then
         FDefaultIndex := AIndex;
     end;
   finally

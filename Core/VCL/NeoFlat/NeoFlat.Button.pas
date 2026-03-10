@@ -219,7 +219,7 @@ begin
 
   Canvas.Brush.Style := bsClear;
 
-  var ACaption: String := Caption;
+  var ACaption: string := Caption;
   Canvas.TextRect(ARect, ACaption, [tfEndEllipsis, tfVerticalCenter, tfSingleLine, tfCenter]);
 end;
 

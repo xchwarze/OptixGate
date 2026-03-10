@@ -62,7 +62,7 @@ type
   end;
   PTreeData = ^TTreeData;
 
-  TOnItemClick = procedure(Sender: TObject; AIndex: Integer; AItemName: String) of object;
+  TOnItemClick = procedure(Sender: TObject; AIndex: Integer; AItemName: string) of object;
 
   TFlatVirtualStringTree = class(TCustomVirtualStringTree)
   private

@@ -142,14 +142,14 @@ type
     function GetNodeByPort(const APort: Word; const AVersion: TIPVersion): PVirtualNode;
     function GetNodeByServer(const AServer: TOptixServerThread): PVirtualNode;
     {$IFDEF USETLS}
-    function GetNodeByServerFingerprint(const AFingerprint: String): PVirtualNode;
+    function GetNodeByServerFingerprint(const AFingerprint: string): PVirtualNode;
     {$ENDIF}
-    procedure UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: String = ''); overload;
-    procedure UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: String = ''); overload;
+    procedure UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: string = ''); overload;
+    procedure UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: string = ''); overload;
 
     procedure OnServerStart(Sender: TOptixServerThread; const ASocketFd: TSocket);
     procedure OnServerStop(Sender: TOptixServerThread);
-    procedure OnServerError(Sender: TOptixServerThread; const AErrorMessage: String);
+    procedure OnServerError(Sender: TOptixServerThread; const AErrorMessage: string);
 
     procedure Save;
     procedure Load;
@@ -161,7 +161,7 @@ type
     procedure StartServer(const pNode: PVirtualNode);
     function ServerPortExists(const APort: Word; const AIpVersion: TIpVersion): Boolean;
     {$IFDEF USETLS}
-    function ServerCertificateIsInUse(const AFingerprint: String): Boolean;
+    function ServerCertificateIsInUse(const AFingerprint: string): Boolean;
     {$ENDIF}
   end;
 
@@ -254,7 +254,7 @@ begin
   end;
 end;
 
-procedure TFormServers.UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: String = '');
+procedure TFormServers.UpdateStatus(const pNode: PVirtualNode; const AStatus: TServerStatus; const AStatusMessage: string = '');
 begin
   if not Assigned(pNode) then
     Exit;
@@ -270,7 +270,7 @@ begin
   end;
 end;
 
-procedure TFormServers.UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: String = '');
+procedure TFormServers.UpdateStatus(const AServer: TOptixServerThread; const AStatus: TServerStatus; const AStatusMessage: string = '');
 begin
   var pNode := GetNodeByServer(AServer);
 
@@ -326,7 +326,7 @@ begin
     AutoStart1.Checked := pData^.ServerConfiguration.AutoStart;
 end;
 
-procedure TFormServers.OnServerError(Sender: TOptixServerThread; const AErrorMessage: String);
+procedure TFormServers.OnServerError(Sender: TOptixServerThread; const AErrorMessage: string);
 begin
   UpdateStatus(Sender, ssOnError, AErrorMessage);
 end;
@@ -463,14 +463,14 @@ begin
 end;
 
 {$IFDEF USETLS}
-function TFormServers.GetNodeByServerFingerprint(const AFingerprint: String): PVirtualNode;
+function TFormServers.GetNodeByServerFingerprint(const AFingerprint: string): PVirtualNode;
 begin
   Result := nil;
   ///
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
-    if String.Compare(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint, True) = 0 then begin
+    if string.Compare(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint, True) = 0 then begin
       Result := pNode;
 
       break;
@@ -478,7 +478,7 @@ begin
   end;
 end;
 
-function TFormServers.ServerCertificateIsInUse(const AFingerprint: String): Boolean;
+function TFormServers.ServerCertificateIsInUse(const AFingerprint: string): Boolean;
 begin
   Result := GetNodeByServerFingerprint(AFingerprint) <> nil;
 end;

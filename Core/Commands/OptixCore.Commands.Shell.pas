@@ -85,10 +85,10 @@ type
   public
 
     {@C}
-    constructor Create(const AInstanceId: TGUID; const ACommandLine: String); overload;
+    constructor Create(const AInstanceId: TGUID; const ACommandLine: string); overload;
 
     {@G}
-    property CommandLine: String read FCommandLine;
+    property CommandLine: string read FCommandLine;
   end;
 
   TOptixCommandReadShellInstance = class(TOptixCommandShellInstance)
@@ -100,7 +100,7 @@ type
     constructor Create(const AGroupId: TGUID; const AOutput: string; const AInstanceId: TGUID);
 
     {@G}
-    property Output: String read FOutput;
+    property Output: string read FOutput;
   end;
 
 implementation
@@ -116,7 +116,7 @@ begin
 end;
 
 (* TOptixCommandWriteShellInstance *)
-constructor TOptixCommandWriteShellInstance.Create(const AInstanceId: TGUID; const ACommandLine: String);
+constructor TOptixCommandWriteShellInstance.Create(const AInstanceId: TGUID; const ACommandLine: string);
 begin
   inherited Create(AInstanceId);
   ///

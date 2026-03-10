@@ -104,7 +104,7 @@ type
     function AcceptClient({$IFDEF USETLS}const ASSLContext: TOptixOpenSSLContext{$ENDIF}): TClientSocket;
 
     {@G}
-    property BindAddress: String read FBindAddress;
+    property BindAddress: string read FBindAddress;
     property BindPort: Word read FBindPort;
   end;
 
@@ -147,7 +147,7 @@ type
     procedure SendStream(const AValue: TMemoryStream);
     procedure ReceiveStream(var AValue: TMemoryStream);
 
-    procedure SendString(const AString: String);
+    procedure SendString(const AString: string);
     function ReceiveString: string;
 
     procedure SendJson(const AJsonObject: TJsonObject);
@@ -161,12 +161,12 @@ type
     procedure Connect overload;
 
     {@G}
-    property RemoteAddress: String read FRemoteAddress;
+    property RemoteAddress: string read FRemoteAddress;
     property RemotePort: Word read FRemotePort;
 
     {$IFDEF USETLS}
     {@G}
-    property PeerCertificateFingerprint: String read GetPeerCertificateFingerprint;
+    property PeerCertificateFingerprint: string read GetPeerCertificateFingerprint;
     {$ENDIF}
   end;
 
@@ -531,7 +531,7 @@ begin
   end;
 end;
 
-procedure TClientSocket.SendString(const AString: String);
+procedure TClientSocket.SendString(const AString: string);
 begin
   var ABuffer := ZCompressStr(AString, TZCompressionLevel.zcDefault);
 
@@ -639,8 +639,8 @@ begin
     var AClassName: string;
     var AWindowGUID_Str: string;
 
-    if not AReceivedJson.TryGetValue<String>('META_CLASSNAME', AClassName) or
-       not AReceivedJson.TryGetValue<String>('FWindowGUID', AWindowGUID_Str)
+    if not AReceivedJson.TryGetValue<string>('META_CLASSNAME', AClassName) or
+       not AReceivedJson.TryGetValue<string>('FWindowGUID', AWindowGUID_Str)
     then
       Exit;
 

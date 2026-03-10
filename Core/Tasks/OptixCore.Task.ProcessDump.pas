@@ -84,10 +84,10 @@ type
     constructor Create(const AOutputFileName: string; const ADumpedProcessId: Cardinal); overload;
 
     {@G}
-    property OutputFilePath: String read FOutputFilePath;
+    property OutputFilePath: string read FOutputFilePath;
     property DumpedProcessId: Cardinal read FDumpedProcessId;
-    property DumpedProcessName: String read FDumpedProcessName;
-    property Displayname: String read GetProcessDisplayName;
+    property DumpedProcessName: string read FDumpedProcessName;
+    property Displayname: string read GetProcessDisplayName;
   end;
 
 implementation
@@ -135,7 +135,7 @@ end;
 
 function TOptixTaskGetProcessDumpResult.GetProcessDisplayName: string;
 begin
-  if String.IsNullOrWhiteSpace(FDumpedProcessName) then
+  if string.IsNullOrWhiteSpace(FDumpedProcessName) then
     Result := IntToStr(FDumpedProcessId)
   else
     Result := Format('%d (%s)', [

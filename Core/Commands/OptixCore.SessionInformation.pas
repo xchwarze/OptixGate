@@ -114,19 +114,19 @@ type
     {@G}
     property Architecture: TProcessorArchitecture read FArchitecture;
     property WindowsArchitecture: TProcessorArchitecture read FWindowsArchitecture;
-    property WindowsVersion: String read FWindowsVersion;
+    property WindowsVersion: string read FWindowsVersion;
     property ProcessId: Cardinal read FProcessId;
-    property Username: String read FUsername;
-    property Computer: String read FComputer;
-    property ImagePath: String read FImagePath;
+    property Username: string read FUsername;
+    property Computer: string read FComputer;
+    property ImagePath: string read FImagePath;
     property ElevatedStatus: TElevatedStatus read FElevatedStatus;
-    property Langroup: String read FLangroup;
-    property DomainName: String read FDomainName;
+    property Langroup: string read FLangroup;
+    property DomainName: string read FDomainName;
     property IsInAdminGroup: Boolean read FIsInAdminGroup;
-    property UserSid: String read FUserSid;
+    property UserSid: string read FUserSid;
 
-    property ProcessDetail: String read GetProcessDetail;
-    property ElevatedStatus_STR: String read GetElevatedStatusString;
+    property ProcessDetail: string read GetProcessDetail;
+    property ElevatedStatus_STR: string read GetElevatedStatusString;
     property IsSystem: Boolean read CheckIfSystemUser;
   end;
 
@@ -185,7 +185,7 @@ end;
 
 function TOptixCommandReceiveSessionInformation.CheckIfSystemUser: Boolean;
 begin
-  Result := String.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := string.Compare(FUserSid, 'S-1-5-18', True) =  0;
 end;
 
 end.

@@ -76,7 +76,7 @@ type
     function MoveNext: Boolean;
 
     {@G}
-    property Current: String read GetCurrent;
+    property Current: string read GetCurrent;
   end;
 
   TOptixConfigTrustedCertificateStore = class(TOptixConfigEnumBase)
@@ -85,7 +85,7 @@ type
     function GetItem(const AIndex: Integer): string;
   public
     {@M}
-    procedure Add(const ATrustedFingerprint: String);
+    procedure Add(const ATrustedFingerprint: string);
     function GetEnumerator: TOptixTrustedFingerprintEnumerator;
 
     {@G}
@@ -145,7 +145,7 @@ begin
   Result := AFingerprint;
 end;
 
-procedure TOptixConfigTrustedCertificateStore.Add(const ATrustedFingerprint: String);
+procedure TOptixConfigTrustedCertificateStore.Add(const ATrustedFingerprint: string);
 begin
   if not Assigned(FItems) then
     Exit;

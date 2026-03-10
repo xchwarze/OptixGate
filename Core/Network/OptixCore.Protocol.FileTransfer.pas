@@ -93,7 +93,7 @@ type
     procedure IncWorkCount(const AValue: UInt64);
   public
     {@C}
-    constructor Create(const AFilePath: String); virtual;
+    constructor Create(const AFilePath: string); virtual;
     destructor Destroy; override;
 
     {@G}
@@ -113,7 +113,7 @@ type
     procedure SetFileSize(const AValue: Int64);
 
     {@C}
-    constructor Create(const AFilePath: String); override;
+    constructor Create(const AFilePath: string); override;
   end;
 
   TOptixUploadTask = class(TOptixTransferTask)
@@ -122,7 +122,7 @@ type
     procedure UploadChunk(const AClient: TClientSocket);
 
     {@C}
-    constructor Create(const AFilePath: String); override;
+    constructor Create(const AFilePath: string); override;
   end;
 
 implementation
@@ -136,7 +136,7 @@ uses
 
 (* TOptixTransferTask *)
 
-constructor TOptixTransferTask.Create(const AFilePath: String);
+constructor TOptixTransferTask.Create(const AFilePath: string);
 begin
   inherited Create;
   ///
@@ -207,7 +207,7 @@ begin
   FFileSize := AValue;
 end;
 
-constructor TOptixDownloadTask.Create(const AFilePath: String);
+constructor TOptixDownloadTask.Create(const AFilePath: string);
 begin
   inherited Create(AFilePath);
   ///
@@ -236,7 +236,7 @@ begin
   IncWorkCount(ABufferSize);
 end;
 
-constructor TOptixUploadTask.Create(const AFilePath: String);
+constructor TOptixUploadTask.Create(const AFilePath: string);
 begin
   inherited Create(AFilePath);
   ///

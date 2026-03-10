@@ -84,9 +84,9 @@ type
 
     {@G}
     property Kind: TLogKind read FKind;
-    property LogMessage: String read FMessage;
-    property DetailedMessage: String read GetDetailedMessage;
-    property Context: String read FContext;
+    property LogMessage: string read FMessage;
+    property DetailedMessage: string read GetDetailedMessage;
+    property Context: string read FContext;
   end;
 
   TOptixCommandReceiveTransferException = class(TOptixCommandReceiveLogMessage)
@@ -98,7 +98,7 @@ type
     function GetDetailedMessage: string; override;
   public
     {@C}
-    constructor Create(const ATransferId: TGUID; const AMessage: string; const AContext: String = ''); overload;
+    constructor Create(const ATransferId: TGUID; const AMessage: string; const AContext: string = ''); overload;
 
     {@}
     property TransferId: TGUID read FTransferId;
@@ -139,7 +139,7 @@ end;
 
 (* TOptixCommandReceiveTransferException *)
 
-constructor TOptixCommandReceiveTransferException.Create(const ATransferId: TGUID; const AMessage: string; const AContext: String = '');
+constructor TOptixCommandReceiveTransferException.Create(const ATransferId: TGUID; const AMessage: string; const AContext: string = '');
 begin
   inherited Create(AMessage, AContext, TLogKind.lkException);
   ///

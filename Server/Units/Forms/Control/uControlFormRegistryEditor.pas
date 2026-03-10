@@ -126,7 +126,7 @@ type
     procedure UpdateQDWordValueBase;
     procedure SetEditMode(const AValue: Boolean);
     procedure SetValueKind(const AValue: DWORD);
-    procedure SetFullKeyPath(const AValue: String);
+    procedure SetFullKeyPath(const AValue: string);
     procedure DoResize;
   protected
     function GetContextDescription: string; override;
@@ -144,7 +144,7 @@ type
     {@G/S}
     property EditMode: Boolean read FEditMode write SetEditMode;
     property ValueKind: DWORD read FValueKind write SetValueKind;
-    property FullKeyPath: String read FFullKeyPath write SetFullKeyPath;
+    property FullKeyPath: string read FFullKeyPath write SetFullKeyPath;
     property ManagerGUID: TGUID read FManagerGUID write FManagerGUID;
   end;
 
@@ -287,11 +287,11 @@ end;
 
 procedure TControlFormRegistryEditor.ButtonActionClick(Sender: TObject);
 begin
-  if (FValueKind = REG_NONE) or String.IsNullOrWhiteSpace(FFullKeyPath) then
+  if (FValueKind = REG_NONE) or string.IsNullOrWhiteSpace(FFullKeyPath) then
     Exit;
   ///
 
-  if String.IsNullOrWhiteSpace(EditName.Text) and not FEditMode then begin
+  if string.IsNullOrWhiteSpace(EditName.Text) and not FEditMode then begin
     EditName.SetFocus;
 
     raise Exception.Create('You must specify a registry value name.');
@@ -639,7 +639,7 @@ begin
   SetValueKind(REG_SZ);
 end;
 
-procedure TControlFormRegistryEditor.SetFullKeyPath(const AValue: String);
+procedure TControlFormRegistryEditor.SetFullKeyPath(const AValue: string);
 begin
   if FFullKeyPath = AValue then
     Exit;

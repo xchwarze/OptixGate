@@ -233,7 +233,7 @@ begin
   ///
 
   if Assigned(FCurrentPage) then
-    if not String.IsNullOrWhiteSpace(FCurrentPage.FilePath) then
+    if not string.IsNullOrWhiteSpace(FCurrentPage.FilePath) then
       Caption := Format('%s - File: "%s"', [
         Caption,
         FCurrentPage.FilePath
@@ -387,7 +387,7 @@ begin
     Exit;
   ///
 
-  ButtonDownload.Enabled := not String.IsNullOrWhiteSpace(FCurrentPage.FilePath);
+  ButtonDownload.Enabled := not string.IsNullOrWhiteSpace(FCurrentPage.FilePath);
   ButtonBack.Enabled := FCurrentPage.PageNumber > 0;
   ButtonForward.Enabled := FCurrentPage.PageNumber < FCurrentPage.PageCount -1;
   ButtonBrowsePage.Enabled := FCurrentPage.PageCount > 1;

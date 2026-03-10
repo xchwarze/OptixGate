@@ -109,7 +109,7 @@ type
     {@G}
     property ProcessId: Cardinal read FProcessId;
     property DestTempPath: Boolean read FDestTempPath;
-    property DestFilePath: String read FDestFilePath;
+    property DestFilePath: string read FDestFilePath;
     property TypesValue: DWORD read FTypesValue;
   end;
 
@@ -168,7 +168,7 @@ begin
 
   FProcessId := AProcessId;
 
-  FDestTempPath := String.IsNullOrWhiteSpace(ADestFilePath);
+  FDestTempPath := string.IsNullOrWhiteSpace(ADestFilePath);
   if not FDestTempPath then
     FDestFilePath := ADestFilePath.Trim
   else

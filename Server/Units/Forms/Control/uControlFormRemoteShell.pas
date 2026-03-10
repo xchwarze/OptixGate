@@ -88,8 +88,8 @@ type
     destructor Destroy; override;
 
     {@M}
-    procedure AddOutput(const AOutput: String);
-    procedure SaveToFile(const ADestinationFile: String);
+    procedure AddOutput(const AOutput: string);
+    procedure SaveToFile(const ADestinationFile: string);
     procedure Close;
 
     {@G}
@@ -98,7 +98,7 @@ type
     property Active: Boolean read FActive;
 
     {@G/S}
-    property Name: String read FName write FName;
+    property Name: string read FName write FName;
     property Visible: Boolean read GetVisible write SetVisible;
   end;
 
@@ -145,8 +145,8 @@ type
     procedure ShowInstance(const AInstance: TShellInstance);
     procedure CloseShellInstance(const AInstanceId: TGUID);
     function GetShellInstanceById(const AInstanceId: TGUID): TShellInstance;
-    function GetShellInstanceByName(const AName: String): TShellInstance;
-    function ShellNameExists(const AName: String): Boolean;
+    function GetShellInstanceByName(const AName: string): TShellInstance;
+    function ShellNameExists(const AName: string): Boolean;
     procedure RequestShellInstanceTermination(const AInstance: TShellInstance);
     function GetActiveShellInstance: TShellInstance;
     procedure RefreshActionButtons;
@@ -198,13 +198,13 @@ begin
   inherited Destroy;
 end;
 
-procedure TShellInstance.AddOutput(const AOutput: String);
+procedure TShellInstance.AddOutput(const AOutput: string);
 begin
   if Assigned(FFrame) then
     FFrame.AddOutput(AOutput);
 end;
 
-procedure TShellInstance.SaveToFile(const ADestinationFile: String);
+procedure TShellInstance.SaveToFile(const ADestinationFile: string);
 begin
   if Assigned(FFrame) then
     FFrame.Shell.Lines.SaveToFile(ADestinationFile);
@@ -343,7 +343,7 @@ begin
   SendCommand(TOptixCommandCreateShellInstance.Create);
 end;
 
-function TControlFormRemoteShell.GetShellInstanceByName(const AName: String): TShellInstance;
+function TControlFormRemoteShell.GetShellInstanceByName(const AName: string): TShellInstance;
 begin
   Result := nil;
   ///
@@ -352,7 +352,7 @@ begin
     Exit;
 
   for var AInstance in FInstances do
-    if String.Compare(AInstance.Name, AName, True) = 0 then
+    if string.Compare(AInstance.Name, AName, True) = 0 then
       Exit(AInstance);
 end;
 
@@ -361,7 +361,7 @@ begin
   ButtonSaveOutputClick(ButtonSaveOutput);
 end;
 
-function TControlFormRemoteShell.ShellNameExists(const AName: String): Boolean;
+function TControlFormRemoteShell.ShellNameExists(const AName: string): Boolean;
 begin
   Result := GetShellInstanceByName(AName) <> nil;
 end;
@@ -501,7 +501,7 @@ begin
     Exit;
 
   AName := TFileSystemHelper.CleanFileName(AName.Trim);
-  if String.Compare(AName, AOldName, True) = 0 then
+  if string.Compare(AName, AOldName, True) = 0 then
     Exit;
 
   if ShellNameExists(AName) then

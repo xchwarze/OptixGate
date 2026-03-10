@@ -100,7 +100,7 @@ type
     procedure Paint; override;
   public
     {@M}
-    procedure ActivateHint(AHintRect: TRect; const AHint: String); override;
+    procedure ActivateHint(AHintRect: TRect; const AHint: string); override;
 
     {@C}
     constructor Create(AOwner: TComponent); override;
@@ -202,7 +202,7 @@ begin
   AParams.WindowClass.Style := AParams.WindowClass.Style - CS_DROPSHADOW;
 end;
 
-procedure TFlatHintWindow.ActivateHint(AHintRect: TRect; const AHint: String);
+procedure TFlatHintWindow.ActivateHint(AHintRect: TRect; const AHint: string);
 begin
   const HINT_WIDTH = FMetrics.ScaleValue(400);
   ///
