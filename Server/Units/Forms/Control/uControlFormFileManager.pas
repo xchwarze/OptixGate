@@ -244,6 +244,7 @@ type
     procedure CopyOrCutSelectedNode(const ACopyMode: TVirtualClipboardCopyMode);
     procedure PasteFileOrDirectory(const pNode: PVirtualNode = nil);
     procedure OnVirtualClipboardUpdate(Sender: TObject);
+    procedure ClearClipboard;
   protected
     {@M}
     function GetContextDescription: string; override;
@@ -751,6 +752,13 @@ begin
   ButtonPasteClick(ButtonPaste);
 end;
 
+procedure TControlFormFileManager.ClearClipboard;
+begin
+  FSharedClass.FileClipboard.Clear;
+  RefreshActionsButtons;
+  VSTFiles.Refresh;
+end;
+
 procedure TControlFormFileManager.PasteFileOrDirectory(const pNode: PVirtualNode = nil);
 begin
   if FSharedClass.FileClipboard.IsEmpty then
@@ -774,6 +782,10 @@ begin
       ADestination,
       FSharedClass.FileClipboard.CopyMode
     ));
+
+  ///
+  if FSharedClass.FileClipboard.CopyMode = vccmCut then
+    ClearClipboard;
 end;
 
 procedure TControlFormFileManager.PasteToSelectedFolder1Click(Sender: TObject);
@@ -934,9 +946,7 @@ end;
 
 procedure TControlFormFileManager.ClearClipboard1Click(Sender: TObject);
 begin
-  FSharedClass.FileClipboard.Clear;
-  RefreshActionsButtons;
-  VSTFiles.Refresh;
+  ClearClipboard;
 end;
 
 function TControlFormFileManager.CanFileBeUploadedToNodeDirectory(var pData: PFileTreeData): Boolean;
