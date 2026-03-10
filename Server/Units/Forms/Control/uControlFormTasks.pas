@@ -116,7 +116,7 @@ uses
 
   uFormMain,
 
-  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump, OptixCore.Task.CopyFileOrDirectory,
+  Optix.Constants, Optix.Helper, OptixCore.Task.ProcessDump, OptixCore.Task.FileOperations,
   OptixCore.System.FileSystem,
 
   uControlFormFileManager;
@@ -142,6 +142,11 @@ begin
         if ACastedResult.Moved then
           DeleteFileFromFileManagers(ACastedResult.Source, ACastedResult.FileInformation.IsDirectory);
       end;
+  end else if AResult is TOptixTaskGetDeleteFileOrDirectoryResult then begin
+    var ACastedResult := TOptixTaskGetDeleteFileOrDirectoryResult(AResult);
+    ///
+
+    DeleteFileFromFileManagers(ACastedResult.FilePath, ACastedResult.IsDirectory);
   end;
 end;
 

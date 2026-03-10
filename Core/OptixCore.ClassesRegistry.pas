@@ -79,7 +79,7 @@ implementation
 uses
   OptixCore.Commands.FileSystem, OptixCore.Commands.Process, OptixCore.Commands, OptixCore.Commands.Shell,
   OptixCore.Task.ProcessDump, OptixCore.Commands.Base, OptixCore.SessionInformation, OptixCore.LogNotifier,
-  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader, OptixCore.Task.CopyFileOrDirectory;
+  OptixCore.Commands.Registry, OptixCore.Commands.ContentReader, OptixCore.Task.FileOperations;
 // ---------------------------------------------------------------------------------------------------------------------
 
 class constructor TClassesRegistry.Create;
@@ -161,6 +161,7 @@ initialization
     TOptixCommandUploadFile,
     TOptixCommandCreateDirectory,
     TOptixCommandCopyFileOrDirectory,
+    TOptixCommandDeleteFileOrDirectory,
 
     // System & Process Commands
     TOptixCommandTerminateProcess,
@@ -200,7 +201,8 @@ initialization
     TOptixTaskResult,
     TOptixTaskCallback,
     TOptixTaskGetProcessDumpResult,
-    TOptixTaskGetCopyFileOrDirectoryResult
+    TOptixTaskGetCopyFileOrDirectoryResult,
+    TOptixTaskGetDeleteFileOrDirectoryResult
   ]);
 
 end.

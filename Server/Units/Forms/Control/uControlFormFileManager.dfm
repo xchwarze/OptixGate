@@ -689,6 +689,13 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Clear Clipboard'
       OnClick = ClearClipboard1Click
     end
+    object N4: TMenuItem
+      Caption = '-'
+    end
+    object Delete1: TMenuItem
+      Caption = 'Delete'
+      OnClick = Delete1Click
+    end
   end
   object PopupMenuOptions: TFlatPopupMenu
     OwnerDraw = True

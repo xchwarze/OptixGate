@@ -209,11 +209,28 @@ type
     property CopyMode: TVirtualClipboardCopyMode read FCopyMode;
   end;
 
+  TOptixCommandDeleteFileOrDirectory = class(TOptixCommandTask)
+  private
+    [OptixSerializableAttribute]
+    FFilePath : string;
+  public
+    {@C}
+    constructor Create(const AFilePath : string); overload;
+
+    {@M}
+    {$IFNDEF SERVER}
+    function CreateTask(const ACommand: TOptixCommand): TOptixTask; override;
+    {$ENDIF}
+
+    {@G}
+    property FilePath : string read FFilePath;
+  end;
+
 implementation
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.IOUtils, OptixCore.Task.CopyFileOrDirectory;
+  System.IOUtils, OptixCore.Task.FileOperations;
 // ---------------------------------------------------------------------------------------------------------------------
 
 (* TOptixCommandFileInformation *)
@@ -398,6 +415,26 @@ function TOptixCommandCopyFileOrDirectory.CreateTask(const ACommand: TOptixComma
 begin
   if Assigned(ACommand) then
     Result := TOptixCopyFileOrDirectoryTask.Create(ACommand)
+  else
+    Result := nil;
+end;
+{$ENDIF}
+
+(* TOptixCommandDeleteFileOrDirectory *)
+
+constructor TOptixCommandDeleteFileOrDirectory.Create(const AFilePath : string);
+begin
+  inherited Create;
+  ///
+
+  FFilePath := AFilePath;
+end;
+
+{$IFNDEF SERVER}
+function TOptixCommandDeleteFileOrDirectory.CreateTask(const ACommand: TOptixCommand): TOptixTask;
+begin
+  if Assigned(ACommand) then
+    Result := TOptixDeleteFileOrDirectoryTask.Create(ACommand)
   else
     Result := nil;
 end;

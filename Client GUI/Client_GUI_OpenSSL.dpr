@@ -90,7 +90,7 @@ uses
   OptixCore.Commands.Registry in '..\Core\Commands\OptixCore.Commands.Registry.pas',
   OptixCore.Commands.ContentReader in '..\Core\Commands\OptixCore.Commands.ContentReader.pas',
   OptixCore.Task.ProcessDump in '..\Core\Tasks\OptixCore.Task.ProcessDump.pas',
-  OptixCore.Task.CopyFileOrDirectory in '..\..\Public\Core\Tasks\OptixCore.Task.CopyFileOrDirectory.pas',
+  OptixCore.Task.FileOperations in '..\..\Public\Core\Tasks\OptixCore.Task.FileOperations.pas',
   Optix.Protocol.SessionHandler in 'Units\Threads\Optix.Protocol.SessionHandler.pas',
   Optix.Protocol.Client in 'Units\Threads\Optix.Protocol.Client.pas',
   Optix.Protocol.Worker.FileTransfer in 'Units\Threads\Optix.Protocol.Worker.FileTransfer.pas',

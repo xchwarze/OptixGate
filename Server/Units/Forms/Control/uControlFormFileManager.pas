@@ -152,6 +152,8 @@ type
     ButtonPaste: TFlatButton;
     Paste1: TMenuItem;
     ClearClipboard1: TMenuItem;
+    N4: TMenuItem;
+    Delete1: TMenuItem;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -201,6 +203,7 @@ type
     procedure Paste1Click(Sender: TObject);
     procedure PasteToSelectedFolder1Click(Sender: TObject);
     procedure ClearClipboard1Click(Sender: TObject);
+    procedure Delete1Click(Sender: TObject);
   private
     FHistoryCursor: Integer;
     FPathHistory: TList<string>;
@@ -346,6 +349,31 @@ begin
   if AFileInformation.IsDirectory then begin
     // TODO: Update Parent > Child Folder Tree
   end;
+end;
+
+procedure TControlFormFileManager.Delete1Click(Sender: TObject);
+begin
+  var pData := PFileTreeData(VSTFiles.FocusedNode.GetData);
+  if not Assigned(pData) or not (faWrite in pData^.Access) or not Assigned(pData^.FileInformation) then
+    Exit;
+  ///
+
+  var ADisplayType := '';
+  if pData^.FileInformation.IsDirectory then
+    ADisplayType := Format('directory ("%s"), including all subdirectories and files', [pData^.Name])
+  else
+    ADisplayType := Format('file ("%s")', [pData^.Name]);
+
+
+  if Application.MessageBox(
+    PWideChar(Format('You are about to delete this %s. Are you sure you want to proceed?', [ADisplayType])),
+    'Delete',
+    MB_ICONQUESTION + MB_YESNO) = ID_NO
+  then
+    Exit;
+  ///
+
+ SendCommand(TOptixCommandDeleteFileOrDirectory.Create(pData^.Path));
 end;
 
 procedure TControlFormFileManager.DeleteFile(const ANewFilePath: string; const AIsDirectory: Boolean);
@@ -763,6 +791,7 @@ begin
 
       Copy1.Visible := True;
       Cut1.Visible := True;
+      Delete1.Visible := True;
 
       if Assigned(pData^.FileInformation) then begin
         if pData^.FileInformation.IsDirectory then begin
@@ -780,6 +809,7 @@ begin
         ///
         Copy1.Enabled := faRead in pData^.Access;
         Cut1.Enabled := (faRead in pData^.Access) and (faWrite in pData^.Access);
+        Delete1.Enabled := (faWrite in pData^.Access);
       end;
     end;
 

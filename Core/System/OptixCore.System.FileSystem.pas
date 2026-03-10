@@ -190,6 +190,7 @@ type
     class procedure CreateDirectory(const AFullPath: string); overload; static;
     class function Copy(const ASource, ADestination: string; const ADoMove: Boolean;
       const ABlockThread: Boolean = True): string; static;
+    class procedure Delete(const AFilePath: string; const ABlockThread: Boolean = True); static;
     class function GetFileVersion(const AFilePath : string; var AMajor, AMinor, ARelease,
       ABuild : Cardinal) : Boolean; overload; static;
     class function GetFileVersion(const AFilePath : string) : string; overload; static;
@@ -894,6 +895,36 @@ begin
       ASourceShellItem := nil;
       ADestinationShellItem := nil;
       ASinkInterface := nil;
+    end;
+  finally
+    CoUninitialize;
+  end;
+end;
+
+class procedure TFileSystemHelper.Delete(const AFilePath: string; const ABlockThread: Boolean = True);
+begin
+  CoInitialize(nil);
+  try
+    var AFileOperation := CreateComObject(CLSID_FileOperation) as IFileOperation;
+    AFileOperation.SetOperationFlags(
+      FOF_SILENT or
+      FOF_NOCONFIRMATION or
+      FOF_NOERRORUI or
+      FOFX_EARLYFAILURE
+    );
+
+    var AShellItem: IShellItem;
+    OleCheck(SHCreateItemFromParsingName(PWideChar(AFilePath), nil, IShellItem, AShellItem));
+    try
+      AFileOperation.DeleteItem(AShellItem, nil);
+
+      if ABlockThread then begin
+        var AResult := AFileOperation.PerformOperations;
+        if Failed(AResult) then
+          raise ECOMException.Create('DeleteItem', AResult);
+      end;
+    finally
+      AFileOperation := nil;
     end;
   finally
     CoUninitialize;

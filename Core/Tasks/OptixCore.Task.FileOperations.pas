@@ -47,7 +47,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit OptixCore.Task.CopyFileOrDirectory;
+unit OptixCore.Task.FileOperations;
 
 interface
 
@@ -92,6 +92,31 @@ type
     property Source: string read FSource;
     property Destination: string read FDestination;
     property Moved: Boolean read FMoved;
+  end;
+
+  TOptixDeleteFileOrDirectoryTask = class(TOptixTask)
+  protected
+    {@M}
+    function TaskCode: TOptixTaskResult; override;
+  end;
+
+  TOptixTaskGetDeleteFileOrDirectoryResult = class(TOptixTaskResult)
+  private
+    [OptixSerializableAttribute]
+    FFilePath: string;
+
+    [OptixSerializableAttribute]
+    FIsDirectory: Boolean;
+  protected
+    {@M}
+    function GetExtendedDescription: string; override;
+  public
+    {@C}
+    constructor Create(const AFilePath: string; const AIsDirectory: Boolean); overload;
+
+    {@G}
+    property FilePath: string read FFilePath;
+    property IsDirectory: Boolean read FIsDirectory;
   end;
 
 implementation
@@ -171,6 +196,40 @@ begin
   // END TODO
 
   Result := Format('"%s" was successfully %s to "%s"', [FSource, AMode, FDestination]);
+end;
+
+(* TOptixDeleteFileOrDirectoryTask *)
+
+function TOptixDeleteFileOrDirectoryTask.TaskCode: TOptixTaskResult;
+begin
+  if not Assigned(FCommand) or not (FCommand is TOptixCommandDeleteFileOrDirectory) then
+    Exit(nil);
+  ///
+
+  var ACastedCommand := TOptixCommandDeleteFileOrDirectory(FCommand);
+
+  var AIsDirectory := DirectoryExists(ACastedCommand.FilePath);
+
+  TFileSystemHelper.Delete(ACastedCommand.FilePath);
+
+  ///
+  Result := TOptixTaskGetDeleteFileOrDirectoryResult.Create(ACastedCommand.FilePath, AIsDirectory);
+end;
+
+(* TOptixTaskGetDeleteFileOrDirectoryResult *)
+
+constructor TOptixTaskGetDeleteFileOrDirectoryResult.Create(const AFilePath: string; const AIsDirectory: Boolean);
+begin
+  FFilePath := AFilePath;
+  FIsDirectory := AIsDirectory;
+
+  ///
+  inherited Create;
+end;
+
+function TOptixTaskGetDeleteFileOrDirectoryResult.GetExtendedDescription: string;
+begin
+  Result := Format('"%s" was successfully deleted.', [FFilePath]);
 end;
 
 end.
