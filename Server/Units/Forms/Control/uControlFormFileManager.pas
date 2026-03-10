@@ -162,6 +162,8 @@ type
     N4: TMenuItem;
     Delete1: TMenuItem;
     Rename1: TMenuItem;
+    N5: TMenuItem;
+    NewDirectory1: TMenuItem;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -213,6 +215,7 @@ type
     procedure ClearClipboard1Click(Sender: TObject);
     procedure Delete1Click(Sender: TObject);
     procedure Rename1Click(Sender: TObject);
+    procedure NewDirectory1Click(Sender: TObject);
   private
     FHistoryCursor: Integer;
     FPathHistory: TList<string>;
@@ -677,6 +680,11 @@ begin
   RefreshActionsButtons;
 end;
 
+procedure TControlFormFileManager.NewDirectory1Click(Sender: TObject);
+begin
+  ButtonNewDirectoryClick(ButtonNewDirectory);
+end;
+
 procedure TControlFormFileManager.OnFirstShow;
 begin
   inherited;
@@ -839,6 +847,10 @@ end;
 
 procedure TControlFormFileManager.ButtonNewDirectoryClick(Sender: TObject);
 begin
+  if not (faWrite in FCurrentPathACL) then
+    Exit;
+  ///
+
   var AFolderName := '';
 
   if not InputQuery('Create New Directory', 'Directory Name', AFolderName) then
@@ -951,12 +963,13 @@ begin
       var pData := PFileTreeData(pNode.GetData);
       ///
 
-      Copy1.Visible := True;
-      Cut1.Visible := True;
-      Delete1.Visible := True;
-      Rename1.Visible := True;
+      if Assigned(pData^.FileInformation) and (pData^.Name <> '..') then begin
+        Copy1.Visible := True;
+        Cut1.Visible := True;
+        Delete1.Visible := True;
+        Rename1.Visible := True;
+        ///
 
-      if Assigned(pData^.FileInformation) then begin
         if pData^.FileInformation.IsDirectory then begin
           UploadToFolder1.Visible := True;
           UploadToFolder1.Enabled := CanFileBeUploadedToNodeDirectory(pData);
@@ -981,6 +994,8 @@ begin
     ClearClipboard1.Visible := not FSharedClass.FileClipboard.IsEmpty;
     Paste1.Visible := True;
     Paste1.Enabled := not FSharedClass.FileClipboard.IsEmpty and (faWrite in FCurrentPathACL);
+    NewDirectory1.Visible := True;
+    NewDirectory1.Enabled := faWrite in FCurrentPathACL;
   end;
 end;
 

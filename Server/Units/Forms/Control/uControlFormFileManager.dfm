@@ -666,6 +666,13 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Stream File Content (Open)'
       OnClick = StreamFileContentOpen1Click
     end
+    object N5: TMenuItem
+      Caption = '-'
+    end
+    object NewDirectory1: TMenuItem
+      Caption = 'New Directory'
+      OnClick = NewDirectory1Click
+    end
     object N3: TMenuItem
       Caption = '-'
     end
