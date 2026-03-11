@@ -127,8 +127,9 @@ type
     function GetContextDescription: string; virtual;
     procedure RefreshCaption; virtual;
 
+    procedure RequestFileDownload(const AFiles: TList<string>; const AContext: string = ''); overload; virtual;
     function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
-      const AContext: string = '') : TGUID; virtual;
+      const AContext: string = '') : TGUID; overload; virtual;
     function RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
       const AContext: string = '') : TGUID; virtual;
 
@@ -366,14 +367,27 @@ begin
   FormMain.SendCommand(self, ACommand);
 end;
 
-function TBaseFormControl.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
+procedure TBaseFormControl.RequestFileDownload(const AFiles: TList<string>; const AContext: string = '');
+begin
+  if not Assigned(AFiles) then
+    Exit;
+  ///
+
+  var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
+  if Assigned(AForm) then
+    AForm.RequestFileDownload(AFiles, AContext);
+end;
+
+function TBaseFormControl.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+  const AContext: string = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
     AForm.RequestFileDownload(ARemoteFilePath, ALocalFilePath, AContext);
 end;
 
-function TBaseFormControl.RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
+function TBaseFormControl.RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
+  const AContext: string = ''): TGUID;
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then

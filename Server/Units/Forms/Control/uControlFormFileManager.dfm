@@ -158,83 +158,146 @@ object ControlFormFileManager: TControlFormFileManager
         BorderBottom = 2
         Color = 13554645
         BorderColor = clBlack
-        object VSTFiles: TVirtualStringTree
+        object MultiPanelFiles: TOMultiPanel
           Left = 2
           Top = 2
           Width = 231
           Height = 295
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 0
-          Align = alClient
-          BackGroundImageTransparent = True
-          BorderStyle = bsNone
-          Color = clWhite
-          Colors.UnfocusedColor = clWindowText
-          DefaultNodeHeight = 17
-          Header.AutoSizeIndex = -1
-          Header.DefaultHeight = 25
-          Header.Height = 17
-          Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible, hoHeaderClickAutoSort]
-          Header.SortColumn = 0
-          Images = FormMain.ImageSystem
-          PopupMenu = PopupMenu
-          StateImages = FormMain.VirtualImageList
-          TabOrder = 0
-          TreeOptions.PaintOptions = [toHideFocusRect, toShowButtons, toShowDropmark, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toFullVertGridLines]
-          TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect, toSelectNextNodeOnRemoval]
-          OnBeforeCellPaint = VSTFilesBeforeCellPaint
-          OnCompareNodes = VSTFilesCompareNodes
-          OnDblClick = VSTFilesDblClick
-          OnFreeNode = VSTFilesFreeNode
-          OnGetText = VSTFilesGetText
-          OnPaintText = VSTFilesPaintText
-          OnGetImageIndex = VSTFilesGetImageIndex
-          OnGetNodeDataSize = VSTFilesGetNodeDataSize
-          Touch.InteractiveGestures = [igPan, igPressAndTap]
-          Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-          Columns = <
+          PanelType = ptVertical
+          PanelCollection = <
             item
-              Position = 0
-              Text = 'Name'
-              Width = 150
+              Control = VSTFiles
+              Position = 0.700000000000000000
+              Visible = True
+              Index = 0
             end
             item
-              Position = 1
-              Text = 'Type'
-              Width = 100
-            end
-            item
-              Position = 2
-              Text = 'Size'
-              Width = 100
-            end
-            item
-              Position = 3
-              Text = 'Access Rights'
-              Width = 100
-            end
-            item
-              Position = 4
-              Text = 'DACL (SSDL)'
-              Width = 200
-            end
-            item
-              Position = 5
-              Text = 'Creation Date'
-              Width = 150
-            end
-            item
-              Position = 6
-              Text = 'Last Modified'
-              Width = 150
-            end
-            item
-              Position = 7
-              Text = 'Last Access'
-              Width = 150
+              Control = VSTBulkActions
+              Position = 1.000000000000000000
+              Visible = False
+              Index = 1
             end>
+          MinPosition = 0.020000000000000000
+          SplitterHoverColor = clHighlight
+          Align = alClient
+          TabOrder = 0
+          object VSTFiles: TVirtualStringTree
+            Left = 0
+            Top = 0
+            Width = 231
+            Height = 206
+            Margins.Left = 0
+            Margins.Top = 0
+            Margins.Right = 0
+            Margins.Bottom = 0
+            Align = alClient
+            BackGroundImageTransparent = True
+            BorderStyle = bsNone
+            Color = clWhite
+            Colors.UnfocusedColor = clWindowText
+            DefaultNodeHeight = 17
+            Header.AutoSizeIndex = -1
+            Header.DefaultHeight = 25
+            Header.Height = 17
+            Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible, hoHeaderClickAutoSort]
+            Header.SortColumn = 0
+            Images = FormMain.ImageSystem
+            PopupMenu = PopupMenu
+            StateImages = FormMain.VirtualImageList
+            TabOrder = 0
+            TreeOptions.PaintOptions = [toHideFocusRect, toShowButtons, toShowDropmark, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toFullVertGridLines]
+            TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect, toSelectNextNodeOnRemoval]
+            OnBeforeCellPaint = VSTFilesBeforeCellPaint
+            OnChecked = VSTFilesChecked
+            OnCompareNodes = VSTFilesCompareNodes
+            OnDblClick = VSTFilesDblClick
+            OnFreeNode = VSTFilesFreeNode
+            OnGetText = VSTFilesGetText
+            OnPaintText = VSTFilesPaintText
+            OnGetImageIndex = VSTFilesGetImageIndex
+            OnGetNodeDataSize = VSTFilesGetNodeDataSize
+            Touch.InteractiveGestures = [igPan, igPressAndTap]
+            Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+            Columns = <
+              item
+                Position = 0
+                Text = 'Name'
+                Width = 150
+              end
+              item
+                Position = 1
+                Text = 'Type'
+                Width = 100
+              end
+              item
+                Position = 2
+                Text = 'Size'
+                Width = 100
+              end
+              item
+                Position = 3
+                Text = 'Access Rights'
+                Width = 100
+              end
+              item
+                Position = 4
+                Text = 'DACL (SSDL)'
+                Width = 200
+              end
+              item
+                Position = 5
+                Text = 'Creation Date'
+                Width = 150
+              end
+              item
+                Position = 6
+                Text = 'Last Modified'
+                Width = 150
+              end
+              item
+                Position = 7
+                Text = 'Last Access'
+                Width = 150
+              end>
+          end
+          object VSTBulkActions: TVirtualStringTree
+            Left = 0
+            Top = 209
+            Width = 231
+            Height = 86
+            Margins.Left = 0
+            Margins.Top = 0
+            Margins.Right = 0
+            Margins.Bottom = 0
+            Align = alClient
+            BackGroundImageTransparent = True
+            BorderStyle = bsNone
+            Color = clWhite
+            Colors.UnfocusedColor = clWindowText
+            DefaultNodeHeight = 17
+            Header.AutoSizeIndex = -1
+            Header.DefaultHeight = 25
+            Header.Height = 17
+            Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoShowSortGlyphs, hoHeaderClickAutoSort]
+            Images = FormMain.ImageSystem
+            PopupMenu = PopupBulkActions
+            TabOrder = 1
+            TreeOptions.PaintOptions = [toHideFocusRect, toShowButtons, toShowDropmark, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toFullVertGridLines]
+            TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect, toRightClickSelect, toSelectNextNodeOnRemoval]
+            Visible = False
+            OnFreeNode = VSTBulkActionsFreeNode
+            OnGetText = VSTBulkActionsGetText
+            OnGetImageIndex = VSTBulkActionsGetImageIndex
+            OnGetNodeDataSize = VSTBulkActionsGetNodeDataSize
+            Touch.InteractiveGestures = [igPan, igPressAndTap]
+            Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+            Columns = <
+              item
+                Position = 0
+                Text = 'File Name'
+                Width = 231
+              end>
+          end
         end
       end
     end
@@ -659,7 +722,7 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Upload To Selected Folder'
       OnClick = UploadToFolder1Click
     end
-    object N2: TMenuItem
+    object N6: TMenuItem
       Caption = '-'
     end
     object StreamFileContentOpen1: TMenuItem
@@ -710,8 +773,8 @@ object ControlFormFileManager: TControlFormFileManager
   end
   object PopupMenuOptions: TFlatPopupMenu
     OwnerDraw = True
-    Left = 256
-    Top = 168
+    Left = 296
+    Top = 72
     object ColoredFoldersAccessView1: TMenuItem
       AutoCheck = True
       Caption = 'Colored Folders (Access View)'
@@ -725,11 +788,16 @@ object ControlFormFileManager: TControlFormFileManager
       Caption = 'Show Folder Tree'
       OnClick = ShowFolderTree1Click
     end
+    object EnableBulkActions1: TMenuItem
+      AutoCheck = True
+      Caption = 'Enable Bulk Actions'
+      OnClick = EnableBulkActions1Click
+    end
   end
   object PopupFoldersTree: TFlatPopupMenu
     OwnerDraw = True
     Left = 56
-    Top = 177
+    Top = 81
     object FullExpand1: TMenuItem
       Caption = 'Full Expand'
       OnClick = FullExpand1Click
@@ -737,6 +805,40 @@ object ControlFormFileManager: TControlFormFileManager
     object FullCollapse1: TMenuItem
       Caption = 'Full Collapse'
       OnClick = FullCollapse1Click
+    end
+  end
+  object PopupBulkActions: TFlatPopupMenu
+    OwnerDraw = True
+    OnPopup = PopupBulkActionsPopup
+    Left = 201
+    Top = 230
+    object BulkDownload1: TMenuItem
+      Caption = 'Bulk Download (All Listed Files)'
+      OnClick = BulkDownload1Click
+    end
+    object N8: TMenuItem
+      Caption = '-'
+    end
+    object BrowsePath1: TMenuItem
+      Caption = 'Browse Selected Item Path'
+      OnClick = BrowsePath1Click
+    end
+    object N9: TMenuItem
+      Caption = '-'
+    end
+    object RemoveSelectedItems1: TMenuItem
+      Caption = 'Remove Selected Item(s) From List'
+      OnClick = RemoveSelectedItems1Click
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Clear1: TMenuItem
+      Caption = 'Clear List'
+      OnClick = Clear1Click
+    end
+    object N7: TMenuItem
+      Caption = '-'
     end
   end
 end

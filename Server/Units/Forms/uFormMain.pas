@@ -65,6 +65,8 @@
     appropriate (e.g., 'if X is not in Y', ternary expressions etc..)
 
   - Use Result (uppercase R) consistently for returning values from functions
+    - continue -> Continue
+    - break -> Break
 
   - Ensure all variable types currently declared as 'String' are updated to lowercase 'string'
 

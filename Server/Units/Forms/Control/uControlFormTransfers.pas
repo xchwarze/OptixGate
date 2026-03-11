@@ -53,7 +53,7 @@ interface
 
 // ---------------------------------------------------------------------------------------------------------------------
 uses
-  System.SysUtils, System.Variants, System.Classes, System.Types,
+  System.SysUtils, System.Variants, System.Classes, System.Types, System.Generics.Collections,
 
   Winapi.Windows, Winapi.Messages,
 
@@ -123,8 +123,11 @@ type
     function GetNodeByTransferId(const ATransferId: TGUID): PVirtualNode;
   public
     {@M}
-    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID; override;
-    function RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID; override;
+    procedure RequestFileDownload(const AFiles: TList<string>; const AContext: string = ''); override;
+    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+      const AContext: string = ''): TGUID; override;
+    function RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = '';
+      const AContext: string = ''): TGUID; override;
 
     procedure ApplyTransferException(const ATransferId: TGUID; const AReason: string); overload;
     procedure ApplyTransferException(const ALogTransferException: TOptixCommandReceiveTransferException); overload;
@@ -380,7 +383,28 @@ begin
   TOptixHelper.ShowForm(self);
 end;
 
-function TControlFormTransfers.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
+procedure TControlFormTransfers.RequestFileDownload(const AFiles: TList<string>; const AContext: string = '');
+begin
+  if not Assigned(AFiles) then
+    Exit;
+  ///
+
+  var ADirectory := '';
+
+  if not SelectDirectory('Select Destination', '', ADirectory) then
+    Exit;
+
+  for var AFile in AFiles do
+    RegisterNewTransfer(
+      AFile,
+      IncludeTrailingPathDelimiter(ADirectory) + TPath.GetFileName(AFile),
+      otdClientIsUploading,
+      AContext
+    );
+end;
+
+function TControlFormTransfers.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+  const AContext: string = ''): TGUID;
 begin
   if string.IsNullOrWhiteSpace(ARemoteFilePath) then
     if not InputQuery('Download File', 'Remote File Path', ARemoteFilePath) then
@@ -399,7 +423,8 @@ begin
   Result := RegisterNewTransfer(ARemoteFilePath, ALocalFilePath, otdClientIsUploading, AContext);
 end;
 
-function TControlFormTransfers.RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
+function TControlFormTransfers.RequestFileUpload(ALocalFilePath: string; ARemoteFilePath: string = '';
+  const AContext: string = ''): TGUID;
 begin
   if string.IsNullOrWhiteSpace(ALocalFilePath) then begin
     if not OpenDialog.Execute then
