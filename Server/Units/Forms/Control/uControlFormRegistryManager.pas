@@ -221,19 +221,19 @@ begin
   Result := nil;
   ///
 
-  if string.Compare(FCurrentKeyPath, AFullKeyPath, True) <> 0 then
+  if not SameText(FCurrentKeyPath, AFullKeyPath) then
     Exit;
 
   for var pNode in VSTValues.Nodes do begin
     var pData := PValuesTreeData(pNode.GetData);
     if not Assigned(pData) or not Assigned(pData^.ValueInformation) then
-      continue;
+      Continue;
     ///
 
-    if string.Compare(AValueName, pData^.ValueInformation.Name, True) = 0 then begin
+    if SameText(AValueName, pData^.ValueInformation.Name) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -272,14 +272,14 @@ begin
   for var pNode in VSTKeys.Nodes do begin
     var pData := PKeysTreeData(pNode.GetData);
     if not Assigned(pData) then
-      continue;
+      Continue;
     ///
 
-    if string.Compare(pData^.Path, AKeyPath, True) = 0 then begin
+    if SameText(pData^.Path, AKeyPath) then begin
       Result := pNode;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -289,19 +289,19 @@ begin
   Result := nil;
   ///
 
-  if string.Compare(AKeyPath, FCurrentKeyPath, True) <> 0 then
+  if not SameText(AKeyPath, FCurrentKeyPath) then
     Exit;
 
   for var pNode in VSTValues.Nodes do begin
     var pData := PValuesTreeData(pNode.GetData);
     if not Assigned(pData) or not ASsigned(pData^.ValueInformation) then
-      continue;
+      Continue;
     ///
 
-    if string.Compare(pData^.ValueInformation.Name, AValueName, True) = 0 then begin
+    if SameText(pData^.ValueInformation.Name, AValueName) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -599,7 +599,7 @@ begin
   if string.IsNullOrWhiteSpace(ANewValueName) then
     Exit;
 
-  if string.Compare(pData^.ValueInformation.Name, ANewValueName) = 0 then
+  if SameText(pData^.ValueInformation.Name, ANewValueName) then
     Exit;
 
   if GetNodeByValueName(FCurrentKeyPath, ANewValueName) <> nil then
@@ -710,7 +710,7 @@ begin
       VSTKeys.EndUpdate;
     end;
 
-    if string.Compare(FCurrentKeyPath, AResult.KeyPath, True) = 0 then begin
+    if SameText(FCurrentKeyPath, AResult.KeyPath) then begin
       VSTValues.Clear;
 
       FCurrentKeyPath := '';
@@ -759,7 +759,7 @@ begin
         pData^.Path := ANewKeyPath;
         ///
 
-        if string.Compare(FCurrentKeyPath, AExistingKeyPath, True) = 0 then begin
+        if SameText(FCurrentKeyPath, AExistingKeyPath) then begin
           EditPath.Text := ANewKeyPath;
           FCurrentKeyPath := ANewKeyPath;
         end;

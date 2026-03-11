@@ -234,7 +234,7 @@ begin
             and not (E is EOpenSSLBaseException)
             {$ENDIF}
             then
-              break;
+              Break;
           end;
         end;
       end;

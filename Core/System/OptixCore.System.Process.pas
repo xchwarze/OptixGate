@@ -521,7 +521,7 @@ end;
 
 function TProcessInformation.CheckIfSystemUser: Boolean;
 begin
-  Result := string.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := SameText(FUserSid, 'S-1-5-18');
 end;
 
 procedure TProcessInformation.Assign(ASource: TPersistent);
@@ -615,11 +615,11 @@ begin
       try
         AList.Add(TProcessInformation.Create(pNextRow));
       except
-        continue;
+        Continue;
       end;
 
       if pNextRow^.NextEntryOffset = 0 then
-        break;
+        Break;
 
       ///
       pNextRow := Pointer(NativeUInt(pNextRow) + pNextRow.NextEntryOffset);

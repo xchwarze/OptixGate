@@ -123,7 +123,7 @@ begin
       // This call is used to detect a potential disconnection from the server and to exit the loop if necessary.
       // It does not consume any network data; it serves solely as a network exit control mechanism.
       if not FClient.IsSocketAlive then
-        break;
+        Break;
 
       var ATransfer: TOptixCommandTransfer := nil;
       ///
@@ -134,7 +134,7 @@ begin
       // Polling Transfer Request --------------------------------------------------------------------------------------
       while (FTransferQueue.PopItem(ATransfer) = TWaitResult.wrSignaled) do begin
         if Terminated then
-          break;
+          Break;
         ///
 
         var ATask: TOptixTransferTask;
@@ -149,7 +149,7 @@ begin
             // Should never happend
             FreeAndNil(ATransfer);
 
-            continue;
+            Continue;
           end;
 
           ///
@@ -161,7 +161,7 @@ begin
 
             FreeAndNil(ATransfer);
 
-            continue;
+            Continue;
           end;
         end;
       end;
@@ -176,13 +176,13 @@ begin
           // Process Tasks
           for ATransfer in ATasks.Keys do begin
             if Terminated then
-              break;
+              Break;
             ///
 
             var ATask: TOptixTransferTask := nil;
 
             if not ATasks.TryGetValue(ATransfer, ATask) or (ATask.State = otsEnd) then
-              continue;
+              Continue;
 
             FClient.Send(ATransfer.TransferId, SizeOf(TGUID));
 
@@ -192,7 +192,7 @@ begin
               ATerminatedTransfers.Add(ATransfer);
 
               ///
-              continue;
+              Continue;
             end;
 
             try
@@ -245,7 +245,7 @@ begin
           // Exit work loop if one of those two condition are met. Then poll new
           // items.
           if (AStopwatch.ElapsedMilliseconds >= 5000) or (ATasks.Count = 0) then
-            break;
+            Break;
         end; // end while not Terminated
       end;
       // ---------------------------------------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ begin
     while True do begin
       ATransfer := FTransferQueue.PopItem;
       if not Assigned(ATransfer) then
-        break;
+        Break;
 
       ///
       FreeAndNil(ATransfer);

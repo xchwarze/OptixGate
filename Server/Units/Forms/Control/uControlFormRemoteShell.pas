@@ -352,7 +352,7 @@ begin
     Exit;
 
   for var AInstance in FInstances do
-    if string.Compare(AInstance.Name, AName, True) = 0 then
+    if SameText(AInstance.Name, AName) then
       Exit(AInstance);
 end;
 
@@ -501,7 +501,7 @@ begin
     Exit;
 
   AName := TFileSystemHelper.CleanFileName(AName.Trim);
-  if string.Compare(AName, AOldName, True) = 0 then
+  if SameText(AName, AOldName) then
     Exit;
 
   if ShellNameExists(AName) then

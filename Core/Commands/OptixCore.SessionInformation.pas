@@ -185,7 +185,7 @@ end;
 
 function TOptixCommandReceiveSessionInformation.CheckIfSystemUser: Boolean;
 begin
-  Result := string.Compare(FUserSid, 'S-1-5-18', True) =  0;
+  Result := SameText(FUserSid, 'S-1-5-18');
 end;
 
 end.

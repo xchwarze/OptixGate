@@ -65,6 +65,8 @@
     appropriate (e.g., 'if X is not in Y', ternary expressions etc..)
 
   - Use Result (uppercase R) consistently for returning values from functions
+    - continue -> Continue
+    - break -> Break
 
   - Ensure all variable types currently declared as 'String' are updated to lowercase 'string'
 
@@ -292,11 +294,10 @@ begin
       ADictionary.Add('Domain Name', SessionInformation.DomainName);
 
     ADictionary.Add('Windows Version', SessionInformation.WindowsVersion);
-    ADictionary.Add('Spawn Since', TOptixHelper.ElapsedDateTime(SpawnDate, Now));
     ADictionary.Add('Spawn Date', DateTimeToStr(SpawnDate));
     ADictionary.Add('Elevated Status', SessionInformation.ElevatedStatus_STR);
     ADictionary.Add('User In Admin Group', BoolToStr(SessionInformation.IsInAdminGroup, True));
-    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem));
+    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem, True));
     ADictionary.Add('User SID', SessionInformation.UserSid);
     ADictionary.Add('Image', SessionInformation.ProcessDetail);
 
@@ -361,7 +362,7 @@ begin
       Result := AForm;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -384,7 +385,7 @@ begin
       Result := AForm;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -467,14 +468,14 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if not Assigned(pData^.Forms) then
-      continue;
+      Continue;
 
     for var ACandidate in pData^.Forms do begin
       if ACandidate = AForm then begin
         Result := pNode;
 
         ///
-        break;
+        Break;
       end;
     end;
   end;
@@ -579,7 +580,7 @@ begin
       Result := pNode;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -910,7 +911,7 @@ begin
     if Assigned(pData^.Handler) and (pData^.Handler.HandlerId = AHandlerId) then begin
       Result := pData^.Handler;
 
-      break;
+      Break;
     end;
   end;
 end;

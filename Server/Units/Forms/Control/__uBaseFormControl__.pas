@@ -127,10 +127,11 @@ type
     function GetContextDescription: string; virtual;
     procedure RefreshCaption; virtual;
 
-    function RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
-      const AContext: string = '') : TGUID; virtual;
-    function RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
-      const AContext: string = '') : TGUID; virtual;
+    procedure RequestFileDownload(const AFiles: TList<string>; const AContext: string = ''); overload; virtual;
+    procedure RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+      const AContext: string = ''); overload; virtual;
+    procedure RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
+      const AContext: string = ''); virtual;
 
     procedure StreamFileContent(const AFilePath: string; const APageSize: UInt64 = 1024);
 
@@ -366,14 +367,27 @@ begin
   FormMain.SendCommand(self, ACommand);
 end;
 
-function TBaseFormControl.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = ''; const AContext: string = ''): TGUID;
+procedure TBaseFormControl.RequestFileDownload(const AFiles: TList<string>; const AContext: string = '');
+begin
+  if not Assigned(AFiles) then
+    Exit;
+  ///
+
+  var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
+  if Assigned(AForm) then
+    AForm.RequestFileDownload(AFiles, AContext);
+end;
+
+procedure TBaseFormControl.RequestFileDownload(ARemoteFilePath: string = ''; ALocalFilePath: string = '';
+  const AContext: string = '');
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then
     AForm.RequestFileDownload(ARemoteFilePath, ALocalFilePath, AContext);
 end;
 
-function TBaseFormControl.RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
+procedure TBaseFormControl.RequestFileUpload(ALocalFilePath: string = ''; ARemoteFilePath: string = '';
+  const AContext: string = '');
 begin
   var AForm := FormMain.GetControlForm(self, TControlFormTransfers);
   if Assigned(AForm) then

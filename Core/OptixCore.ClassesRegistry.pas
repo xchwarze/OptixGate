@@ -113,7 +113,7 @@ begin
 
   for var AMethod in AType.GetMethods do begin
     if not AMethod.IsConstructor then
-      continue;
+      Continue;
     ///
 
     var AParameters := AMethod.GetParameters;
@@ -122,12 +122,12 @@ begin
         if AParams[I].IsType(AParameters[I].ParamType.Handle) then begin
           Result := AMethod.Invoke(AClass, AParams).AsObject;
 
-          break;
+          Break;
         end;
       end;
 
       if Assigned(Result) then
-        break;
+        Break;
     end;
   end;
 end;

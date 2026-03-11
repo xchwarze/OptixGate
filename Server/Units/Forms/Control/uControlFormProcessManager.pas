@@ -202,13 +202,13 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if not Assigned(pData^.ProcessInformation) then
-      continue;
+      Continue;
     ///
 
     if pData^.ProcessInformation.Id = AProcessId then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -259,7 +259,7 @@ begin
           AExclude := True;
 
           ///
-          continue;
+          Continue;
         end;
 
         ///
@@ -272,7 +272,7 @@ begin
         end;
 
         if AExclude then
-          continue;
+          Continue;
 
         if (fkUnreachable in AFilters) then begin
           // Good sign, it is!

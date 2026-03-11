@@ -157,7 +157,7 @@ begin
   try
     for var AFingerprint in AFingerprints do begin
       var AIndex := ComboCertificate.Items.Add(AFingerprint);
-      if (APreSelectCertificate <> '') and (string.Compare(APreSelectCertificate, AFingerprint, True) = 0) then
+      if (APreSelectCertificate <> '') and SameText(APreSelectCertificate, AFingerprint) then
         FDefaultIndex := AIndex;
     end;
   finally

@@ -858,7 +858,7 @@ begin
 
           ARet := RegEnumKeyExW(hOpenedKey, I, pNameBuffer, AKeyLength, nil, nil, nil, nil);
           if ARet <> ERROR_SUCCESS then
-            continue;
+            Continue;
 
           var AKeyName := String(pNameBuffer);
 
@@ -877,7 +877,7 @@ begin
 
           ARet := RegEnumValueW(hOpenedKey, I, pNameBuffer, AValueNameLength, nil, nil, nil, nil);
           if ARet <> ERROR_SUCCESS then
-            continue;
+            Continue;
 
           ///
           AValueName := String(pNameBuffer);

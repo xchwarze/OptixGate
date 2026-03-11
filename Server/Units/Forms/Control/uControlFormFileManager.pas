@@ -84,6 +84,7 @@ type
     {@M}
     function GetName: string;
     function GetAccess: TFileAccessAttributes;
+    function CheckSupportBulkActions: Boolean;
   public
     DriveInformation: TDriveInformation;
     FileInformation: TFileInformation;
@@ -95,6 +96,7 @@ type
     {@G}
     property Name: string read GetName;
     property Access: TFileAccessAttributes read GetAccess;
+    property SupportBulkActions: Boolean read CheckSupportBulkActions;
   end;
   PFileTreeData = ^TFileTreeData;
 
@@ -104,12 +106,24 @@ type
     function GetIsRoot: Boolean;
   public
     Information: TSimpleFolderInformation;
-    ImageIndex: Integer;
 
     {@G}
     property IsRoot: Boolean read GetIsRoot;
   end;
   PFolderTreeData = ^TFolderTreeData;
+
+  TBulkActionTreeData = record
+  private
+    {@M}
+    function GetPath: string;
+  public
+    FilePath: string;
+    ImageIndex: Integer;
+
+    {@G}
+    property Path: string read GetPath;
+  end;
+  PBulkActionTreeData = ^TBulkActionTreeData;
 
   TDisplayMode = (
     dmDrives,
@@ -127,14 +141,12 @@ type
     PopupFoldersTree: TFlatPopupMenu;
     FullExpand1: TMenuItem;
     FullCollapse1: TMenuItem;
-    N2: TMenuItem;
     StreamFileContentOpen1: TMenuItem;
     PanelMain: TFlatPanel;
     MultiPanel: TOMultiPanel;
     PanelVSTFolders: TFlatPanel;
     VSTFolders: TVirtualStringTree;
     PanelVSTFiles: TFlatPanel;
-    VSTFiles: TVirtualStringTree;
     PanelPath: TFlatPanel;
     EditPath: TFlatEdit;
     PanelActions: TFlatPanel;
@@ -164,6 +176,20 @@ type
     Rename1: TMenuItem;
     N5: TMenuItem;
     NewDirectory1: TMenuItem;
+    N6: TMenuItem;
+    EnableBulkActions1: TMenuItem;
+    MultiPanelFiles: TOMultiPanel;
+    VSTFiles: TVirtualStringTree;
+    VSTBulkActions: TVirtualStringTree;
+    PopupBulkActions: TFlatPopupMenu;
+    BulkDownload1: TMenuItem;
+    N2: TMenuItem;
+    Clear1: TMenuItem;
+    N7: TMenuItem;
+    RemoveSelectedItems1: TMenuItem;
+    N8: TMenuItem;
+    BrowsePath1: TMenuItem;
+    N9: TMenuItem;
     procedure VSTFilesGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
       var ImageIndex: TImageIndex);
@@ -216,6 +242,19 @@ type
     procedure Delete1Click(Sender: TObject);
     procedure Rename1Click(Sender: TObject);
     procedure NewDirectory1Click(Sender: TObject);
+    procedure EnableBulkActions1Click(Sender: TObject);
+    procedure VSTBulkActionsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
+    procedure VSTBulkActionsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+      TextType: TVSTTextType; var CellText: string);
+    procedure VSTBulkActionsFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VSTFilesChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VSTBulkActionsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+      Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
+    procedure PopupBulkActionsPopup(Sender: TObject);
+    procedure BulkDownload1Click(Sender: TObject);
+    procedure Clear1Click(Sender: TObject);
+    procedure RemoveSelectedItems1Click(Sender: TObject);
+    procedure BrowsePath1Click(Sender: TObject);
   private
     FHistoryCursor: Integer;
     FPathHistory: TList<string>;
@@ -244,14 +283,27 @@ type
     procedure CopyOrCutSelectedNode(const ACopyMode: TVirtualClipboardCopyMode);
     procedure PasteFileOrDirectory(const pNode: PVirtualNode = nil);
     procedure OnVirtualClipboardUpdate(Sender: TObject);
+    procedure SetupOrRefreshTreeForBulkDownload;
+    procedure DisplayBulkCheckBoxes;
+    procedure RegisterFileToBulkActionsList(const AFilePath: string);
+    procedure RemoveFileFromBulkActionsList(const AFilePath: string);
+    procedure RenameFileFromBulkActionsList(const AOldFilePath, ANewFilePath: string);
+    function GetBulkActionNodeByFilePath(const AFilePath: string) : PVirtualNode;
+    function GetBulkActionFileList: TList<string>;
+    function GetNodeByFilePath(const AFilePath: string): PVirtualNode;
+    procedure UncheckRowByFilePath(const AFilePath: string);
+    function GetImageIndexForDriveType(const ADriveType: TDriveType) : Integer;
     procedure ClearClipboard;
   protected
     {@M}
     function GetContextDescription: string; override;
     procedure OnFirstShow; override;
 
-    function RequestFileDownload(const ARemoteFilePath: string = ''; ALocalFilePath: string = ''): TGUID; reintroduce;
-    function RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = ''; const AContext: string = ''): TGUID; reintroduce;
+    procedure RequestFileDownload(const AFiles: TList<string>; const AContext: string = ''); reintroduce; overload;
+    procedure RequestFileDownload(const ARemoteFilePath: string = '';
+      ALocalFilePath: string = ''); reintroduce; overload;
+    procedure RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
+      const AContext: string = ''); reintroduce;
   public
     {@M}
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
@@ -309,6 +361,15 @@ begin
     Result := [];
 end;
 
+function TFileTreeData.CheckSupportBulkActions: Boolean;
+begin
+  if not Assigned(FileInformation) then
+    Exit(False);
+
+  ///
+  Result := (faRead in FileInformation.Access) and not FileInformation.IsDirectory;
+end;
+
 function TFileTreeData.Path(const IncludeTrailingPathDelimiterIfDirectory: Boolean = False): string;
 begin
   Result := '';
@@ -321,7 +382,62 @@ begin
   end;
 end;
 
+(* TBulkActionTreeData *)
+
+function TBulkActionTreeData.GetPath: string;
+begin
+  result := ExtractFilePath(ExcludeTrailingPathDelimiter(FilePath));
+end;
+
 (* TControlFormFileManager *)
+
+function TControlFormFileManager.GetImageIndexForDriveType(const ADriveType: TDriveType) : Integer;
+begin
+  case ADriveType of
+    dtNoRootDir: Result := IMAGE_DRIVE_NO_ROOT;
+    dtRemovable: Result := IMAGE_DRIVE_USB;
+    dtFixed: Result := IMAGE_DRIVE;
+    dtRemote: Result := IMAGE_DRIVE_NETWORK;
+    dtCDROM: Result := IMAGE_DRIVE_CD;
+    dtRAMDisk: Result := IMAGE_DRIVE_HARDWARE;
+    else
+      Result := IMAGE_DRIVE_UNKNOWN;
+  end;
+end;
+
+procedure TControlFormFileManager.DisplayBulkCheckBoxes;
+begin
+  VSTFiles.BeginUpdate;
+  try
+    for var pNode in VSTFiles.Nodes do begin
+      var pData := PFileTreeData(pNode.GetData);
+      if not Assigned(pData) or not Assigned(pData^.FileInformation) then
+        Continue;
+      ///
+
+      if pData^.CheckSupportBulkActions then
+        pNode.CheckType := ctCheckBox
+      else
+        pNode.CheckType := ctNone;
+    end;
+  finally
+    VSTFiles.EndUpdate;
+  end;
+end;
+
+function TControlFormFileManager.GetNodeByFilePath(const AFilePath: string): PVirtualNode;
+begin
+  Result := nil;
+  ///
+
+  for var pNode in VSTFiles.Nodes do begin
+    var pData := PFileTreeData(pNode.GetData);
+    ///
+
+    if SameText(pData^.Path, AFilePath) then
+      Exit(pNode);
+  end;
+end;
 
 function TControlFormFileManager.GetNodeByFileName(const AFileName: string): PVirtualNode;
 begin
@@ -332,11 +448,8 @@ begin
     var pData := PFileTreeData(pNode.GetData);
     ///
 
-    if string.Compare(pData^.Name, AFileName, True) = 0 then begin
-      Result := pNode;
-
-      break;
-    end;
+    if SameText(pData^.Name, AFileName) then
+      Exit(pNode);
   end;
 end;
 
@@ -346,11 +459,7 @@ begin
     Exit;
   ///
 
-  if string.Compare(
-    IncludeTrailingPathDelimiter(APath),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+  if not SameText(IncludeTrailingPathDelimiter(APath), IncludeTrailingPathDelimiter(EditPath.Text)) then
     Exit;
 
   VSTFiles.BeginUpdate;
@@ -370,7 +479,13 @@ begin
     if AFileInformation.IsDirectory then
       pData^.ImageIndex := TOptixHelper.SystemFolderIcon
     else
-      pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.Name, True);
+      pData^.ImageIndex := TOptixHelper.SystemFileIcon(pData^.Name, False);
+
+    if EnableBulkActions1.Checked then
+      if pData^.SupportBulkActions then
+        pNode.CheckType := ctCheckBox
+      else
+        pNode.CheckType := ctNone;
 
     ///
     if AFileInformation.IsDirectory then
@@ -411,22 +526,20 @@ end;
 
 procedure TControlFormFileManager.DeleteFile(const AFilePath: string; const AIsDirectory: Boolean);
 begin
-  if string.Compare(
+  if VSTBulkActions.RootNodeCount > 0 then
+    RemoveFileFromBulkActionsList(AFilePath);
+  ///
+
+  if not SameText(
     IncludeTrailingPathDelimiter(ExtractFilePath(AFilePath)),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+    IncludeTrailingPathDelimiter(EditPath.Text)
+  )then
     Exit;
   ///
 
-  VSTFiles.BeginUpdate;
-  try
-    var pNode := GetNodeByFileName(ExtractFileName(AFilePath));
-    if Assigned(pNode) then
-      VSTFiles.DeleteNode(pNode);
-  finally
-    VSTFiles.EndUpdate;
-  end;
+  var pNode := GetNodeByFileName(ExtractFileName(AFilePath));
+  if Assigned(pNode) then
+    VSTFiles.DeleteNode(pNode);
 
   ///
   if AIsDirectory then
@@ -435,11 +548,13 @@ end;
 
 procedure TControlFormFileManager.RenameFileOrDirectory(const AOldFilePath, ANewFilePath: string);
 begin
-  if string.Compare(
+  RenameFileFromBulkActionsList(AOldFilePath, ANewFilePath);
+  ///
+
+  if not SameText(
     TFileSystemHelper.ExtractFilePath(AOldFilePath, True),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+    IncludeTrailingPathDelimiter(EditPath.Text)
+  ) then
     Exit;
   ///
 
@@ -458,7 +573,6 @@ begin
       if pData^.FileInformation.IsDirectory then
         RenameFolderFromTree(AOldFilePath, ANewFilePath);
     end;
-
   finally
     VSTFiles.EndUpdate;
   end;
@@ -522,11 +636,6 @@ begin
           pData := PFolderTreeData(pNode.GetData);
 
         pData^.Information.Assign(AItem);
-
-        if pData^.IsRoot then
-          pData^.ImageIndex := TOptixHelper.SystemFileIcon(AItem.Path)
-        else
-          pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
       end
     )
   );
@@ -543,14 +652,11 @@ begin
   for var pNode in VSTFolders.Nodes do begin
     var pData := PFolderTreeData(pNode.GetData);
     if not Assigned(pData) then
-      Exit;
+      Continue;
     ///
 
-    if string.Compare(pData^.Information.Path, AFolderPath, True) = 0 then begin
-      result := pNode;
-
-      Break;
-    end;
+    if SameText(pData^.Information.Path, AFolderPath) then
+      Exit(pNode);
   end;
 end;
 
@@ -601,7 +707,6 @@ begin
     ///
 
     pData^.Information := TSimpleFolderInformation.Create(AFolderInformation);
-    pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
   finally
     if Assigned(pParentNode) then
       VSTFolders.Expanded[pParentNode] := True;
@@ -640,7 +745,7 @@ begin
   if (FPathHistory.Count > 0) and (FHistoryCursor >= 0) then begin
     var APath := FPathHistory.Items[FHistoryCursor];
 
-    if string.Compare(APath, '\\:DRIVES:\\') = 0 then
+    if SameText(APath, '\\:DRIVES:\\') then
       RefreshDrives(False)
     else
       BrowsePath(APath, False);
@@ -666,7 +771,7 @@ begin
   APath := IncludeTrailingPathDelimiter(APath);
 
   if (FPathHistory.Count = 0) or
-     (string.Compare(FPathHistory.Items[FPathHistory.Count-1], APath, True) <> 0) then begin
+     not SameText(FPathHistory.Items[FPathHistory.Count-1], APath) then begin
 
      if FHistoryCursor < FPathHistory.Count -1 then
       FPathHistory.DeleteRange(FHistoryCursor +1, (FPathHistory.Count -1) - FHistoryCursor);
@@ -694,12 +799,23 @@ begin
   RefreshDrives;
 end;
 
-function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: string = ''; ALocalFilePath: string = ''): TGUID;
+procedure TControlFormFileManager.RequestFileDownload(const AFiles: TList<string>; const AContext: string = '');
+begin
+  if not Assigned(AFiles) then
+    Exit;
+  ///
+
+  inherited RequestFileDownload(AFiles, Format('Bulk Download %d file(s)', [AFiles.Count]));
+end;
+
+procedure TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: string = '';
+  ALocalFilePath: string = '');
 begin
   inherited RequestFileDownload(ARemoteFilePath, ALocalFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
 
-function TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = ''; const AContext: string = ''): TGUID;
+procedure TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
+  const AContext: string = '');
 begin
   inherited RequestFileUpload(ALocalFilePath, ARemoteFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
@@ -750,6 +866,12 @@ end;
 procedure TControlFormFileManager.Paste1Click(Sender: TObject);
 begin
   ButtonPasteClick(ButtonPaste);
+end;
+
+procedure TControlFormFileManager.Clear1Click(Sender: TObject);
+begin
+  VSTBulkActions.Clear;
+  VSTFiles.ClearChecked;
 end;
 
 procedure TControlFormFileManager.ClearClipboard;
@@ -817,6 +939,20 @@ begin
 
   ///
   RefreshActionsButtons;
+end;
+
+procedure TControlFormFileManager.BulkDownload1Click(Sender: TObject);
+begin
+  var AFiles := GetBulkActionFileList;
+  try
+    RequestFileDownload(AFiles);
+  finally
+    AFiles.Free;
+  end;
+
+  ///
+  VSTBulkActions.Clear;
+  VSTFiles.ClearChecked;
 end;
 
 procedure TControlFormFileManager.ButtonBackClick(Sender: TObject);
@@ -962,6 +1098,19 @@ begin
   Result := (pData^.FileInformation.IsDirectory) and (faWrite in pData^.FileInformation.Access);
 end;
 
+procedure TControlFormFileManager.PopupBulkActionsPopup(Sender: TObject);
+begin
+  BulkDownload1.Enabled := VSTBulkActions.RootNodeCount > 0;
+  Clear1.Enabled := BulkDownload1.Enabled;
+
+  var ASelectedCount := VSTBulkActions.SelectedCount;
+  BrowsePath1.Visible := ASelectedCount > 0;
+  BrowsePath1.Enabled := ASelectedCount = 1;
+
+  ///
+  RemoveSelectedItems1.Visible := ASelectedCount > 0;
+end;
+
 procedure TControlFormFileManager.PopupMenuPopup(Sender: TObject);
 begin
   TOptixHelper.HideAllPopupMenuRootItems(TPopupMenu(Sender));
@@ -973,7 +1122,7 @@ begin
       var pData := PFileTreeData(pNode.GetData);
       ///
 
-      if Assigned(pData^.FileInformation) and (pData^.Name <> '..') then begin
+      if Assigned(pData) and Assigned(pData^.FileInformation) and (pData^.Name <> '..') then begin
         Copy1.Visible := True;
         Cut1.Visible := True;
         Delete1.Visible := True;
@@ -1009,6 +1158,42 @@ begin
   end;
 end;
 
+procedure TControlFormFileManager.VSTBulkActionsFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  var pData := PBulkActionTreeData(Node.GetData);
+  if Assigned(pData) then
+    Finalize(pData^);
+end;
+
+procedure TControlFormFileManager.VSTBulkActionsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
+  Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
+begin
+  if (Column <> 0) or ((Kind <> TVTImageKind.ikNormal) and (Kind <> TVTImageKind.ikSelected)) then
+    Exit;
+
+  var pData := PBulkActionTreeData(Node.GetData);
+  if not Assigned(pData) then
+    Exit;
+
+  ImageIndex := pData^.ImageIndex;
+end;
+
+procedure TControlFormFileManager.VSTBulkActionsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
+begin
+  NodeDataSize := SizeOf(TBulkActionTreeData);
+end;
+
+procedure TControlFormFileManager.VSTBulkActionsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+begin
+  var pData := PBulkActionTreeData(Node.GetData);
+  if not Assigned(pData) then
+    Exit;
+  ///
+
+  CellText := pData^.FilePath;
+end;
+
 procedure TControlFormFileManager.VSTFilesBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -1042,6 +1227,124 @@ begin
 
       TargetCanvas.FillRect(CellRect);
     end;
+  end;
+end;
+
+function TControlFormFileManager.GetBulkActionNodeByFilePath(const AFilePath: string) : PVirtualNode;
+begin
+  Result := nil;
+  ///
+
+  for var pNode in VSTBulkActions.Nodes do begin
+    var pData := PBulkActionTreeData(pNode.GetData);
+    if not Assigned(pData) then
+      Continue;
+    ///
+
+    if SameText(pData^.FilePath, AFilePath) then
+      Exit(pNode);
+  end;
+end;
+
+function TControlFormFileManager.GetBulkActionFileList: TList<string>;
+begin
+  result := TList<string>.Create;
+  ///
+
+  for var pNode in VSTBulkActions.Nodes do begin
+    var pData := PBulkActionTreeData(pNode.GetData);
+    if Assigned(pData) then
+      result.Add(pData^.FilePath);
+  end;
+end;
+
+procedure TControlFormFileManager.UncheckRowByFilePath(const AFilePath: string);
+begin
+  var pNode := GetNodeByFilePath(AFilePath);
+  if Assigned(pNode) and (pNode.CheckType = ctCheckBox) then
+    pNode.CheckState := csUncheckedNormal;
+end;
+
+procedure TControlFormFileManager.RegisterFileToBulkActionsList(const AFilePath: string);
+begin
+  if GetBulkActionNodeByFilePath(AFilePath) <> nil then
+    Exit;
+  ///
+
+  VSTBulkActions.BeginUpdate;
+  try
+    var pNode := VSTBulkActions.AddChild(nil);
+    var pData := PBulkActionTreeData(pNode.GetData);
+    ///
+
+    pData^.FilePath := AFilePath;
+    pData^.ImageIndex := TOptixHelper.SystemFileIcon(AFilePath);
+  finally
+    VSTBulkActions.EndUpdate;
+  end;
+end;
+
+procedure TControlFormFileManager.RemoveFileFromBulkActionsList(const AFilePath: string);
+begin
+  var pNodeToDelete := GetBulkActionNodeByFilePath(AFilePath);
+  if Assigned(pNodeToDelete) then
+    VSTBulkActions.DeleteNode(pNodeToDelete);
+end;
+
+procedure TControlFormFileManager.RenameFileFromBulkActionsList(const AOldFilePath, ANewFilePath: string);
+begin
+  if GetBulkActionNodeByFilePath(ANewFilePath) <> nil then
+    Exit;
+  ///
+
+  var pNode := GetBulkActionNodeByFilePath(AOldFilePath);
+  if Assigned(pNode) then begin
+    var pData := PBulkActionTreeData(pNode.GetData);
+    if Assigned(pData) then
+      pData^.FilePath := ANewFilePath;
+
+    ///
+    VSTBulkActions.InvalidateNode(pNode);
+  end;
+end;
+
+procedure TControlFormFileManager.RemoveSelectedItems1Click(Sender: TObject);
+begin
+  VSTFiles.BeginUpdate;
+  try
+    for var pNode in VSTBulkActions.SelectedNodes do begin
+      var pData := PBulkActionTreeData(pNode.GetData);
+      if not Assigned(pData) then
+        Exit;
+      ///
+
+      if SameText(pData^.Path, EditPath.Text) then
+        UncheckRowByFilePath(pData^.FilePath);
+    end;
+  finally
+    VSTFiles.EndUpdate;
+  end;
+
+  ///
+  VSTBulkActions.DeleteSelectedNodes;
+  MultiPanelFiles.PanelCollection.Items[1].Visible := VSTBulkActions.RootNodeCount > 0;
+end;
+
+procedure TControlFormFileManager.VSTFilesChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  if (Node.CheckType = ctCheckBox) then begin
+    var pData := PFileTreeData(Node.GetData);
+    if not Assigned(pData) then
+      Exit;
+    ///
+
+    if Node.CheckState.IsChecked then
+      RegisterFileToBulkActionsList(pData^.Path)
+    else
+      RemoveFileFromBulkActionsList(pData^.Path);
+
+    ///
+    MultiPanelFiles.PanelCollection.Items[1].Visible := VSTBulkActions.RootNodeCount > 0;
   end;
 end;
 
@@ -1121,6 +1424,17 @@ begin
   SendCommand(TOptixCommandEnumDirectoryFiles.Create(APath));
 end;
 
+procedure TControlFormFileManager.BrowsePath1Click(Sender: TObject);
+begin
+  if VSTBulkActions.FocusedNode = nil then
+    Exit;
+  ///
+
+  var pData := PBulkActionTreeData(VSTBulkActions.FocusedNode.GetData);
+  if Assigned(pData) then
+    BrowsePath(pData^.Path);
+end;
+
 procedure TControlFormFileManager.VSTFilesDblClick(Sender: TObject);
 begin
   if VSTFiles.FocusedNode = nil then
@@ -1130,8 +1444,9 @@ begin
 
   if Assigned(pData^.DriveInformation) then
     BrowsePath(pData^.DriveInformation.Letter)
-  else if Assigned(pData^.FileInformation) then begin
+  else if Assigned(pData^.FileInformation) and pData^.FileInformation.IsDirectory then begin
     var APath := EditPath.Text;
+    ///
 
     if pData^.FileInformation.Name = '..' then
       APath := IncludeTrailingPathDelimiter(
@@ -1172,38 +1487,27 @@ begin
     Exit;
   ///
 
-//  if Assigned(pData^.DriveInformation) and (Kind = TVTImageKind.ikState) then begin
-//    case pData^.DriveInformation.DriveType of
-//      dtUnknown: ImageIndex := IMAGE_DRIVE_UNKNOWN;
-//      dtNoRootDir: ImageIndex := IMAGE_DRIVE_NO_ROOT;
-//      dtRemovable: ImageIndex := IMAGE_DRIVE_USB;
-//      dtFixed: ImageIndex := IMAGE_DRIVE;
-//      dtRemote: ImageIndex := IMAGE_DRIVE_NETWORK;
-//      dtCDROM: ImageIndex := IMAGE_DRIVE_CD;
-//      dtRAMDisk: ImageIndex := IMAGE_DRIVE_HARDWARE;
-//    end;
-  if Assigned(pData^.DriveInformation) and ((Kind = ikNormal) or (Kind = ikSelected)) then
+  if Assigned(pData^.DriveInformation) and (Kind = TVTImageKind.ikState) then
     ImageIndex := pData^.ImageIndex
   else if Assigned(pData^.FileInformation) then begin
     case Kind of
       ikNormal, ikSelected: begin
-        if (pData^.FileInformation.IsDirectory and not ColoredFoldersAccessView1.Checked) or
-            not (pData^.FileInformation.IsDirectory) then
+        if not pData^.FileInformation.IsDirectory then
           ImageIndex := pData^.ImageIndex;
       end;
 
       ikState: begin
         if not FSharedClass.FileClipboard.IsEmpty and
-          (string.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0)
+          SameText(FSharedClass.FileClipboard.Content, pData^.Path)
         then begin
           if FSharedClass.FileClipboard.CopyMode = vccmCopy then
             ImageIndex := IMAGE_COPY
           else
             ImageIndex := IMAGE_CUT;
         end else begin
-          if pData^.FileInformation.IsDirectory and ColoredFoldersAccessView1.Checked then begin
-            if (pData^.FileInformation.Name = '..') then
-              ImageIndex := IMAGE_FOLDER_PREV
+          if pData^.FileInformation.IsDirectory then begin
+            if not ColoredFoldersAccessView1.Checked then
+              ImageIndex := IMAGE_FOLDER_NORMAL
             else
               ImageIndex := GetFolderImageIndex(pData^.FileInformation.Access);
           end;
@@ -1303,7 +1607,7 @@ begin
     Exit;
 
   if not FSharedClass.FileClipboard.IsEmpty and
-    (string.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
+    SameText(pData^.Path, FSharedClass.FileClipboard.Content)
   then begin
     case FSharedClass.FileClipboard.CopyMode of
       vccmCopy: TargetCanvas.Font.Color := clBlue;
@@ -1357,11 +1661,11 @@ procedure TControlFormFileManager.VSTFoldersGetImageIndex(Sender: TBaseVirtualTr
   Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   var pData := PFolderTreeData(Node.GetData);
-  if not Assigned(pData) or (Column <> 0) or ((Kind <> ikNormal) and (Kind <> ikSelected)) then
+  if not Assigned(pData) or (Column <> 0) or (Kind <> ikState) then
     Exit;
   ///
 
-  ImageIndex := pData^.ImageIndex;
+  ImageIndex := IMAGE_FOLDER_NORMAL;
 end;
 
 procedure TControlFormFileManager.VSTFoldersGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
@@ -1437,7 +1741,7 @@ begin
       pData^.DriveInformation := TDriveInformation.Create;
       pData^.DriveInformation.Assign(ADrive);
       pData^.FileInformation := nil;
-      pData^.ImageIndex := TOptixHelper.SystemFileIcon(IncludeTrailingPathDelimiter(ADrive.Letter));
+      pData^.ImageIndex := GetImageIndexForDriveType(pData^.DriveInformation.DriveType);
 
       ///
       AFolders.Add(TSimpleFolderInformation.Create(ADrive.Letter, []));
@@ -1479,18 +1783,26 @@ begin
       pData^.FileInformation.Assign(AFile);
 
       if AFile.IsDirectory then begin
-        pData^.ImageIndex := TOptixHelper.SystemFolderIcon;
+        pData^.ImageIndex := IMAGE_FOLDER_NORMAL;
 
         ///
         if not MatchStr(pData^.FileInformation.Name, ['.', '..']) then
           AFolders.Add(
             TSimpleFolderInformation.Create(pData^.FileInformation.Path, pData^.FileInformation.Access)
           );
-      end else
-        pData^.ImageIndex := TOptixHelper.SystemFileIcon(AFile.Name, True);
+      end else begin
+        pData^.ImageIndex := TOptixHelper.SystemFileIcon(AFile.Name);
+
+        ///
+        if VSTBulkActions.RootNodeCount > 0 then
+          if GetBulkActionNodeByFilePath(pData^.Path) <> nil then
+            pNode.CheckState := csCheckedNormal;
+      end;
     end;
   finally
     RegisterFoldersInTree(AList.ParentFolders, AFolders);
+
+    SetupOrRefreshTreeForBulkDownload;
 
     VSTFiles.EndUpdate;
 
@@ -1513,6 +1825,37 @@ begin
 
   ///
   RequestFileDownload(IncludeTrailingPathDelimiter(EditPath.Text) + pData^.FileInformation.Name);
+end;
+
+procedure TControlFormFileManager.SetupOrRefreshTreeForBulkDownload;
+begin
+  var ACheckSupport := toCheckSupport in VSTFiles.TreeOptions.MiscOptions;
+  if EnableBulkActions1.Checked then begin
+    if not ACheckSupport then
+      VSTFiles.TreeOptions.MiscOptions := VSTFiles.TreeOptions.MiscOptions + [toCheckSupport];
+
+    ///
+    DisplayBulkCheckBoxes;
+  end else if ACheckSupport then begin
+    VSTFiles.BeginUpdate;
+    try
+      VSTFiles.ClearChecked;
+    finally
+      VSTFiles.EndUpdate;
+    end;
+
+    VSTBulkActions.Clear;
+
+    self.MultiPanelFiles.PanelCollection.Items[1].Visible := False;
+
+    ///
+    VSTFiles.TreeOptions.MiscOptions := VSTFiles.TreeOptions.MiscOptions - [toCheckSupport];
+  end;
+end;
+
+procedure TControlFormFileManager.EnableBulkActions1Click(Sender: TObject);
+begin
+  SetupOrRefreshTreeForBulkDownload;
 end;
 
 procedure TControlFormFileManager.ShowFolderTree1Click(Sender: TObject);

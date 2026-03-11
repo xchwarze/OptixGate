@@ -1,5 +1,12 @@
 # Changelogs
 
+## 2.0.3 (March 2026)
+
+This version introduces two major updates:
+
+- Bulk Actions for File Manager: This new feature allows you to perform multiple actions simultaneously on several selected files (using checkboxes). The first bulk action enables downloading multiple files from the current and previously browsed directories, eliminating the need to download files one by one. To activate this feature, check the "Enable Bulk Actions" option in the file manager (please refer to the wiki for more details).
+- Multiple File Selection in the Open Dialog: You can now select multiple files at once in the open dialog, facilitating the upload of multiple files simultaneously.
+
 ## 2.0.2 (March 2026)
 
 - Updated NeoFlat Hint Component and implemented it on the user list. When hovering over a user, a summary of remote peer information is displayed.

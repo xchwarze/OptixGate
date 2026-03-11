@@ -157,12 +157,12 @@ begin
   while True do begin
     var AReturn := SSL_Write(FSSLConnection, buf, len);
     if AReturn > 0 then
-      break;
+      Break;
     ///
 
     case SSL_get_error(FSSLConnection, AReturn) of
       SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE: 
-        continue;
+        Continue;
 
       else
         raise EOpenSSLBaseException.Create(FSSLConnection);
@@ -175,12 +175,12 @@ begin
   while True do begin
     var AReturn := SSL_Read(FSSLConnection, buf, len);
     if AReturn > 0 then
-      break;
+      Break;
     ///
 
     case SSL_get_error(FSSLConnection, AReturn) of
       SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE: 
-        continue;
+        Continue;
 
       else
         raise EOpenSSLBaseException.Create(FSSLConnection);

@@ -241,7 +241,7 @@ begin
   try
     for var AThread in AList do begin
       if not Assigned(AThread) then
-        continue;
+        Continue;
 
       AThreadsToFlush.Add(AThread);
     end;
@@ -294,7 +294,7 @@ begin
         Result := True;
 
         ///
-        break;
+        Break;
       end;
     end;
   finally
@@ -315,7 +315,7 @@ begin
         AThread.Terminate;
 
         ///
-        break;
+        Break;
       end;
     end;
   finally

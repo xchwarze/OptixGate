@@ -211,7 +211,7 @@ begin
     if pData^.Handler = AHandler then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
