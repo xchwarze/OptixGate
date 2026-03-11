@@ -300,10 +300,10 @@ type
     procedure OnFirstShow; override;
 
     procedure RequestFileDownload(const AFiles: TList<string>; const AContext: string = ''); reintroduce; overload;
-    function RequestFileDownload(const ARemoteFilePath: string = '';
-      ALocalFilePath: string = ''): TGUID; reintroduce; overload;
-    function RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
-      const AContext: string = ''): TGUID; reintroduce;
+    procedure RequestFileDownload(const ARemoteFilePath: string = '';
+      ALocalFilePath: string = ''); reintroduce; overload;
+    procedure RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
+      const AContext: string = ''); reintroduce;
   public
     {@M}
     procedure ReceivePacket(const AOptixPacket: TOptixPacket; var AHandleMemory: Boolean); override;
@@ -808,14 +808,14 @@ begin
   inherited RequestFileDownload(AFiles, Format('Bulk Download %d file(s)', [AFiles.Count]));
 end;
 
-function TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: string = '';
-  ALocalFilePath: string = ''): TGUID;
+procedure TControlFormFileManager.RequestFileDownload(const ARemoteFilePath: string = '';
+  ALocalFilePath: string = '');
 begin
   inherited RequestFileDownload(ARemoteFilePath, ALocalFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;
 
-function TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
-  const AContext: string = ''): TGUID;
+procedure TControlFormFileManager.RequestFileUpload(ALocalFilePath: string; const ARemoteFilePath: string = '';
+  const AContext: string = '');
 begin
   inherited RequestFileUpload(ALocalFilePath, ARemoteFilePath, Format('File Manager (%s)', [EditPath.Text]));
 end;

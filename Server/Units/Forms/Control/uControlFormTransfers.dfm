@@ -47,8 +47,6 @@ object ControlFormTransfers: TControlFormTransfers
     OnGetNodeDataSize = VSTGetNodeDataSize
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-    ExplicitWidth = 570
-    ExplicitHeight = 170
     Columns = <
       item
         Position = 0
@@ -113,6 +111,7 @@ object ControlFormTransfers: TControlFormTransfers
     end
   end
   object OpenDialog: TOpenDialog
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofCreatePrompt, ofEnableSizing]
     Left = 320
     Top = 88
   end
