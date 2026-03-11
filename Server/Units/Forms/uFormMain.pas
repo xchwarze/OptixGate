@@ -292,11 +292,10 @@ begin
       ADictionary.Add('Domain Name', SessionInformation.DomainName);
 
     ADictionary.Add('Windows Version', SessionInformation.WindowsVersion);
-    ADictionary.Add('Spawn Since', TOptixHelper.ElapsedDateTime(SpawnDate, Now));
     ADictionary.Add('Spawn Date', DateTimeToStr(SpawnDate));
     ADictionary.Add('Elevated Status', SessionInformation.ElevatedStatus_STR);
     ADictionary.Add('User In Admin Group', BoolToStr(SessionInformation.IsInAdminGroup, True));
-    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem));
+    ADictionary.Add('User Is System', BoolToStr(SessionInformation.IsSystem, True));
     ADictionary.Add('User SID', SessionInformation.UserSid);
     ADictionary.Add('Image', SessionInformation.ProcessDetail);
 
