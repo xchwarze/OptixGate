@@ -362,7 +362,7 @@ begin
       Result := AForm;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -385,7 +385,7 @@ begin
       Result := AForm;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -468,14 +468,14 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if not Assigned(pData^.Forms) then
-      continue;
+      Continue;
 
     for var ACandidate in pData^.Forms do begin
       if ACandidate = AForm then begin
         Result := pNode;
 
         ///
-        break;
+        Break;
       end;
     end;
   end;
@@ -580,7 +580,7 @@ begin
       Result := pNode;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;
@@ -911,7 +911,7 @@ begin
     if Assigned(pData^.Handler) and (pData^.Handler.HandlerId = AHandlerId) then begin
       Result := pData^.Handler;
 
-      break;
+      Break;
     end;
   end;
 end;

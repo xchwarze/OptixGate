@@ -124,7 +124,7 @@ begin
 
   for var ATransferId in ATasks.Keys do begin
     if not ATasks.TryGetValue(ATransferId, ATask) then
-      continue;
+      Continue;
     ///
 
     Synchronize(procedure begin
@@ -173,7 +173,7 @@ begin
         if ATask = nil then begin
           SendAcknowledgement(False);
 
-          continue;
+          Continue;
         end;
 
         ///

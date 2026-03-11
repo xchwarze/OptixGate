@@ -153,7 +153,7 @@ begin
     try
       for var AFingerprint in AConfig do begin
         if String.IsNullOrWhitespace(AFingerprint) then
-          continue;
+          Continue;
 
         ///
         AddTrustedCertificate(AFingerprint);
@@ -169,7 +169,7 @@ end;
 procedure TFormTrustedCertificates.OnVerifyPeerCertificate(Sender: TObject; const APeerFingerprint: string; var ASuccess: Boolean);
 begin
   {$IFDEF DEBUG}
-    ASuccess := string.Compare(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint, True) = 0;
+    ASuccess := SameText(DEBUG_PEER_CERTIFICATE_FINGERPRINT, APeerFingerprint);
     if ASuccess then
       Exit;
   {$ENDIF}
@@ -193,10 +193,10 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
-    if string.Compare(pData^.Fingerprint, AFingerprint, True) = 0 then begin
+    if SameText(pData^.Fingerprint, AFingerprint) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;

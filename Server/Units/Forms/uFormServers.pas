@@ -213,7 +213,7 @@ begin
       for var pNode in VST.Nodes do begin
         var pData := PTreeData(pNode.GetData);
         if pData^.ServerConfiguration.Debug then
-          continue;
+          Continue;
 
         ///
         AConfig.Add(pData^.ServerConfiguration);
@@ -241,7 +241,7 @@ begin
     try
       for var AServerConfiguration in AConfig do begin
         if String.IsNullOrWhitespace(AServerConfiguration.Address) then
-          continue;
+          Continue;
 
         ///
         TryRegisterServer(AServerConfiguration, False);
@@ -442,7 +442,7 @@ begin
     if (pData^.ServerConfiguration.Port = APort) and (pData^.ServerConfiguration.Version = AVersion) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -457,7 +457,7 @@ begin
     if Assigned(pData^.Server) and (pData^.Server = AServer) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -470,10 +470,10 @@ begin
 
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
-    if string.Compare(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint, True) = 0 then begin
+    if SameText(pData^.ServerConfiguration.CertificateFingerprint, AFingerprint) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;

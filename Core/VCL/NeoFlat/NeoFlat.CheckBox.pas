@@ -526,13 +526,13 @@ procedure TFlatCheckBox.SetChecked(AValue: Boolean);
       var C := Owner.Components[i];
 
       if C = self then
-        continue;
+        Continue;
 
       if not (C is TFlatCheckBox) then
-        continue;
+        Continue;
 
       if (TFlatCheckBox(C).Mode <> cbmRadioBox) then
-        continue;
+        Continue;
 
       TFlatCheckBox(C)._SetChecked(False);
     end;

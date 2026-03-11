@@ -166,7 +166,7 @@ begin
     if Assigned(pData^.TaskCallBack) and (pData^.TaskCallBack.Id = ATaskId) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;

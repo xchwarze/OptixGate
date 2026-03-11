@@ -1199,7 +1199,7 @@ begin
     if (ALogicalDrives and (1 shl AIndex)) = 0 then begin
       Inc(AIndex);
 
-      continue;
+      Continue;
     end;
     ///
 
@@ -1295,7 +1295,7 @@ begin
     repeat
       AFileName := String(AWin32FindData.cFileName);
       if AFileName = '.' then
-        continue;
+        Continue;
       ///
 
       if AFileName = '..' then
@@ -1414,7 +1414,7 @@ begin
     if Succeeded(psiItem.GetDisplayName(SIGDN_FILESYSPATH, ASource)) then begin
       try
         if Succeeded(psiNewlyCreated.GetDisplayName(SIGDN_FILESYSPATH, ACurrent)) and
-          (string.Compare(string(ASource), FSourcePath, True) = 0)
+          SameText(string(ASource), FSourcePath)
         then begin
           try
             FLastOperationFinalPath := string(ACurrent);

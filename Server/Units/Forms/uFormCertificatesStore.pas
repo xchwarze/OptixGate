@@ -222,10 +222,10 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
 
-    if string.Compare(pData^.Certificate.Fingerprint, AFingerPrint, True) = 0 then begin
+    if SameText(pData^.Certificate.Fingerprint, AFingerPrint) then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -254,8 +254,8 @@ begin
         var pData := PTreeData(pNode.GetData);
 
         {$IFDEF DEBUG}
-        if string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
-          continue;
+        if SameText(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) then
+          Continue;
         {$ENDIF}
 
         AConfig.Add(pData^.Certificate);
@@ -295,7 +295,7 @@ begin
     try
       for ACertificate in AConfig do begin
         if not Assigned(ACertificate.pX509) or not Assigned(ACertificate.pPrivKey) then
-          continue;
+          Continue;
 
         ///
         RegisterCertificate(ACertificate);
@@ -383,7 +383,7 @@ begin
 
   var AColor := clNone;
 
-  if string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT, True) = 0 then
+  if SameText(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) then
     AColor := COLOR_LIST_RED;
 
   if AColor <> clNone then begin
@@ -437,7 +437,7 @@ begin
       {$IFDEF DEBUG}
       var pData := PTreeData(Node.GetData);
 
-      if Assigned(pData) and (string.Compare(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) = 0) then
+      if Assigned(pData) and SameText(pData^.Certificate.Fingerprint, DEBUG_CERTIFICATE_FINGERPRINT) then
         ImageIndex := IMAGE_BUG
       else
       {$ENDIF}

@@ -126,7 +126,7 @@ begin
     for var AField in AType.GetFields do begin
       for var AFieldAttribute in AField.GetAttributes do begin
         if not (AFieldAttribute is OptixSerializableAttribute) then
-          continue;
+          Continue;
         ///
 
         case AField.FieldType.TypeKind of
@@ -143,7 +143,7 @@ begin
             var AFieldClass := AField.FieldType.AsInstance.MetaclassType;
             var AObject := AField.GetValue(self).AsObject;
             if not Assigned(AObject) then
-              continue;
+              Continue;
             ///
 
             // Serializable Object -------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ begin
                   ///
 
                   if not Assigned(AItemObject) or not (AItemObject is TOptixSerializableObject) then
-                    continue;
+                    Continue;
 
                   ///
                   AJsonArray.AddElement(TOptixSerializableObject(AItemObject).Serialize)
@@ -230,7 +230,7 @@ begin
   for var APair in ASerializedObject do begin
     var AField := AType.GetField(APair.JsonString.Value);
     if not Assigned(AField) or not Assigned(AField.GetAttribute(OptixSerializableAttribute)) then
-      continue;
+      Continue;
     ///
 
     var AJsonValue := APair.JsonValue;
@@ -269,7 +269,7 @@ begin
           if not Assigned(AClearMethod) or not Assigned(AAddMethod) or (Length(AAddMethod.GetParameters) = 0) or
             not (AJsonValue is TJsonArray)
           then
-            continue;
+            Continue;
 
           AClearMethod.Invoke(AObject, []);
 
@@ -284,7 +284,7 @@ begin
             if not (AItem is TOptixSerializableObject) then begin
               FreeAndNil(AItem);
 
-              break;
+              Break;
             end;
             ///
 

@@ -121,7 +121,7 @@ begin
     while (FPacketQueue.PopItem(APacket) = TWaitResult.wrSignaled) do begin
       try
         if Terminated then
-          break;
+          Break;
         ///
 
         // Dispatch Packet
@@ -192,7 +192,7 @@ begin
     while True do begin
       APacket := FPacketQueue.PopItem;
       if not Assigned(APacket) then
-        break;
+        Break;
 
       ///
       FreeAndNil(APacket);

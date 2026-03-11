@@ -153,11 +153,11 @@ begin
 
     if not Assigned(pData.FormInformation) or
       (pData^.FormInformation.GUID <> AGUID) then
-      continue;
+      Continue;
 
     Result := pNode;
 
-    break;
+    Break;
   end;
 end;
 
@@ -223,13 +223,13 @@ begin
   for var AForm in pNodeClientData^.Forms do begin
     if not Assigned(pData^.FormInformation) or
        (AForm.GUID <> pData^.FormInformation.GUID ) then
-      continue;
+      Continue;
       ///
 
     Result := AForm;
 
     ///
-    break;
+    Break;
   end;
 end;
 
@@ -299,7 +299,7 @@ begin
 
         ///
         if AInitializeRefresh then
-          continue;
+          Continue;
       end;
       ///
 

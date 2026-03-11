@@ -239,7 +239,7 @@ begin
         AShellInstancesToDelete.Add(AShellInstance);
 
         ///
-        continue;
+        Continue;
       end;
 
       try
@@ -271,7 +271,7 @@ procedure TOptixSessionHandlerThread.PerformActionOnShellInstance(const AInstanc
 begin
   for var AShellInstance in FShellInstances do begin
     if AShellInstance.InstanceId <> AInstanceId then
-      continue;
+      Continue;
     ///
 
     case AShellAction of
@@ -290,7 +290,7 @@ procedure TOptixSessionHandlerThread.StdinToShellInstance(const ACommand: TOptix
 begin
   for var AShellInstance in FShellInstances do begin
     if AShellInstance.InstanceId <> ACommand.InstanceId then
-      continue;
+      Continue;
     try
       AShellInstance.WriteLn(AnsiString(ACommand.CommandLine));
     except

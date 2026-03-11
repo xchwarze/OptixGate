@@ -264,7 +264,7 @@ begin
             FOnVerifyPeerCertificate(self, AFingerprint, ASuccess);
           end);
         {$ELSE}
-          ASuccess := string.Compare(FServerCertificateFingerprint, AFingerprint) = 0;
+          ASuccess := SameText(FServerCertificateFingerprint, AFingerprint);
         {$ENDIF}
 
         if not ASuccess then
@@ -331,7 +331,7 @@ begin
     end;
 
     if not FRetry then
-      break;
+      Break;
   end; // (While not Terminated)
 end;
 

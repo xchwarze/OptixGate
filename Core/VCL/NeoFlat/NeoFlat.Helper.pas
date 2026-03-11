@@ -228,7 +228,7 @@ begin
 
     while True do begin
       if ABase.Owner = nil then
-        break;
+        Break;
 
       ABase := ABase.Owner;
 
@@ -280,7 +280,7 @@ begin
     var pPixels := PRGBQuad(ABitmap.ScanLine[y]);
     for var x := 0 to ABitmap.Width-1 do begin
       try
-        if pPixels^.rgbReserved = 0 then continue;
+        if pPixels^.rgbReserved = 0 then Continue;
 
         var APixelOpacity: Word := (pPixels^.rgbReserved * AOpacity) div high(byte);
 

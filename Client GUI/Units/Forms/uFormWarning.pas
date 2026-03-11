@@ -130,7 +130,7 @@ end;
 
 procedure TFormWarning.ButtonAcceptTheRiskClick(Sender: TObject);
 begin
-  if string.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0 then begin
+  if SameText(Trim(EditAccept.Text), MAGIC_SENTENCE) then begin
     FValidated := True;
 
     Close;
@@ -186,7 +186,7 @@ end;
 
 procedure TFormWarning.TimerTimer(Sender: TObject);
 begin
-  ButtonAcceptTheRisk.Enabled := string.Compare(Trim(EditAccept.Text), MAGIC_SENTENCE, True) = 0;
+  ButtonAcceptTheRisk.Enabled := SameText(Trim(EditAccept.Text), MAGIC_SENTENCE);
 
   ///
 

@@ -220,7 +220,7 @@ begin
       for var AStringInformation in AStringInformations do begin
         // TODO: Delphi CE13 "not in"
         if not (AStringInformation.Kind in AStringKinds) then
-          continue;
+          Continue;
         ///
 
         AStringBuilder.AppendLine(AStringInformation.ToString);
@@ -355,7 +355,7 @@ begin
 
       while pCandidate < pEnd do begin
         if pCandidate^ = #0 then
-          break;
+          Break;
 
         ///
         Inc(pCandidate);

@@ -259,11 +259,11 @@ begin
   for var pNode in VST.Nodes do begin
     var pData := PTreeData(pNode.GetData);
     if pData^.Id <> ATransferId then
-      continue;
+      Continue;
 
     Result := pNode;
 
-    break;
+    Break;
   end;
 end;
 

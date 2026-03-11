@@ -410,7 +410,7 @@ object ControlFormFileManager: TControlFormFileManager
       object LabelAccess: TLabel
         Left = 6
         Top = 278
-        Width = 68
+        Width = 21
         Height = 15
         Margins.Left = 8
         Margins.Top = 10
@@ -429,7 +429,6 @@ object ControlFormFileManager: TControlFormFileManager
         ParentFont = False
         Transparent = False
         Visible = False
-        ExplicitWidth = 21
       end
       object Shape1: TShape
         AlignWithMargins = True

@@ -382,7 +382,7 @@ begin
         if EqualSID(pAdminSID, pTokenInfo^.Groups[I].Sid) then begin
           Result := True;
 
-          break;
+          Break;
         end;
       end;
       {$R+}

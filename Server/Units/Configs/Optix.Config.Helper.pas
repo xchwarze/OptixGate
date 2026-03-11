@@ -191,7 +191,7 @@ begin
   var AKeyPath := 'Software\' + FKeyName;
   ///
 
-  if string.Compare(FRegistry.CurrentPath, AKeyPath, True) <> 0 then
+  if not SameText(FRegistry.CurrentPath, AKeyPath) then
     FRegistry.OpenKey(AKeyPath, True);
 end;
 

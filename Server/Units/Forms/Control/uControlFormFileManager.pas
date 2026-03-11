@@ -412,7 +412,7 @@ begin
     for var pNode in VSTFiles.Nodes do begin
       var pData := PFileTreeData(pNode.GetData);
       if not Assigned(pData) or not Assigned(pData^.FileInformation) then
-        continue;
+        Continue;
       ///
 
       if pData^.CheckSupportBulkActions then
@@ -459,11 +459,7 @@ begin
     Exit;
   ///
 
-  if string.Compare(
-    IncludeTrailingPathDelimiter(APath),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+  if not SameText(IncludeTrailingPathDelimiter(APath), IncludeTrailingPathDelimiter(EditPath.Text)) then
     Exit;
 
   VSTFiles.BeginUpdate;
@@ -534,11 +530,10 @@ begin
     RemoveFileFromBulkActionsList(AFilePath);
   ///
 
-  if string.Compare(
+  if not SameText(
     IncludeTrailingPathDelimiter(ExtractFilePath(AFilePath)),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+    IncludeTrailingPathDelimiter(EditPath.Text)
+  )then
     Exit;
   ///
 
@@ -556,11 +551,10 @@ begin
   RenameFileFromBulkActionsList(AOldFilePath, ANewFilePath);
   ///
 
-  if string.Compare(
+  if not SameText(
     TFileSystemHelper.ExtractFilePath(AOldFilePath, True),
-    IncludeTrailingPathDelimiter(EditPath.Text),
-    True
-  ) <> 0 then
+    IncludeTrailingPathDelimiter(EditPath.Text)
+  ) then
     Exit;
   ///
 
@@ -658,14 +652,11 @@ begin
   for var pNode in VSTFolders.Nodes do begin
     var pData := PFolderTreeData(pNode.GetData);
     if not Assigned(pData) then
-      Exit;
+      Continue;
     ///
 
-    if string.Compare(pData^.Information.Path, AFolderPath, True) = 0 then begin
-      result := pNode;
-
-      Break;
-    end;
+    if SameText(pData^.Information.Path, AFolderPath) then
+      Exit(pNode);
   end;
 end;
 
@@ -754,7 +745,7 @@ begin
   if (FPathHistory.Count > 0) and (FHistoryCursor >= 0) then begin
     var APath := FPathHistory.Items[FHistoryCursor];
 
-    if string.Compare(APath, '\\:DRIVES:\\') = 0 then
+    if SameText(APath, '\\:DRIVES:\\') then
       RefreshDrives(False)
     else
       BrowsePath(APath, False);
@@ -780,7 +771,7 @@ begin
   APath := IncludeTrailingPathDelimiter(APath);
 
   if (FPathHistory.Count = 0) or
-     (string.Compare(FPathHistory.Items[FPathHistory.Count-1], APath, True) <> 0) then begin
+     not SameText(FPathHistory.Items[FPathHistory.Count-1], APath) then begin
 
      if FHistoryCursor < FPathHistory.Count -1 then
       FPathHistory.DeleteRange(FHistoryCursor +1, (FPathHistory.Count -1) - FHistoryCursor);
@@ -1247,10 +1238,10 @@ begin
   for var pNode in VSTBulkActions.Nodes do begin
     var pData := PBulkActionTreeData(pNode.GetData);
     if not Assigned(pData) then
-      continue;
+      Continue;
     ///
 
-    if string.Compare(pData^.FilePath, AFilePath, True) = 0 then
+    if SameText(pData^.FilePath, AFilePath) then
       Exit(pNode);
   end;
 end;
@@ -1507,7 +1498,7 @@ begin
 
       ikState: begin
         if not FSharedClass.FileClipboard.IsEmpty and
-          (string.Compare(FSharedClass.FileClipboard.Content, pData^.Path, True) = 0)
+          SameText(FSharedClass.FileClipboard.Content, pData^.Path)
         then begin
           if FSharedClass.FileClipboard.CopyMode = vccmCopy then
             ImageIndex := IMAGE_COPY
@@ -1616,7 +1607,7 @@ begin
     Exit;
 
   if not FSharedClass.FileClipboard.IsEmpty and
-    (string.Compare(pData^.Path, FSharedClass.FileClipboard.Content, True) = 0)
+    SameText(pData^.Path, FSharedClass.FileClipboard.Content)
   then begin
     case FSharedClass.FileClipboard.CopyMode of
       vccmCopy: TargetCanvas.Font.Color := clBlue;

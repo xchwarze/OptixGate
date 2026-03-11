@@ -472,7 +472,7 @@ begin
     if pNode.Index = AIndex then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -490,7 +490,7 @@ begin
     if (pNode.Index >= AFromIndex) and (pNode.Index <= AToIndex) then
       VST.InvalidateNode(pNode)
     else if (pNode.Index > AToIndex) then
-      break;
+      Break;
   end;
 end;
 

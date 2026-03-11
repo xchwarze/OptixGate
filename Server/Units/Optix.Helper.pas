@@ -182,7 +182,7 @@ begin
           if SameText(AGetNameFromDataFunc(pNode.GetData), AGetNameFromitemFunc(AItem)) then begin
             pChildNode := pNode;
 
-            break;
+            Break;
           end;
 
           ///
@@ -280,11 +280,11 @@ begin
     Exit;
 
   for var AIndex := 0 to AVST.Header.Columns.Count -1 do begin
-    if string.Compare(AName, AVST.Header.Columns.Items[AIndex].Text, True) = 0 then begin
+    if SameText(AName, AVST.Header.Columns.Items[AIndex].Text) then begin
       Result := AIndex;
 
       ///
-      break;
+      Break;
     end;
   end;
 end;

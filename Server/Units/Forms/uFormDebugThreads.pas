@@ -139,7 +139,7 @@ begin
     if pData^.Guid = AGuid then begin
       Result := pNode;
 
-      break;
+      Break;
     end;
   end;
 end;
@@ -165,7 +165,7 @@ begin
     try
       for var AThread in AList do begin
         if not Assigned(AThread) then
-          continue;
+          Continue;
         ///
 
         var pNode := GetNodeByGUID(AThread.Guid);
